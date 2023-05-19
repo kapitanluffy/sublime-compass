@@ -1,0 +1,76 @@
+[
+    { "keys": ["ctrl+l", "ctrl+o"], "command": "recently_used_extended_list_files", },
+
+    {
+        "keys": ["ctrl"],
+        "command": "recently_used_extended_close",
+        "context": [
+            { "key": "overlay_visible", "operator": "equal", "operand": true },
+            { "key": "panel_has_focus", "operator": "equal", "operand": false },
+            { "key": "recently_used_extended" },
+        ]
+    },
+    {
+        "keys": ["alt"],
+        "command": "recently_used_extended_close",
+        "context": [
+            { "key": "overlay_visible", "operator": "equal", "operand": true },
+            { "key": "panel_has_focus", "operator": "equal", "operand": false },
+            { "key": "recently_used_extended" },
+        ]
+    },
+
+    // override next/prev view stack keybinds
+    {
+        "keys": ["ctrl+tab"],
+        "command": "recently_used_extended_show",
+        "args": {
+            "forward": true
+        },
+        "context": [
+            { "key": "overlay_visible", "operator": "equal", "operand": false },
+            { "key": "recently_used_extended" },
+        ]
+    },
+    {
+        "keys": ["ctrl+shift+tab"],
+        "command": "recently_used_extended_show",
+        "args": {
+            "forward": false
+        },
+        "context": [
+            { "key": "overlay_visible", "operator": "equal", "operand": false },
+            { "key": "recently_used_extended" },
+        ]
+    },
+
+    // close quick panel and goto to initial view
+    {
+        "keys": ["escape"],
+        "command": "recently_used_extended_reset",
+        "context": [
+            { "key": "overlay_visible", "operator": "equal", "operand": true },
+            { "key": "recently_used_extended" },
+        ]
+    },
+
+    // move up and down the quick panel
+    {
+        "keys": ["ctrl+tab"],
+        "command": "recently_used_extended_move",
+        "args": { "forward": true },
+        "context": [
+            { "key": "overlay_visible", "operator": "equal", "operand": true },
+            { "key": "recently_used_extended" },
+        ]
+    },
+    {
+        "keys": ["ctrl+shift+tab"],
+        "command": "recently_used_extended_move",
+        "args": { "forward": false },
+        "context": [
+            { "key": "overlay_visible", "operator": "equal", "operand": true },
+            { "key": "recently_used_extended" },
+        ]
+    },
+]

@@ -1,0 +1,7 @@
+{
+    "debug": true,
+
+    // This will allow you to jump to the most
+    // recently used view when displaying the stack
+    "jump_to_most_recent_on_show": true,
+}
