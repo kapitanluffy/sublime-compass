@@ -8,39 +8,39 @@ class StackManager():
     def _stack_filter(stack: ViewStack, new_stack: ViewStack):
         return stack.window != new_stack.window and stack.group != new_stack.group
 
-    @classmethod
-    def add(cls, stack: ViewStack):
-        cls.stack = list(filter(lambda i: cls._stack_filter(i, stack), cls.stack))
-        cls.stack.append(stack)
+    @staticmethod
+    def add(stack: ViewStack):
+        StackManager.stack = list(filter(lambda i: StackManager._stack_filter(i, stack), StackManager.stack))
+        StackManager.stack.append(stack)
 
-    @classmethod
-    def get(cls, window: sublime.Window, group = None) -> ViewStack:
+    @staticmethod
+    def get(window: sublime.Window, group = None) -> ViewStack:
         stack = None
 
         if group is None:
             group = window.active_group()
 
-        for s in cls.stack:
+        for s in StackManager.stack:
             if s.window == window and s.group == group:
                 stack = s
                 break
 
         if stack is None:
             stack = ViewStack(window, group)
-            cls.stack.append(stack)
+            StackManager.stack.append(stack)
 
         return stack
 
-    @classmethod
-    def remove(cls, stack: ViewStack):
-        for i, s in enumerate(cls.stack):
+    @staticmethod
+    def remove(stack: ViewStack):
+        for i, s in enumerate(StackManager.stack):
             if stack.window == s.window and stack.group == s.group:
-                cls.stack.pop(i)
+                StackManager.stack.pop(i)
 
-    @classmethod
-    def clear(cls):
-        cls.stack = []
+    @staticmethod
+    def clear():
+        StackManager.stack = []
 
-    @classmethod
-    def all(cls):
-        return cls.stack
+    @staticmethod
+    def all():
+        return StackManager.stack
