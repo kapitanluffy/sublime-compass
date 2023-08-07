@@ -10,6 +10,9 @@ def plugin_unloaded():
     StackManager.clear()
 
 
+def is_view_valid_tab(view):
+    return view.element() is not None and view.element() != "find_in_files:output"
+
 class RecentlyUsedExtendedFocusListener(sublime_plugin.EventListener):
     def on_load_project_async(self, window):
         plugin_debug("project loaded! build stack!")
@@ -34,8 +37,7 @@ class RecentlyUsedExtendedFocusListener(sublime_plugin.EventListener):
 
         plugin_debug("closing view ", view)
 
-        if view.element() is not None:
-            plugin_debug("View is a %s" % view.element())
+        if is_view_valid_tab(view):
             return
 
         window = view.window()
@@ -65,7 +67,7 @@ class RecentlyUsedExtendedFocusListener(sublime_plugin.EventListener):
             return
 
         # only work on views with buffer
-        if view.element() is not None:
+        if is_view_valid_tab(view):
             return
 
         window = view.window()
