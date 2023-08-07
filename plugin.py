@@ -14,6 +14,11 @@ def is_view_valid_tab(view):
     return view.element() is not None and view.element() != "find_in_files:output"
 
 class RecentlyUsedExtendedFocusListener(sublime_plugin.EventListener):
+    def on_query_context(self, view, key, operator, operand, match_all):
+        if key == "recently_used_extended" and operator == 0 and operand is True:
+            return True
+        return None
+
     def on_load_project_async(self, window):
         plugin_debug("project loaded! build stack!")
         window.run_command("recently_used_extended_build_stack")
@@ -136,13 +141,6 @@ class RecentlyUsedExtendedCloseCommand(sublime_plugin.WindowCommand):
         state = plugin_state()
         return state["is_quick_panel_open"] != False
 
-
-class RecentlyUsedExtendedKeybindListener(sublime_plugin.EventListener):
-    def on_query_context(self, view, key, operator, operand, match_all):
-        if key == "recently_used_extended" and operator == sublime.QueryOperator.EQUAL and operand is True:
-            return True
-
-        return False
 
 
 class RecentlyUsedExtendedListFilesCommand(sublime_plugin.WindowCommand):
