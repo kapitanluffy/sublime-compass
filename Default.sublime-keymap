@@ -1,19 +1,8 @@
 [
-    // { "keys": ["ctrl+l", "ctrl+o"], "command": "recently_used_extended_list_files", },
-
-    // close quick panel and select current tab
+    // close quick panel and goto to initial view
     {
         "keys": ["ctrl+`"],
-        "command": "recently_used_extended_close",
-        "context": [
-            { "key": "overlay_visible", "operator": "equal", "operand": true },
-            { "key": "panel_has_focus", "operator": "equal", "operand": false },
-            { "key": "recently_used_extended" },
-        ]
-    },
-    {
-        "keys": ["right"],
-        "command": "recently_used_extended_close",
+        "command": "recently_used_extended_reset",
         "context": [
             { "key": "overlay_visible", "operator": "equal", "operand": true },
             { "key": "panel_has_focus", "operator": "equal", "operand": false },
@@ -41,37 +30,6 @@
         },
         "context": [
             { "key": "overlay_visible", "operator": "equal", "operand": false },
-            { "key": "recently_used_extended" },
-        ]
-    },
-
-    // close quick panel and goto to initial view
-    {
-        "keys": ["left"],
-        "command": "recently_used_extended_reset",
-        "context": [
-            { "key": "overlay_visible", "operator": "equal", "operand": true },
-            { "key": "panel_has_focus", "operator": "equal", "operand": false },
-            { "key": "recently_used_extended" },
-        ]
-    },
-
-    // move up and down the quick panel
-    {
-        "keys": ["ctrl+tab"],
-        "command": "recently_used_extended_move",
-        "args": { "forward": true },
-        "context": [
-            { "key": "overlay_visible", "operator": "equal", "operand": true },
-            { "key": "recently_used_extended" },
-        ]
-    },
-    {
-        "keys": ["ctrl+shift+tab"],
-        "command": "recently_used_extended_move",
-        "args": { "forward": false },
-        "context": [
-            { "key": "overlay_visible", "operator": "equal", "operand": true },
             { "key": "recently_used_extended" },
         ]
     },
