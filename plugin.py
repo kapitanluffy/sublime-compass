@@ -4,14 +4,23 @@ import sublime_plugin
 from .stack_manager import StackManager
 from .build_stack_command import RecentlyUsedExtendedBuildStackCommand
 from .utils import *
+from typing import List
 
 def plugin_unloaded():
     # remove all stacks when unloading
     StackManager.clear()
 
-
 def is_view_valid_tab(view):
     return view.element() is not None and view.element() != "find_in_files:output"
+
+# Build the stack from window object
+def build_stack(window):
+    sheets = window.sheets()
+
+    for sheet in sheets:
+        group = sheet.group()
+        stack = StackManager.get(window, group)
+        stack.push([sheet])
 
 class RecentlyUsedExtendedFocusListener(sublime_plugin.EventListener):
     def on_query_context(self, view, key, operator, operand, match_all):
@@ -20,24 +29,23 @@ class RecentlyUsedExtendedFocusListener(sublime_plugin.EventListener):
         return None
 
     def on_load_project_async(self, window):
-        plugin_debug("project loaded! build stack!")
-        window.run_command("recently_used_extended_build_stack")
+        build_stack(window)
 
-    def on_init(self, views):
-        sublime.active_window().run_command("recently_used_extended_build_stack")
+    def on_init(self, views: List[sublime.View]):
+        for view in views:
+            window = view.window()
+            if window is not None:
+                build_stack(window)
 
     def on_pre_close_window(self, window: sublime.Window):
         group = window.active_group()
         stack = StackManager.get(window, group)
-
-        plugin_debug("closing window, purging stack..", window, group)
         StackManager.remove(stack)
 
     def on_pre_close(self, view: sublime.View):
         sheet = view.sheet()
 
         if sheet is not None and sheet.is_transient():
-            print("on_pre_close sheet", sheet)
             return
 
         plugin_debug("closing view ", view)
@@ -71,7 +79,6 @@ class RecentlyUsedExtendedFocusListener(sublime_plugin.EventListener):
         if RecentlyUsedExtendedBuildStackCommand.is_building is True:
             return
 
-        # only work on views with buffer
         if is_view_valid_tab(view):
             return
 
@@ -81,7 +88,6 @@ class RecentlyUsedExtendedFocusListener(sublime_plugin.EventListener):
             plugin_debug("Window for View #%s is a None xxx" % view.id())
             return
 
-        # skip stack building if there are no views
         if window.views().__len__() <= 0:
             return
 
@@ -90,21 +96,12 @@ class RecentlyUsedExtendedFocusListener(sublime_plugin.EventListener):
         sheets = window.selected_sheets()
 
         if stack.sheet_total() == 0:
-            plugin_debug("new stack! building stack!")
-            window.run_command("recently_used_extended_build_stack")
             return
 
         if view.sheet() in stack.head():
             return
 
-        # plugin_debug("focused!", view, view.sheet(), sheets)
         stack.push(sheets)
-
-
-class RecentlyUsedExtendedMoveCommand(sublime_plugin.WindowCommand):
-    def run(self, **kwargs):
-        is_forward = kwargs.get('forward', True)
-        self.window.run_command("move", { "by": "lines", "forward": is_forward })
 
 
 class RecentlyUsedExtendedCloseCommand(sublime_plugin.WindowCommand):
@@ -119,10 +116,11 @@ class RecentlyUsedExtendedCloseCommand(sublime_plugin.WindowCommand):
         if sheet is None:
             return
 
-        file_name = view.file_name()
+        # @note experimenting on including unopened files
+        # file_name = view.file_name()
 
-        if sheet.is_transient():
-            self.window.promote_sheet(sheet)
+        # if sheet.is_transient():
+            # self.window.promote_sheet(sheet)
             # view = self.window.open_file(file_name)
             # self.window.focus_view(view)
             # print("z", view, view.sheet(), sheet, sheet.is_transient(), view.is_valid())
@@ -131,22 +129,17 @@ class RecentlyUsedExtendedCloseCommand(sublime_plugin.WindowCommand):
 
         self.window.run_command("hide_overlay")
 
-    def focus_transient_sheet(self, sheet, view):
-        self.window.promote_sheet(sheet)
+    # def focus_transient_sheet(self, sheet, view):
+        # self.window.promote_sheet(sheet)
         # self.window.select_sheets([sheet])
         # self.window.focus_view(view)
-        print("zz", view, view.sheet(), sheet)
-
-    def is_enabled(self) -> bool:
-        state = plugin_state()
-        return state["is_quick_panel_open"] != False
-
+        # print("zz", view, view.sheet(), sheet)
 
 
 class RecentlyUsedExtendedListFilesCommand(sublime_plugin.WindowCommand):
     def run(self):
         folders = self.window.folders()
-        for root, dirs, files in os.walk(folders[1]):
+        for root, dirs, files in os.walk(folders[0]):
             for file in files:
                 print(os.path.join(root, file))
 
