@@ -5,6 +5,7 @@ from .stack_manager import StackManager
 import copy
 from .show_command import ContextKeeperShowCommand
 
+# @note this is glitchy..
 class ContextKeeperResetCommand(sublime_plugin.WindowCommand):
     def run(self):
         self.window.run_command("context_keeper_goto", { "index": 0 })

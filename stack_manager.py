@@ -1,8 +1,9 @@
+from typing import List
 import sublime
 from .view_stack import ViewStack
 
 class StackManager():
-    stack = []
+    stack: List[ViewStack] = []
 
     @staticmethod
     def _stack_filter(stack: ViewStack, new_stack: ViewStack):
