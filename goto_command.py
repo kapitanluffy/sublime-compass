@@ -18,8 +18,7 @@ class RecentlyUsedExtendedGotoCommand(sublime_plugin.WindowCommand):
         stack = StackManager.get(self.window, group)
 
         if stack.sheet_total() == 0:
-            print("new stack! building stack! #3")
-            self.window.run_command("recently_used_extended_build_stack")
+            raise Exception("stack is empty!")
 
         current_view = self.window.active_view_in_group(group)
 
