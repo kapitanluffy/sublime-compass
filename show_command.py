@@ -115,10 +115,11 @@ class ContextKeeperShowCommand(sublime_plugin.WindowCommand):
             trigger = ', '.join(names)
 
             # @todo hacky tags for filter
-            spaces = [' '] * 10
-            spaces = ''.join(spaces)
-            trigger = "%s%s%s" % (trigger, spaces, ' '.join(tags))
-            annotation = ' '.join(tags)
+            # spaces = [' '] * 10
+            # spaces = ''.join(spaces)
+            # trigger = "%s%s%s" % (trigger, spaces, ' '.join(tags))
+            # annotation = ' '.join(tags)
+            annotation = ""
 
             item = sublime.QuickPanelItem(trigger=trigger, annotation=annotation, kind=kind, details=preview)
             items.append(item)
