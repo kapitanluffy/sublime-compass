@@ -8,10 +8,10 @@ def plugin_state():
     return PLUGIN_STATE
 
 def plugin_debug(*message):
-    settings = sublime.load_settings("Recently Used Extended.sublime-settings")
+    settings = sublime.load_settings("ContextKeeper.sublime-settings")
 
     if settings["debug"] is True:
         print(*message)
 
 def plugin_settings():
-    return sublime.load_settings("Recently Used Extended.sublime-settings")
+    return sublime.load_settings("ContextKeeper.sublime-settings")

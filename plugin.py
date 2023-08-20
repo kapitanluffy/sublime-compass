@@ -2,7 +2,7 @@ import os
 import sublime
 import sublime_plugin
 from .stack_manager import StackManager
-from .build_stack_command import RecentlyUsedExtendedBuildStackCommand
+from .build_stack_command import ContextKeeperBuildStackCommand
 from .utils import *
 from typing import List
 
@@ -22,9 +22,9 @@ def build_stack(window):
         stack = StackManager.get(window, group)
         stack.push([sheet])
 
-class RecentlyUsedExtendedFocusListener(sublime_plugin.EventListener):
+class ContextKeeperFocusListener(sublime_plugin.EventListener):
     def on_query_context(self, view, key, operator, operand, match_all):
-        if key == "recently_used_extended" and operator == 0 and operand is True:
+        if key == "context_keeper" and operator == 0 and operand is True:
             return True
         return None
 
@@ -64,7 +64,7 @@ class RecentlyUsedExtendedFocusListener(sublime_plugin.EventListener):
             plugin_debug("Sheet for View #%s is gone" % view.id())
             return
 
-        window.run_command("recently_used_extended_close")
+        window.run_command("context_keeper_close")
 
         group = window.active_group()
         stack = StackManager.get(window, group)
@@ -76,7 +76,7 @@ class RecentlyUsedExtendedFocusListener(sublime_plugin.EventListener):
         if sheet is not None and sheet.is_transient():
             return
 
-        if RecentlyUsedExtendedBuildStackCommand.is_building is True:
+        if ContextKeeperBuildStackCommand.is_building is True:
             return
 
         if is_view_valid_tab(view):
@@ -104,7 +104,7 @@ class RecentlyUsedExtendedFocusListener(sublime_plugin.EventListener):
         stack.push(sheets)
 
 
-class RecentlyUsedExtendedCloseCommand(sublime_plugin.WindowCommand):
+class ContextKeeperCloseCommand(sublime_plugin.WindowCommand):
     def run(self):
         view = self.window.active_view()
 
@@ -136,7 +136,7 @@ class RecentlyUsedExtendedCloseCommand(sublime_plugin.WindowCommand):
         # print("zz", view, view.sheet(), sheet)
 
 
-class RecentlyUsedExtendedListFilesCommand(sublime_plugin.WindowCommand):
+class ContextKeeperListFilesCommand(sublime_plugin.WindowCommand):
     def run(self):
         folders = self.window.folders()
         for root, dirs, files in os.walk(folders[0]):

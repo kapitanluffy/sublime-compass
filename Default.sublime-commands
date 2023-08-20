@@ -1,11 +1,11 @@
 [
-    { "caption": "REU: Rebuild Recently Used Stack", "command": "recently_used_extended_build_stack" },
-    { "caption": "REU: Show Recently Used Tabs/Views", "command": "recently_used_extended_show", "args": { "forward": true } },
+    { "caption": "REU: Rebuild Recently Used Stack", "command": "context_keeper_build_stack" },
+    { "caption": "REU: Show Recently Used Tabs/Views", "command": "context_keeper_show", "args": { "forward": true } },
     {
-        "caption": "Preferences: Recently Used Extended Settings",
+        "caption": "Preferences: ContextKeeper Settings",
         "command": "edit_settings",
         "args": {
-            "base_file": "${packages}/RecentlyUsedExtended/Recently Used Extended.sublime-settings",
+            "base_file": "${packages}/context-keeper/ContextKeeper.sublime-settings",
             "default": "{\n$0\n}\n"
         }
     },

@@ -8,12 +8,12 @@ import copy
 import os
 import re
 
-class RecentlyUsedExtendedShowCommand(sublime_plugin.WindowCommand):
+class ContextKeeperShowCommand(sublime_plugin.WindowCommand):
     ignore_highlight = False
 
     def run(self, **kwargs):
         settings = plugin_settings()
-        RecentlyUsedExtendedShowCommand.ignore_highlight = False
+        ContextKeeperShowCommand.ignore_highlight = False
         self.highlighted_index = -1
         is_forward = kwargs.get('forward', True)
 
@@ -199,7 +199,7 @@ class RecentlyUsedExtendedShowCommand(sublime_plugin.WindowCommand):
             self.highlighted_index = index
             self.window.select_sheets(sheets)
 
-        RecentlyUsedExtendedShowCommand.ignore_highlight=False
+        ContextKeeperShowCommand.ignore_highlight=False
 
     def on_done(self, index, items, stack: ViewStack, selection, event):
         if index == -1:
@@ -217,7 +217,7 @@ class RecentlyUsedExtendedShowCommand(sublime_plugin.WindowCommand):
             # raise Exception("Sheets is missing!")
             return
 
-        if RecentlyUsedExtendedShowCommand.ignore_highlight is True:
+        if ContextKeeperShowCommand.ignore_highlight is True:
             return
 
         state = plugin_state()

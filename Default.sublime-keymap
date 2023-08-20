@@ -2,55 +2,55 @@
     // close quick panel and goto to initial view
     {
         "keys": ["ctrl+`"],
-        "command": "recently_used_extended_reset",
+        "command": "context_keeper_reset",
         "context": [
             { "key": "overlay_visible", "operator": "equal", "operand": true },
             { "key": "panel_has_focus", "operator": "equal", "operand": false },
-            { "key": "recently_used_extended" },
+            { "key": "context_keeper" },
         ]
     },
 
     // override next/prev view stack keybinds
     {
         "keys": ["ctrl+tab"],
-        "command": "recently_used_extended_show",
+        "command": "context_keeper_show",
         "args": {
             "forward": true
         },
         "context": [
             { "key": "overlay_visible", "operator": "equal", "operand": false },
-            { "key": "recently_used_extended" },
+            { "key": "context_keeper" },
         ]
     },
     {
         "keys": ["ctrl+shift+tab"],
-        "command": "recently_used_extended_show",
+        "command": "context_keeper_show",
         "args": {
             "forward": false
         },
         "context": [
             { "key": "overlay_visible", "operator": "equal", "operand": false },
-            { "key": "recently_used_extended" },
+            { "key": "context_keeper" },
         ]
     },
 
     // move up and down the quick panel even with ctrl pressed
     {
         "keys": ["ctrl+tab"],
-        "command": "recently_used_extended_move",
+        "command": "context_keeper_move",
         "args": { "forward": true },
         "context": [
             { "key": "overlay_visible", "operator": "equal", "operand": true },
-            { "key": "recently_used_extended" },
+            { "key": "context_keeper" },
         ]
     },
     {
         "keys": ["ctrl+shift+tab"],
-        "command": "recently_used_extended_move",
+        "command": "context_keeper_move",
         "args": { "forward": false },
         "context": [
             { "key": "overlay_visible", "operator": "equal", "operand": true },
-            { "key": "recently_used_extended" },
+            { "key": "context_keeper" },
         ]
     },
 ]

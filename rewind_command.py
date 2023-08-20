@@ -1,7 +1,7 @@
 import sublime
 import sublime_plugin
 
-class RecentlyUsedExtendedRewindCommand(sublime_plugin.WindowCommand):
+class ContextKeeperRewindCommand(sublime_plugin.WindowCommand):
     STEPS = 10
 
     def run(self):

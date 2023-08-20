@@ -3,14 +3,14 @@ import sublime_plugin
 from .view_stack import ViewStack
 from .stack_manager import StackManager
 import copy
-from .show_command import RecentlyUsedExtendedShowCommand
+from .show_command import ContextKeeperShowCommand
 
-class RecentlyUsedExtendedResetCommand(sublime_plugin.WindowCommand):
+class ContextKeeperResetCommand(sublime_plugin.WindowCommand):
     def run(self):
-        self.window.run_command("recently_used_extended_goto", { "index": 0 })
+        self.window.run_command("context_keeper_goto", { "index": 0 })
         self.window.run_command("hide_overlay")
 
-class RecentlyUsedExtendedGotoCommand(sublime_plugin.WindowCommand):
+class ContextKeeperGotoCommand(sublime_plugin.WindowCommand):
     def run(self, **kwargs):
         index = kwargs.get('index', 0)
 
@@ -39,7 +39,7 @@ class RecentlyUsedExtendedGotoCommand(sublime_plugin.WindowCommand):
             return
 
         # ignore highlighted
-        RecentlyUsedExtendedShowCommand.ignore_highlight = True
+        ContextKeeperShowCommand.ignore_highlight = True
 
         self.window.select_sheets(recently_used)
         stack.push(recently_used)
