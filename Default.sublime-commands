@@ -1,6 +1,6 @@
 [
-    { "caption": "REU: Rebuild Recently Used Stack", "command": "context_keeper_build_stack" },
-    { "caption": "REU: Show Recently Used Tabs/Views", "command": "context_keeper_show", "args": { "forward": true } },
+    { "caption": "ContextKeeper: Rebuild Recently Used Stack", "command": "context_keeper_build_stack" },
+    { "caption": "ContextKeeper: Show Recently Used Tabs/Views", "command": "context_keeper_show", "args": { "forward": true } },
     {
         "caption": "Preferences: ContextKeeper Settings",
         "command": "edit_settings",
