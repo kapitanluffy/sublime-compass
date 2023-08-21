@@ -13,20 +13,14 @@ class ContextKeeperShowCommand(sublime_plugin.WindowCommand):
 
     def run(self, **kwargs):
         settings = plugin_settings()
+        state = plugin_state()
+
         ContextKeeperShowCommand.ignore_highlight = False
         self.highlighted_index = -1
         is_forward = kwargs.get('forward', True)
-        state = plugin_state()
-
-        if state["is_quick_panel_open"] is True and settings["jump_to_most_recent_on_show"] is True and state["highlighted_index"] <= 1:
-            self.window.run_command("move", { "by": "lines", "forward": False if state["highlighted_index"] == 1 else True })
-            return
-
-        if state["is_quick_panel_open"] is True and (settings["jump_to_most_recent_on_show"] is False or state["highlighted_index"] > 1):
-            self.window.run_command("move", { "by": "lines", "forward": is_forward })
-            return
 
         group = self.window.active_group()
+        # @todo fix grouping support
         stack = StackManager.get(self.window, group)
 
         if stack.sheet_total() == 0:
