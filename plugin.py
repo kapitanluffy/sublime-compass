@@ -104,6 +104,12 @@ class ContextKeeperFocusListener(sublime_plugin.EventListener):
         stack.push(sheets)
 
 
+class ContextKeeperMoveCommand(sublime_plugin.WindowCommand):
+    def run(self, **kwargs):
+        is_forward = kwargs.get('forward', True)
+        self.window.run_command("move", { "by": "lines", "forward": is_forward })
+
+
 class ContextKeeperCloseCommand(sublime_plugin.WindowCommand):
     def run(self):
         view = self.window.active_view()
