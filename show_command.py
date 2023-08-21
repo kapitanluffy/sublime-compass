@@ -220,6 +220,9 @@ class ContextKeeperShowCommand(sublime_plugin.WindowCommand):
 
         sheets = stack.get(index)
 
+        state = plugin_state()
+        state["is_quick_panel_open"] = False
+
         if sheets is None and (len(stack.all()) <= index < len(items)):
             print("selected transient!", items[index])
             # self.window.open_file(items[index])
@@ -233,6 +236,4 @@ class ContextKeeperShowCommand(sublime_plugin.WindowCommand):
         if ContextKeeperShowCommand.ignore_highlight is True:
             return
 
-        state = plugin_state()
-        state["is_quick_panel_open"] = False
         self.window.select_sheets(sheets)
