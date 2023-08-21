@@ -101,7 +101,8 @@ class ContextKeeperFocusListener(sublime_plugin.EventListener):
         if stack.sheet_total() == 0:
             return
 
-        if view.sheet() in stack.head():
+        # skip pushing to sheet if selected sheet is only one and is already focused
+        if view.sheet() in stack.head() and stack.head().__len__() == 1:
             return
 
         stack.push(sheets)
