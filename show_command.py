@@ -63,6 +63,7 @@ class ContextKeeperShowCommand(sublime_plugin.WindowCommand):
                 view = sheet.view()
 
                 if view is None or view.is_valid() is False:
+                    stack.remove(sheet)
                     continue
 
                 name = "Untitled #%s" % sheet.id()
