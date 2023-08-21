@@ -6,16 +6,6 @@ from .build_stack_command import ContextKeeperBuildStackCommand
 from .utils import *
 from typing import List
 
-def plugin_loaded():
-    reset_plugin_state()
-
-def plugin_unloaded():
-    # remove all stacks when unloading
-    StackManager.clear()
-
-def is_view_valid_tab(view):
-    return view.element() is not None and view.element() != "find_in_files:output"
-
 # Build the stack from window object
 def build_stack(window):
     sheets = window.sheets()
@@ -24,6 +14,17 @@ def build_stack(window):
         group = sheet.group()
         stack = StackManager.get(window, group)
         stack.push([sheet])
+
+def plugin_loaded():
+    reset_plugin_state()
+    build_stack(sublime.active_window())
+
+def plugin_unloaded():
+    # remove all stacks when unloading
+    StackManager.clear()
+
+def is_view_valid_tab(view):
+    return view.element() is not None and view.element() != "find_in_files:output"
 
 class ContextKeeperFocusListener(sublime_plugin.EventListener):
     def on_query_context(self, view, key, operator, operand, match_all):
