@@ -37,8 +37,7 @@
     // move up and down the quick panel even with ctrl pressed
     {
         "keys": ["ctrl+tab"],
-        "command": "context_keeper_move",
-        "args": { "forward": true },
+        "command": "context_keeper_show",
         "context": [
             { "key": "overlay_visible", "operator": "equal", "operand": true },
             { "key": "context_keeper" },

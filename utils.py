@@ -1,11 +1,17 @@
 import sublime
 
 PLUGIN_STATE = {
-    "is_quick_panel_open": False
+    "is_quick_panel_open": False,
+    "highlighted_index": 0
 }
 
 def plugin_state():
     return PLUGIN_STATE
+
+def reset_plugin_state():
+    state = plugin_state()
+    state["is_quick_panel_open"] = False
+    state["highlighted_index"] = 0
 
 def plugin_debug(*message):
     settings = sublime.load_settings("ContextKeeper.sublime-settings")

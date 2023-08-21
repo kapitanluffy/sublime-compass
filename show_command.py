@@ -16,6 +16,15 @@ class ContextKeeperShowCommand(sublime_plugin.WindowCommand):
         ContextKeeperShowCommand.ignore_highlight = False
         self.highlighted_index = -1
         is_forward = kwargs.get('forward', True)
+        state = plugin_state()
+
+        if state["is_quick_panel_open"] is True and settings["jump_to_most_recent_on_show"] is True and state["highlighted_index"] <= 1:
+            self.window.run_command("move", { "by": "lines", "forward": False if state["highlighted_index"] == 1 else True })
+            return
+
+        if state["is_quick_panel_open"] is True and (settings["jump_to_most_recent_on_show"] is False or state["highlighted_index"] > 1):
+            self.window.run_command("move", { "by": "lines", "forward": is_forward })
+            return
 
         group = self.window.active_group()
         stack = StackManager.get(self.window, group)
@@ -131,8 +140,8 @@ class ContextKeeperShowCommand(sublime_plugin.WindowCommand):
         #         for file in files:
         #             items.append(os.path.join(root, file))
 
-        state = plugin_state()
         state["is_quick_panel_open"] = True
+        state["highlighted_index"] = selected_index
 
         self.window.show_quick_panel(
             items=items,
@@ -199,6 +208,9 @@ class ContextKeeperShowCommand(sublime_plugin.WindowCommand):
             # print("has sheet!", sheets)
             self.highlighted_index = index
             self.window.select_sheets(sheets)
+
+        state = plugin_state()
+        state["highlighted_index"] = index
 
         ContextKeeperShowCommand.ignore_highlight=False
 

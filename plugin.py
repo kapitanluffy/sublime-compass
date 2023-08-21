@@ -6,6 +6,9 @@ from .build_stack_command import ContextKeeperBuildStackCommand
 from .utils import *
 from typing import List
 
+def plugin_loaded():
+    reset_plugin_state()
+
 def plugin_unloaded():
     # remove all stacks when unloading
     StackManager.clear()
