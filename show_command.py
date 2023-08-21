@@ -216,12 +216,17 @@ class ContextKeeperShowCommand(sublime_plugin.WindowCommand):
         ContextKeeperShowCommand.ignore_highlight=False
 
     def on_done(self, index, items, stack: ViewStack, selection, event):
+        state = plugin_state()
+
         if index == -1:
             index = self.highlighted_index
 
+        if state["is_reset"] == True:
+            index = 0
+            state["is_reset"] = False
+
         sheets = stack.get(index)
 
-        state = plugin_state()
         state["is_quick_panel_open"] = False
 
         if sheets is None and (len(stack.all()) <= index < len(items)):
