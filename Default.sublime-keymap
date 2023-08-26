@@ -1,8 +1,19 @@
 [
     // close quick panel and goto to initial view
     {
-        "keys": ["ctrl+`"],
+        "keys": ["alt", "alt"],
         "command": "context_keeper_reset",
+        "context": [
+            { "key": "overlay_visible", "operator": "equal", "operand": true },
+            { "key": "panel_has_focus", "operator": "equal", "operand": false },
+            { "key": "context_keeper" },
+        ]
+    },
+
+    // close quick panel and select the highlighted view
+    {
+        "keys": ["ctrl", "ctrl"],
+        "command": "context_keeper_close",
         "context": [
             { "key": "overlay_visible", "operator": "equal", "operand": true },
             { "key": "panel_has_focus", "operator": "equal", "operand": false },
