@@ -1,6 +1,7 @@
 import sublime
 import sublime_plugin
 
+## @expiremental Rewinds your cursor position and slowly replays it back for you
 class ContextKeeperRewindCommand(sublime_plugin.WindowCommand):
     STEPS = 10
 
