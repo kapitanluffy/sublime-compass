@@ -1,35 +1,55 @@
 import sublime
-from typing import List
+from typing import List, Union
 
+"""
+The group of selected sheets in a sublime group
+"""
+class SheetGroup(List[sublime.Sheet]):
+    focused: Union[sublime.Sheet, None] = None
 
+    def __init__(self, *args):
+        super().__init__(*args)
+
+    def set_focused(self, sheet: Union[sublime.Sheet, None]):
+        self.focused = sheet
+
+    def get_focused(self):
+        return self.focused
+
+"""
+This is more like Sheet stack
+"""
 class ViewStack():
     def __init__(self, window: sublime.Window, group: int):
         self.window = window
         self.group = group
-        self.stack = []
+        self.stack: List[SheetGroup] = []
 
-    def get(self, index):
+    def get(self, index: int):
         if 0 <= index < len(self.stack):
             return self.stack[index]
 
         return None
-        print("not in stack!", index)
-
 
     def push(self, sheets: List[sublime.Sheet]):
+        sheets = SheetGroup(sheets)
+
         for sheet in sheets:
             for i, sheet_stack in enumerate(self.stack):
                 if sheet in sheet_stack:
                     self.stack[i].remove(sheet)
+
+                    # remove if empty
                     if len(self.stack[i]) <= 0:
                         self.stack.pop(i)
                     break
 
+        sheets.set_focused(self.window.active_sheet_in_group(self.group))
         self.stack.insert(0, sheets)
 
     def append(self, sheets: List[sublime.Sheet]):
         self.stack = [item for item in self.stack if item != sheets]
-        self.stack.append(sheets)
+        self.stack.append(SheetGroup(sheets))
 
     def remove(self, sheet: sublime.Sheet):
         for i, sheet_stack in enumerate(self.stack):
@@ -42,7 +62,7 @@ class ViewStack():
     def clear(self):
         self.stack = []
 
-    def all(self) -> List[List[sublime.Sheet]]:
+    def all(self) -> List[SheetGroup]:
         return self.stack
 
     def sheet_total(self):
