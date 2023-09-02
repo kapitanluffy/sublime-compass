@@ -97,7 +97,7 @@ class ContextKeeperFocusListener(sublime_plugin.EventListener):
 
         group = window.active_group()
         stack = StackManager.get(window, group)
-        sheets = window.selected_sheets()
+        sheets = window.selected_sheets_in_group(group)
 
         if stack.sheet_total() == 0:
             return
