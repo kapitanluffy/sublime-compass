@@ -229,12 +229,9 @@ class ContextKeeperShowCommand(sublime_plugin.WindowCommand):
         sheets = stack.get(index)
 
         if sheets is None and (len(stack.all()) <= index < len(items)):
-            print("xxx", items[index])
             self.window.open_file(items[index], sublime.TRANSIENT)
-            print(self.window.active_view())
 
         if sheets is not None:
-            # print("has sheet!", sheets)
             self.highlighted_index = index
             self.window.select_sheets(sheets)
 
@@ -264,7 +261,11 @@ class ContextKeeperShowCommand(sublime_plugin.WindowCommand):
 
         if sheets is None:
             print("Sheets is missing!")
-            # raise Exception("Sheets is missing!")
             return
 
         self.window.select_sheets(sheets)
+
+        # refocus on the selected sheet
+        focused = sheets.get_focused()
+        if focused is not None:
+            self.window.focus_sheet(focused)
