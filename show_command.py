@@ -2,7 +2,7 @@ from typing import List
 import sublime
 import sublime_plugin
 from .utils import plugin_settings, plugin_state
-from .view_stack import ViewStack
+from .view_stack import SheetGroup, ViewStack
 from .stack_manager import StackManager
 import copy
 import os
@@ -162,9 +162,11 @@ class ContextKeeperShowCommand(sublime_plugin.WindowCommand):
         if is_forward is False:
             selected_index = stack_length - 1
 
-        postList = []
+        post_list = []
+        items_meta: List[SheetGroup] = []
+        post_list_meta: List[SheetGroup] = []
 
-        for index,sheets in enumerate(stack_sheets):
+        for index, sheets in enumerate(stack_sheets):
             names = []
             files = []
             preview = ""
@@ -195,6 +197,7 @@ class ContextKeeperShowCommand(sublime_plugin.WindowCommand):
             joinedTags = ' '.join(tags)
             item = sublime.QuickPanelItem(trigger=trigger, kind=kind, details=preview, annotation=joinedTags)
             items.append(item)
+            items_meta.append(sheets)
 
             file_label: str | None = files[0]
 
@@ -209,24 +212,28 @@ class ContextKeeperShowCommand(sublime_plugin.WindowCommand):
 
             expandedTrigger = "%s%s%s" % (joinedTags, ' | ', file_label)
             item = sublime.QuickPanelItem(trigger=expandedTrigger, kind=kind, annotation=trigger)
-            postList.append(item)
+            post_list.append(item)
+            post_list_meta.append(sheets)
 
         state["is_quick_panel_open"] = True
         state["highlighted_index"] = selected_index
 
+        items = items + post_list
+        items_meta = items_meta + post_list_meta
+
         self.window.show_quick_panel(
-            items=items + postList,
+            items=items,
             selected_index=selected_index,
             flags=sublime.QuickPanelFlags.WANT_EVENT,
-            on_select=lambda index, event=None: self.on_done(index, items, stack, initial_selection, event),
-            on_highlight=lambda index: self.on_highlight(index, items, stack, initial_selection)
+            on_select=lambda index: self.on_done(index, items, stack, initial_selection, items_meta),
+            on_highlight=lambda index: self.on_highlight(index, items, stack, initial_selection, items_meta)
         )
 
-    def on_highlight(self, index, items, stack: ViewStack, selection):
+    def on_highlight(self, index, items, stack: ViewStack, selection, items_meta):
         if index == -1:
             raise Exception("Cannot highlight index: -1")
 
-        sheets = stack.get(index)
+        sheets = items_meta[index]
 
         if sheets is None and (len(stack.all()) <= index < len(items)):
             self.window.open_file(items[index], sublime.TRANSIENT)
@@ -240,7 +247,7 @@ class ContextKeeperShowCommand(sublime_plugin.WindowCommand):
 
         ContextKeeperShowCommand.ignore_highlight=False
 
-    def on_done(self, index, items, stack: ViewStack, selection, event):
+    def on_done(self, index, items, stack: ViewStack, selection, items_meta):
         state = plugin_state()
 
         if index == -1:
@@ -250,7 +257,7 @@ class ContextKeeperShowCommand(sublime_plugin.WindowCommand):
             index = 0
             state["is_reset"] = False
 
-        sheets = stack.get(index)
+        sheets = items_meta[index]
 
         state["is_quick_panel_open"] = False
 
