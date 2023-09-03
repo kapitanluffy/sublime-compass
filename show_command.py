@@ -144,9 +144,8 @@ class File():
     def __init__(self, file, folder):
         self.file = file
         self.folder = folder
-        trimmedRoot = file.replace("%s\\" % folder, "")
-        basename = os.path.basename(file)
-        self.relative = "%s\\%s" % (trimmedRoot, basename)
+        filename = file.replace("%s\\" % folder, "")
+        self.relative = "%s" % (filename)
 
     def get_file_name(self):
         return self.relative
