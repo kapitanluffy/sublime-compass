@@ -1,7 +1,7 @@
 import sublime
 import sublime_plugin
 from .view_stack import ViewStack
-from .stack_manager import StackManager
+from .src.stack_manager import StackManager
 import copy
 from .show_command import ContextKeeperShowCommand
 from .utils import plugin_settings, plugin_state

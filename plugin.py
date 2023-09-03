@@ -1,7 +1,7 @@
 import os
 import sublime
 import sublime_plugin
-from .stack_manager import StackManager
+from .src.stack_manager import StackManager
 from .build_stack_command import ContextKeeperBuildStackCommand
 from .utils import *
 from typing import List

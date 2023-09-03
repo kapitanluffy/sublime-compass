@@ -1,6 +1,6 @@
 import sublime
 import sublime_plugin
-from .stack_manager import StackManager
+from .src.stack_manager import StackManager
 from .utils import *
 
 class ContextKeeperBuildStackCommand(sublime_plugin.WindowCommand):

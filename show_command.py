@@ -3,7 +3,7 @@ import sublime
 import sublime_plugin
 from .utils import plugin_settings, plugin_state
 from .view_stack import SheetGroup, ViewStack
-from .stack_manager import StackManager
+from .src.stack_manager import StackManager
 import copy
 import os
 import re
