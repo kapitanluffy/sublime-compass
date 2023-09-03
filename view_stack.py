@@ -1,20 +1,6 @@
 import sublime
-from typing import List, Union
-
-"""
-The group of selected sheets in a sublime group
-"""
-class SheetGroup(List[sublime.Sheet]):
-    focused: Union[sublime.Sheet, None] = None
-
-    def __init__(self, *args):
-        super().__init__(*args)
-
-    def set_focused(self, sheet: Union[sublime.Sheet, None]):
-        self.focused = sheet
-
-    def get_focused(self):
-        return self.focused
+from typing import List
+from .src.sheet_group import SheetGroup
 
 """
 This is more like Sheet stack
