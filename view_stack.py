@@ -30,7 +30,9 @@ class ViewStack():
                         self.stack.pop(i)
                     break
 
-        sheets.set_focused(self.window.active_sheet_in_group(self.group))
+        if len(sheets) == 1:
+            sheets.set_focused(sheets[0])
+
         self.stack.insert(0, sheets)
 
     def append(self, sheets: List[sublime.Sheet]):
