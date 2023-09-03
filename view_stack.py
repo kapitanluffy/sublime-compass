@@ -14,7 +14,6 @@ class ViewStack():
     def get(self, index: int):
         if 0 <= index < len(self.stack):
             return self.stack[index]
-
         return None
 
     def push(self, sheets: List[sublime.Sheet]):
@@ -62,7 +61,7 @@ class ViewStack():
     def head(self):
         if self.stack.__len__() > 0:
             return self.stack[0]
-        return []
+        return None
 
     def _sheet_filter(self, sheet: sublime.Sheet, new_sheet: sublime.Sheet):
         return sheet.id() != new_sheet.id()

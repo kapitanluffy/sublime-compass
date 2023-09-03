@@ -52,8 +52,6 @@ class ContextKeeperFocusListener(sublime_plugin.EventListener):
         if sheet is not None and sheet.is_transient():
             return
 
-        plugin_debug("closing view ", view)
-
         if is_view_valid_tab(view):
             return
 
@@ -103,11 +101,11 @@ class ContextKeeperFocusListener(sublime_plugin.EventListener):
             return
 
         # skip pushing to sheet if selected sheet is only one and is already focused
-        if view.sheet() in stack.head() and stack.head().__len__() == 1:
+        head = stack.head()
+        if head is not None and view.sheet() in head:
             return
 
         stack.push(sheets)
-
 
 class ContextKeeperMoveCommand(sublime_plugin.WindowCommand):
     def run(self, **kwargs):
