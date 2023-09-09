@@ -97,15 +97,15 @@ class ContextKeeperFocusListener(sublime_plugin.EventListener):
         stack = StackManager.get(window, group)
         sheets = window.selected_sheets_in_group(group)
 
-        if stack.sheet_total() == 0:
-            return
-
         # skip pushing to sheet if selected sheet is only one and is already focused
         head = stack.head()
         if head is not None and view.sheet() in head:
             return
 
         stack.push(sheets)
+
+    def on_load(self, view: sublime.View):
+        self.on_activated_async(view)
 
 class ContextKeeperMoveCommand(sublime_plugin.WindowCommand):
     def run(self, **kwargs):
