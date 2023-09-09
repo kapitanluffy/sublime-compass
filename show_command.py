@@ -15,7 +15,6 @@ def list_files(directory = "."):
     ripgrep = str(settings.get("ripgrep_path", ""))
 
     if ripgrep == "" or os.path.exists(ripgrep) is False:
-        print("settings", ripgrep)
         return None
 
     command = [settings["ripgrep_path"], "--files", directory]
@@ -40,11 +39,16 @@ def list_files(directory = "."):
 def generate_view_meta(view: sublime.View):
     tags = set()
     kind = sublime.KIND_FUNCTION
+    file_name = view.file_name()
 
     # Set item type
     # Normal sheet
     if view.file_name() is not None and view.element() is None:
         tags.add("#files")
+
+    if file_name is not None:
+        ext = os.path.splitext(file_name)[1][1:]
+        tags.add('#%s' % ext)
 
     # Empty sheet
     if view.file_name() is None and view.element() is None:
@@ -153,6 +157,10 @@ class File():
     def get_full_path(self):
         return self.file
 
+    def get_extension(self):
+        ext = os.path.splitext(self.file)[1]
+        return ext
+
 class ContextKeeperShowCommand(sublime_plugin.WindowCommand):
     def parseSheet(self, sheet: sublime.Sheet):
         view = sheet.view()
@@ -195,17 +203,10 @@ class ContextKeeperShowCommand(sublime_plugin.WindowCommand):
         # @todo fix grouping support
         stack = StackManager.get(self.window, group)
 
-        if stack.sheet_total() == 0:
-            return
-
-        if self.window.views_in_group(group).__len__() <= 0:
-            return
+        # @note show quick panel even if window is empty
 
         items: List[sublime.QuickPanelItem] = []
-        current_view = self.window.active_view_in_group(group)
-
-        if current_view is None:
-            raise Exception("Active view is missing!")
+        # @note showing quickpanel does not need a current_view
 
         initial_selection = self.window.selected_sheets_in_group(group)
         stack_length = len(stack.all())
@@ -274,23 +275,42 @@ class ContextKeeperShowCommand(sublime_plugin.WindowCommand):
                 post_list.append(item)
                 post_list_meta.append(sheets)
 
-        unopened_files = self.parse_listed_files()
+        unopened_files = None
         unopened_files_items: List[sublime.QuickPanelItem] = []
         unopened_files_meta = []
+        file_types_items: List[sublime.QuickPanelItem] = []
+        file_types_meta = []
 
+        only_show_unopened_files_on_empty_window = settings.get("only_show_unopened_files_on_empty_window", True)
+
+        if only_show_unopened_files_on_empty_window is True and self.window.sheets().__len__() <= 0:
+            unopened_files = self.parse_listed_files()
+
+        if only_show_unopened_files_on_empty_window is False and self.window.sheets().__len__() > 0:
+            unopened_files = self.parse_listed_files()
+
+        # @todo refactor and put inside parse_listed_files and maybe rething items+meta
         if unopened_files is not None:
             for file in unopened_files:
                 filename = file.get_file_name()
+                extension = file.get_extension()[1:]
+
                 trigger = "#open > %s" % (filename)
-                item = sublime.QuickPanelItem(trigger=trigger, kind=(sublime.KindId.VARIABLE, "f", "Function"))
+                item = sublime.QuickPanelItem(trigger=trigger, kind=(sublime.KindId.COLOR_YELLOWISH, "f", "Function"))
                 unopened_files_items.append(item)
                 unopened_files_meta.append(file)
+
+                if extension != "":
+                    trigger = "#type > %s | %s" % (extension, filename)
+                    item = sublime.QuickPanelItem(trigger=trigger, kind=(sublime.KindId.COLOR_BLUISH, "t", "Function"), annotation=filename)
+                    file_types_items.append(item)
+                    file_types_meta.append(file)
 
         state["is_quick_panel_open"] = True
         state["highlighted_index"] = selected_index
 
-        items = items + post_list + unopened_files_items
-        items_meta = items_meta + post_list_meta + unopened_files_meta
+        items = items + post_list + unopened_files_items + file_types_items
+        items_meta = items_meta + post_list_meta + unopened_files_meta + file_types_meta
 
         self.window.show_quick_panel(
             items=items,

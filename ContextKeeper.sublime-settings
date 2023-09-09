@@ -9,6 +9,9 @@
     // Enables listing files in the sidebar via #open tag
     "ripgrep_path": "",
 
+    // If ripgrep_path is set, unopend files will be shown only when the window is empty
+    "only_show_unopened_files_on_empty_window": true,
+
     // Enable filterable tags
     "enable_tags": false,
 }
