@@ -40,16 +40,11 @@ def list_files(directory = "."):
 def generate_view_meta(view: sublime.View):
     tags = set()
     kind = sublime.KIND_FUNCTION
-    file_name = view.file_name()
 
     # Set item type
     # Normal sheet
     if view.file_name() is not None and view.element() is None:
         tags.add("#files")
-
-    if file_name is not None:
-        ext = os.path.splitext(file_name)[1][1:]
-        tags.add('#%s' % ext)
 
     # Empty sheet
     if view.file_name() is None and view.element() is None:
