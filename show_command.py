@@ -9,6 +9,7 @@ import os
 import re
 from pathlib import Path
 import subprocess
+from .src.file import File
 
 def list_files(directory = "."):
     settings = plugin_settings()
@@ -143,23 +144,6 @@ def generate_preview(view: sublime.View):
 
     # @todo for groups, show the preview for the currently active in that group
     return """<tt style='color:red'>%s</tt>""" % sublime.html.escape(preview)
-
-class File():
-    def __init__(self, file, folder):
-        self.file = file
-        self.folder = folder
-        filename = file.replace("%s\\" % folder, "")
-        self.relative = "%s" % (filename)
-
-    def get_file_name(self):
-        return self.relative
-
-    def get_full_path(self):
-        return self.file
-
-    def get_extension(self):
-        ext = os.path.splitext(self.file)[1]
-        return ext
 
 class ContextKeeperShowCommand(sublime_plugin.WindowCommand):
     def parseSheet(self, sheet: sublime.Sheet):
