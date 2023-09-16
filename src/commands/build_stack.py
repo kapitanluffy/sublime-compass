@@ -1,7 +1,7 @@
 import sublime
 import sublime_plugin
-from .src.stack_manager import StackManager
-from .utils import *
+from ..stack_manager import StackManager
+from ...utils import plugin_settings, plugin_debug
 
 class CompassBuildStackCommand(sublime_plugin.WindowCommand):
     is_building = False

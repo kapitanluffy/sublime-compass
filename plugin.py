@@ -1,8 +1,7 @@
-import os
 import sublime
 import sublime_plugin
 from .src.stack_manager import StackManager
-from .build_stack_command import CompassBuildStackCommand
+from .src.commands.build_stack import CompassBuildStackCommand
 from .utils import *
 from typing import List
 
