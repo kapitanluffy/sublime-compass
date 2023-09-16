@@ -16,10 +16,10 @@ def reset_plugin_state():
     state["is_reset"] = False
 
 def plugin_debug(*message):
-    settings = sublime.load_settings("ContextKeeper.sublime-settings")
+    settings = sublime.load_settings("Compass.sublime-settings")
 
     if settings["debug"] is True:
         print(*message)
 
 def plugin_settings():
-    return sublime.load_settings("ContextKeeper.sublime-settings")
+    return sublime.load_settings("Compass.sublime-settings")

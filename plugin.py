@@ -2,7 +2,7 @@ import os
 import sublime
 import sublime_plugin
 from .src.stack_manager import StackManager
-from .build_stack_command import ContextKeeperBuildStackCommand
+from .build_stack_command import CompassBuildStackCommand
 from .utils import *
 from typing import List
 
@@ -26,9 +26,9 @@ def plugin_unloaded():
 def is_view_valid_tab(view):
     return view.element() is not None and view.element() != "find_in_files:output"
 
-class ContextKeeperFocusListener(sublime_plugin.EventListener):
+class CompassFocusListener(sublime_plugin.EventListener):
     def on_query_context(self, view, key, operator, operand, match_all):
-        if key == "context_keeper" and operator == 0 and operand is True:
+        if key == "compass" and operator == 0 and operand is True:
             return True
         return None
 
@@ -66,7 +66,7 @@ class ContextKeeperFocusListener(sublime_plugin.EventListener):
             plugin_debug("Sheet for View #%s is gone" % view.id())
             return
 
-        window.run_command("context_keeper_close")
+        window.run_command("compass_close")
 
         group = window.active_group()
         stack = StackManager.get(window, group)
@@ -78,7 +78,7 @@ class ContextKeeperFocusListener(sublime_plugin.EventListener):
         if sheet is not None and sheet.is_transient():
             return
 
-        if ContextKeeperBuildStackCommand.is_building is True:
+        if CompassBuildStackCommand.is_building is True:
             return
 
         if is_view_valid_tab(view):
@@ -107,7 +107,7 @@ class ContextKeeperFocusListener(sublime_plugin.EventListener):
     def on_load(self, view: sublime.View):
         self.on_activated_async(view)
 
-class ContextKeeperMoveCommand(sublime_plugin.WindowCommand):
+class CompassMoveCommand(sublime_plugin.WindowCommand):
     def run(self, **kwargs):
         is_forward = kwargs.get('forward', True)
         settings = plugin_settings()
@@ -120,7 +120,7 @@ class ContextKeeperMoveCommand(sublime_plugin.WindowCommand):
         self.window.run_command("move", { "by": "lines", "forward": is_forward })
 
 
-class ContextKeeperCloseCommand(sublime_plugin.WindowCommand):
+class CompassCloseCommand(sublime_plugin.WindowCommand):
     def run(self):
         view = self.window.active_view()
 
@@ -152,7 +152,7 @@ class ContextKeeperCloseCommand(sublime_plugin.WindowCommand):
         # print("zz", view, view.sheet(), sheet)
 
 
-class ContextKeeperListFilesCommand(sublime_plugin.WindowCommand):
+class CompassListFilesCommand(sublime_plugin.WindowCommand):
     def run(self):
         folders = self.window.folders()
         for root, dirs, files in os.walk(folders[0]):

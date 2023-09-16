@@ -140,7 +140,7 @@ def generate_preview(view: sublime.View):
     # @todo for groups, show the preview for the currently active in that group
     return """<tt style='color:red'>%s</tt>""" % sublime.html.escape(preview)
 
-class ContextKeeperShowCommand(sublime_plugin.WindowCommand):
+class CompassShowCommand(sublime_plugin.WindowCommand):
     def parseSheet(self, sheet: sublime.Sheet):
         view = sheet.view()
 
@@ -314,7 +314,7 @@ class ContextKeeperShowCommand(sublime_plugin.WindowCommand):
         state = plugin_state()
         state["highlighted_index"] = index
 
-        ContextKeeperShowCommand.ignore_highlight=False
+        CompassShowCommand.ignore_highlight=False
 
     def on_done(self, index, items, stack: ViewStack, selection, items_meta: List[Union[SheetGroup, File]]):
         state = plugin_state()

@@ -3,14 +3,14 @@ import sublime_plugin
 from .src.stack_manager import StackManager
 from .utils import *
 
-class ContextKeeperBuildStackCommand(sublime_plugin.WindowCommand):
+class CompassBuildStackCommand(sublime_plugin.WindowCommand):
     is_building = False
 
     def is_enabled(self):
-        return ContextKeeperBuildStackCommand.is_building != True
+        return CompassBuildStackCommand.is_building != True
 
     def run(self):
-        ContextKeeperBuildStackCommand.is_building = True
+        CompassBuildStackCommand.is_building = True
         group = self.window.active_group()
         stack = StackManager.get(self.window, group)
         stack.clear()
@@ -29,7 +29,7 @@ class ContextKeeperBuildStackCommand(sublime_plugin.WindowCommand):
         settings = plugin_settings()
         group = self.window.active_group()
         stack = StackManager.get(self.window, group)
-        # self.window.active_view().set_status("context_keeper_status", "Building MRU stack..")
+        # self.window.active_view().set_status("compass_status", "Building MRU stack..")
 
         if stack.sheet_total() == view_count:
             return
@@ -43,8 +43,8 @@ class ContextKeeperBuildStackCommand(sublime_plugin.WindowCommand):
         self.window.run_command("next_view_in_stack")
 
     def build_done(self):
-        # self.window.active_view().erase_status("context_keeper_status")
-        ContextKeeperBuildStackCommand.is_building = False
+        # self.window.active_view().erase_status("compass_status")
+        CompassBuildStackCommand.is_building = False
 
     def _dump_stack(self, sheets):
         _sheet_names = []

@@ -1,11 +1,11 @@
 [
-    { "caption": "ContextKeeper: Rebuild Recently Used Stack", "command": "context_keeper_build_stack" },
-    { "caption": "ContextKeeper: Show Recently Used Tabs/Views", "command": "context_keeper_show", "args": { "forward": true } },
+    { "caption": "Compass: Rebuild Recently Used Stack", "command": "compass_build_stack" },
+    { "caption": "Compass: Show Recently Used Tabs/Views", "command": "compass_show", "args": { "forward": true } },
     {
-        "caption": "Preferences: ContextKeeper Settings",
+        "caption": "Preferences: Compass Settings",
         "command": "edit_settings",
         "args": {
-            "base_file": "${packages}/context-keeper/ContextKeeper.sublime-settings",
+            "base_file": "${packages}/Compass/Compass.sublime-settings",
             "default": "{\n$0\n}\n"
         }
     },
