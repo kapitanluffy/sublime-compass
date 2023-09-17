@@ -136,22 +136,22 @@ def generate_preview(view: sublime.View):
     # @todo for groups, show the preview for the currently active in that group
     return """<tt style='color:red'>%s</tt>""" % sublime.html.escape(preview)
 
+def parse_sheet(sheet: sublime.Sheet):
+    view = sheet.view()
+
+    if view is None or view.is_valid() is False:
+        return False
+
+    name = guess_sheet_name(sheet)
+    preview = generate_preview(view)
+    viewMeta = generate_view_meta(view)
+    kind = viewMeta['kind']
+    tags = viewMeta['tags']
+    file = sheet.file_name()
+
+    return { "name": name, "preview": preview, "kind": kind, "tags": tags, "file": file }
+
 class CompassShowCommand(sublime_plugin.WindowCommand):
-    def parseSheet(self, sheet: sublime.Sheet):
-        view = sheet.view()
-
-        if view is None or view.is_valid() is False:
-            return False
-
-        name = guess_sheet_name(sheet)
-        preview = generate_preview(view)
-        viewMeta = generate_view_meta(view)
-        kind = viewMeta['kind']
-        tags = viewMeta['tags']
-        file = sheet.file_name()
-
-        return { "name": name, "preview": preview, "kind": kind, "tags": tags, "file": file }
-
     def parse_listed_files(self):
         folders = self.window.folders()
         items: List[File] = []
@@ -207,7 +207,7 @@ class CompassShowCommand(sublime_plugin.WindowCommand):
             tags = set()
 
             for sheet in sheets:
-                parsedSheet = self.parseSheet(sheet)
+                parsedSheet = parse_sheet(sheet)
 
                 if parsedSheet is False:
                     stack.remove(sheet)
