@@ -1,15 +1,12 @@
 from typing import List, Union
 import sublime
 import sublime_plugin
-from .utils import plugin_settings, plugin_state
-from .view_stack import SheetGroup, ViewStack
-from .src.stack_manager import StackManager
-import copy
+from ...utils import plugin_settings, plugin_state
+from ...view_stack import SheetGroup, ViewStack
+from .. import StackManager, File
 import os
 import re
-from pathlib import Path
 import subprocess
-from .src.file import File
 
 def list_files(directory = "."):
     settings = plugin_settings()
