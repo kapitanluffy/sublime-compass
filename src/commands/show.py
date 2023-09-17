@@ -151,21 +151,23 @@ def parse_sheet(sheet: sublime.Sheet):
 
     return { "name": name, "preview": preview, "kind": kind, "tags": tags, "file": file }
 
+def parse_listed_files(window: sublime.Window):
+    folders = window.folders()
+    items: List[File] = []
+
+    for folder in folders:
+        files = list_files(folder)
+
+        if files is None:
+            return None
+
+        for file in files:
+            items.append(File(file, folder))
+
+        return items
+
 class CompassShowCommand(sublime_plugin.WindowCommand):
-    def parse_listed_files(self):
-        folders = self.window.folders()
-        items: List[File] = []
 
-        for folder in folders:
-            files = list_files(folder)
-
-            if files is None:
-                return None
-
-            for file in files:
-                items.append(File(file, folder))
-
-            return items
 
     def run(self, **kwargs):
         settings = plugin_settings()
@@ -259,10 +261,10 @@ class CompassShowCommand(sublime_plugin.WindowCommand):
         only_show_unopened_files_on_empty_window = settings.get("only_show_unopened_files_on_empty_window", True)
 
         if only_show_unopened_files_on_empty_window is True and self.window.sheets().__len__() <= 0:
-            unopened_files = self.parse_listed_files()
+            unopened_files = parse_listed_files(self.window)
 
         if only_show_unopened_files_on_empty_window is False and self.window.sheets().__len__() > 0:
-            unopened_files = self.parse_listed_files()
+            unopened_files = parse_listed_files(self.window)
 
         # @todo refactor and put inside parse_listed_files and maybe rething items+meta
         if unopened_files is not None:
