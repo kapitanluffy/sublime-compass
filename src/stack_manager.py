@@ -1,6 +1,6 @@
 from typing import Dict, Tuple
 import sublime
-from ..view_stack import ViewStack
+from .view_stack import ViewStack
 
 class StackManager():
     stack: Dict[Tuple[int, int], ViewStack] = {}

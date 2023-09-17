@@ -1,6 +1,6 @@
 import sublime
 from typing import List
-from .src.sheet_group import SheetGroup
+from .sheet_group import SheetGroup
 
 """
 This is more like Sheet stack

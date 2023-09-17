@@ -2,8 +2,7 @@ from typing import List, Union
 import sublime
 import sublime_plugin
 from ...utils import plugin_settings, plugin_state
-from ...view_stack import SheetGroup, ViewStack
-from .. import StackManager, File
+from .. import StackManager, File, ViewStack, SheetGroup
 import os
 import re
 import subprocess
