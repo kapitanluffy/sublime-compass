@@ -1,4 +1,4 @@
-from ...reloader import reload
+from ...plugin import reload
 
 reload("src.commands", ["close", "move", "build_stack", "reset", "show"])
 

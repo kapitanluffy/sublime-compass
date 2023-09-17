@@ -1,4 +1,4 @@
-from ..reloader import reload
+from ..plugin import reload
 
 reload("src", ["file", "sheet_group", "stack_manager", "view_stack", "events"])
 reload("src.commands")
