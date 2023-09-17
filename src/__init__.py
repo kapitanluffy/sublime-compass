@@ -1,6 +1,6 @@
 from ..plugin import reload
 
-reload("src", ["file", "sheet_group", "stack_manager", "view_stack", "events"])
+reload("src", ["file", "sheet_group", "stack_manager", "view_stack", "events", "utils"])
 reload("src.commands")
 
 from .file import *
@@ -9,6 +9,7 @@ from .stack_manager import *
 from .commands import *
 from .view_stack import *
 from .events import *
+from .utils import *
 
 __all__ = [
     "File",
@@ -18,6 +19,8 @@ __all__ = [
 
     # functions
     "build_stack",
+    "list_files",
+    "parse_listed_files",
 
     # src.commands
     "CompassCloseCommand",
