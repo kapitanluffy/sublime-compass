@@ -127,8 +127,6 @@ def parse_sheet(sheet: sublime.Sheet):
     return { "name": name, "preview": preview, "kind": kind, "tags": tags, "file": file }
 
 class CompassShowCommand(sublime_plugin.WindowCommand):
-
-
     def run(self, **kwargs):
         settings = plugin_settings()
         state = plugin_state()
@@ -220,10 +218,10 @@ class CompassShowCommand(sublime_plugin.WindowCommand):
 
         only_show_unopened_files_on_empty_window = settings.get("only_show_unopened_files_on_empty_window", True)
 
-        if only_show_unopened_files_on_empty_window is True and self.window.sheets().__len__() <= 0:
+        if only_show_unopened_files_on_empty_window is True and self.window.sheets().__len__() > 0:
             unopened_files = parse_listed_files(self.window)
 
-        if only_show_unopened_files_on_empty_window is False and self.window.sheets().__len__() > 0:
+        if only_show_unopened_files_on_empty_window is False and self.window.sheets().__len__() <= 0:
             unopened_files = parse_listed_files(self.window)
 
         # @todo refactor and put inside parse_listed_files and maybe rething items+meta
@@ -248,6 +246,9 @@ class CompassShowCommand(sublime_plugin.WindowCommand):
 
         items = items + post_list + unopened_files_items + file_types_items
         items_meta = items_meta + post_list_meta + unopened_files_meta + file_types_meta
+
+        if len(items) <= 0 or len(items_meta) <= 0:
+            return
 
         self.window.show_quick_panel(
             items=items,
