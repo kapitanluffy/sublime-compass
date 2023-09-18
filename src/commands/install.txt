@@ -1,0 +1,7 @@
+🧭 Compass - Better Code Navigation
+
+Lost? Tired of endlessly scrolling through tabs just to find the previous file you were working on?
+
+Compass provides you the list of most-recently used tabs. It also helps you filter them by special tags!
+
+By default, ctrl+tab jumps you to the next view in the MRU stack without showing the stack. Compass provides you a visual guide of where you have been.
