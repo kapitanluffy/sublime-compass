@@ -1,67 +1,67 @@
 [
     // close quick panel and goto to initial view
-    {
-        "keys": ["alt", "alt"],
-        "command": "compass_reset",
-        "context": [
-            { "key": "overlay_visible", "operator": "equal", "operand": true },
-            { "key": "panel_has_focus", "operator": "equal", "operand": false },
-            { "key": "compass" },
-        ]
-    },
+    // {
+    //     "keys": ["alt", "alt"],
+    //     "command": "compass_reset",
+    //     "context": [
+    //         { "key": "overlay_visible", "operator": "equal", "operand": true },
+    //         { "key": "panel_has_focus", "operator": "equal", "operand": false },
+    //         { "key": "compass" },
+    //     ]
+    // },
 
     // close quick panel and select the highlighted view
-    {
-        "keys": ["ctrl", "ctrl"],
-        "command": "compass_close",
-        "context": [
-            { "key": "overlay_visible", "operator": "equal", "operand": true },
-            { "key": "panel_has_focus", "operator": "equal", "operand": false },
-            { "key": "compass" },
-        ]
-    },
+    // {
+    //     "keys": ["ctrl", "ctrl"],
+    //     "command": "compass_close",
+    //     "context": [
+    //         { "key": "overlay_visible", "operator": "equal", "operand": true },
+    //         { "key": "panel_has_focus", "operator": "equal", "operand": false },
+    //         { "key": "compass" },
+    //     ]
+    // },
 
     // override next/prev view stack keybinds
-    {
-        "keys": ["ctrl+tab"],
-        "command": "compass_show",
-        "args": {
-            "forward": true
-        },
-        "context": [
-            { "key": "overlay_visible", "operator": "equal", "operand": false },
-            { "key": "compass" },
-        ]
-    },
-    {
-        "keys": ["ctrl+shift+tab"],
-        "command": "compass_show",
-        "args": {
-            "forward": false
-        },
-        "context": [
-            { "key": "overlay_visible", "operator": "equal", "operand": false },
-            { "key": "compass" },
-        ]
-    },
+    // {
+    //     "keys": ["ctrl+tab"],
+    //     "command": "compass_show",
+    //     "args": {
+    //         "forward": true
+    //     },
+    //     "context": [
+    //         { "key": "overlay_visible", "operator": "equal", "operand": false },
+    //         { "key": "compass" },
+    //     ]
+    // },
+    // {
+    //     "keys": ["ctrl+shift+tab"],
+    //     "command": "compass_show",
+    //     "args": {
+    //         "forward": false
+    //     },
+    //     "context": [
+    //         { "key": "overlay_visible", "operator": "equal", "operand": false },
+    //         { "key": "compass" },
+    //     ]
+    // },
 
     // move up and down the quick panel even with ctrl pressed
-    {
-        "keys": ["ctrl+tab"],
-        "command": "compass_move",
-        "args": { "forward": true },
-        "context": [
-            { "key": "overlay_visible", "operator": "equal", "operand": true },
-            { "key": "compass" },
-        ]
-    },
-    {
-        "keys": ["ctrl+shift+tab"],
-        "command": "compass_move",
-        "args": { "forward": false },
-        "context": [
-            { "key": "overlay_visible", "operator": "equal", "operand": true },
-            { "key": "compass" },
-        ]
-    },
+    // {
+    //     "keys": ["ctrl+tab"],
+    //     "command": "compass_move",
+    //     "args": { "forward": true },
+    //     "context": [
+    //         { "key": "overlay_visible", "operator": "equal", "operand": true },
+    //         { "key": "compass" },
+    //     ]
+    // },
+    // {
+    //     "keys": ["ctrl+shift+tab"],
+    //     "command": "compass_move",
+    //     "args": { "forward": false },
+    //     "context": [
+    //         { "key": "overlay_visible", "operator": "equal", "operand": true },
+    //         { "key": "compass" },
+    //     ]
+    // },
 ]

@@ -9,4 +9,12 @@
             "default": "{\n$0\n}\n"
         }
     },
+    {
+        "caption": "Preferences: Compass Keybindings",
+        "command": "edit_settings",
+        "args": {
+            "base_file": "${packages}/Compass Navigator/Default.sublime-keymap",
+            "default": "[\n$0\n]\n"
+        }
+    },
 ]

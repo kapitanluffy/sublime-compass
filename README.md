@@ -24,6 +24,9 @@ Compass provides you a visual guide of where you have been.
 
 ### How To Use
 
+You must first enable the keybindings. 
+The plugin already has pre-commented keybinds that you can just copy or you can set it to your preferred keybinds
+
 #### Open Navigation Quick Panel
 
 > `ctrl+tab`
