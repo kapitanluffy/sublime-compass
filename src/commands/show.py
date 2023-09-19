@@ -8,9 +8,18 @@ import os
 import re
 import subprocess
 
+KIND_VIEW = (sublime.KindId.COLOR_REDISH, "f", "File")
+KIND_VIEW_EMPTY = (sublime.KindId.COLOR_GREENISH, "E", "Empty")
+KIND_VIEW_DIRTY = (sublime.KindId.COLOR_CYANISH, "d", "Dirty")
+KIND_VIEW_FINDFILES = (sublime.KindId.COLOR_BLUISH, "?", "FindFiles")
+KIND_VIEW_PRIMARY = (sublime.KindId.COLOR_PINKISH, "P", "PrimaryView")
+KIND_VIEW_CLONE = (sublime.KindId.COLOR_PINKISH, "c", "CloneView")
+KIND_FILE_OPEN = (sublime.KindId.COLOR_YELLOWISH, "f", "OpenFile")
+KIND_FILE_TYPE = (sublime.KindId.COLOR_BLUISH, "t", "FileType")
+
 def generate_view_meta(view: sublime.View):
     tags = set()
-    kind = sublime.KIND_FUNCTION
+    kind = KIND_VIEW
 
     # Set item type
     # Normal sheet
@@ -20,28 +29,28 @@ def generate_view_meta(view: sublime.View):
     # Empty sheet
     if view.file_name() is None and view.element() is None:
         tags.add("#empty")
-        kind = (sublime.KindId.SNIPPET, "E", "Snippet")
+        kind = KIND_VIEW_EMPTY
 
     # Dirty sheets
     if  view.file_name() is not None and view.is_dirty():
         tags.discard('#files')
         tags.add("#dirty")
-        kind = (sublime.KindId.VARIABLE, "d", "Type")
+        kind = KIND_VIEW_DIRTY
 
     # Find results
     if view.element() == "find_in_files:output":
         tags.add("#search")
-        kind = (sublime.KindId.NAMESPACE, "?", "Namespace")
+        kind = KIND_VIEW_FINDFILES
 
     # Sheets with clones
     if view.is_primary() is True and view.clones().__len__() > 0:
         tags.add("#primary")
-        kind = (sublime.KindId.KEYWORD, "P", "Keyword")
+        kind = KIND_VIEW_PRIMARY
 
     # Sheet clones
     if view.is_primary() is False and view.clones().__len__() > 0:
         tags.add("#clones")
-        kind = (sublime.KindId.KEYWORD, "c", "Keyword")
+        kind = KIND_VIEW_CLONE
 
     return { "kind": kind, "tags": tags }
 
@@ -231,13 +240,13 @@ class CompassShowCommand(sublime_plugin.WindowCommand):
                 extension = file.get_extension()[1:]
 
                 trigger = "#open > %s" % (filename)
-                item = sublime.QuickPanelItem(trigger=trigger, kind=(sublime.KindId.COLOR_YELLOWISH, "f", "Function"))
+                item = sublime.QuickPanelItem(trigger=trigger, kind=KIND_FILE_OPEN)
                 unopened_files_items.append(item)
                 unopened_files_meta.append(file)
 
                 if extension != "":
                     trigger = "#type > %s | %s" % (extension, filename)
-                    item = sublime.QuickPanelItem(trigger=trigger, kind=(sublime.KindId.COLOR_BLUISH, "t", "Function"), annotation=filename)
+                    item = sublime.QuickPanelItem(trigger=trigger, kind=KIND_FILE_TYPE, annotation=filename)
                     file_types_items.append(item)
                     file_types_meta.append(file)
 
