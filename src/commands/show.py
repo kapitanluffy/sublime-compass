@@ -6,10 +6,9 @@ from .. import StackManager, File, ViewStack, SheetGroup
 from ..utils import parse_listed_files
 import os
 import re
-import subprocess
 
 KIND_VIEW = (sublime.KindId.COLOR_REDISH, "f", "File")
-KIND_VIEW_EMPTY = (sublime.KindId.COLOR_GREENISH, "E", "Empty")
+KIND_VIEW_SCRATCH = (sublime.KindId.COLOR_GREENISH, "s", "Scratch")
 KIND_VIEW_DIRTY = (sublime.KindId.COLOR_CYANISH, "d", "Dirty")
 KIND_VIEW_FINDFILES = (sublime.KindId.COLOR_BLUISH, "?", "FindFiles")
 KIND_VIEW_PRIMARY = (sublime.KindId.COLOR_PINKISH, "P", "PrimaryView")
@@ -26,10 +25,10 @@ def generate_view_meta(view: sublime.View):
     if view.file_name() is not None and view.element() is None:
         tags.add("#files")
 
-    # Empty sheet
+    # Scratch sheet
     if view.file_name() is None and view.element() is None:
-        tags.add("#empty")
-        kind = KIND_VIEW_EMPTY
+        tags.add("#scratch")
+        kind = KIND_VIEW_SCRATCH
 
     # Dirty sheets
     if  view.file_name() is not None and view.is_dirty():
