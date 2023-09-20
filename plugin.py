@@ -19,7 +19,7 @@ from .src import *
 
 def plugin_loaded():
     reset_plugin_state()
-    build_stack(sublime.active_window())
+    load()
 
 def plugin_unloaded():
     # remove all stacks when unloading

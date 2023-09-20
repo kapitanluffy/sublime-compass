@@ -1,6 +1,14 @@
 from ..plugin import reload
 
-reload("src", ["file", "sheet_group", "stack_manager", "view_stack", "events", "utils"])
+reload("src", [
+    "file",
+    "sheet_group",
+    "stack_manager",
+    "view_stack",
+    "events",
+    "utils",
+    "core"
+])
 reload("src.commands")
 
 from .file import *
@@ -10,12 +18,16 @@ from .commands import *
 from .view_stack import *
 from .events import *
 from .utils import *
+from .core import *
 
 __all__ = [
     "File",
     "SheetGroup",
     "StackManager",
     "ViewStack",
+
+    # core
+    "load",
 
     # functions
     "build_stack",
