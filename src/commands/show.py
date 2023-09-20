@@ -297,10 +297,17 @@ class CompassShowCommand(sublime_plugin.WindowCommand):
 
         state["is_quick_panel_open"] = False
 
-        if isinstance(sheets, File) and sheets is not None:
+        class_name = type(sheets).__name__
+        item_type = items[index].kind[2]
+        sub_commands = ["OpenFile", "FileType"]
+        is_file = item_type in sub_commands and class_name == "File"
+
+        if sheets is not None and (isinstance(sheets, File) or is_file is True):
+            assert isinstance(sheets, File)
             self.window.open_file(sheets.get_full_path())
             return
 
+        # @todo on plugin reload, sheets are still SheetGroup because it is a subclass of List.
         if isinstance(sheets, SheetGroup) and sheets is not None:
             self.window.select_sheets(sheets)
 
