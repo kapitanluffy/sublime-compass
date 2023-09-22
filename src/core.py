@@ -1,8 +1,16 @@
 import sublime
-from . import build_stack
+from . import STACK, append_sheet, push_sheets, build_stack, hydrate_stack, get_item
 
 def load_window(window: sublime.Window):
-    build_stack(window)
+    is_hydrated = hydrate_stack(window)
+
+    if len(STACK) != len(window.sheets()):
+        for sheet in window.sheets():
+            if get_item(sheet) is None:
+                append_sheet(sheet)
+
+    if is_hydrated is False:
+        build_stack(window)
 
 def load():
     windows = sublime.windows()
