@@ -13,7 +13,6 @@ def reload(prefix, modules=[""]):
 
 reload("src")
 
-import sublime
 from .utils import *
 from .src import *
 

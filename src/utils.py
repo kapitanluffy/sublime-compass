@@ -31,7 +31,6 @@ def list_files(directory = "."):
     except Exception as e:
         print(f"An error occurred: {e}")
 
-
 def parse_listed_files(window: sublime.Window):
     folders = window.folders()
     items: List[File] = []
