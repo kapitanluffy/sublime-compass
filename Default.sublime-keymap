@@ -64,4 +64,7 @@
     //         { "key": "compass" },
     //     ]
     // },
+
+    { "keys": ["alt+up", "<character>"], "command": "compass_move_line", "args": { "forward": false } },
+    { "keys": ["alt+down", "<character>"], "command": "compass_move_line", "args": { "forward": true } },
 ]
