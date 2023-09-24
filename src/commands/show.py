@@ -243,11 +243,11 @@ class CompassShowCommand(sublime_plugin.WindowCommand):
                 unopened_files_items.append(item)
                 unopened_files_meta.append(file)
 
-                if extension != "":
-                    trigger = "#type > %s | %s" % (extension, filename)
-                    item = sublime.QuickPanelItem(trigger=trigger, kind=KIND_FILE_TYPE, annotation=filename)
-                    file_types_items.append(item)
-                    file_types_meta.append(file)
+                # if extension != "":
+                #     trigger = "#type > %s | %s" % (extension, filename)
+                #     item = sublime.QuickPanelItem(trigger=trigger, kind=KIND_FILE_TYPE, annotation=filename)
+                #     file_types_items.append(item)
+                #     file_types_meta.append(file)
 
         state["is_quick_panel_open"] = True
         state["highlighted_index"] = selected_index
