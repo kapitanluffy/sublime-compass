@@ -7,6 +7,9 @@ class File():
         filename = file.replace("%s\\" % folder, "")
         self.relative = "%s" % (filename)
 
+    def get_folder(self):
+        return self.folder
+
     def get_file_name(self):
         return self.relative
 
