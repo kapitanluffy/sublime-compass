@@ -3,7 +3,7 @@ import sublime_plugin
 from .stack_manager import StackManager
 from .commands.build_stack import CompassBuildStackCommand
 from ..utils import *
-from .stack import cache_stack, hydrate_stack, push_sheets, remove_sheet, remove_window
+from .stack import STACK, cache_stack, hydrate_stack, push_sheets, remove_sheet, remove_window
 
 # Build the stack from window object
 def build_stack(window):
@@ -21,7 +21,7 @@ def is_view_valid_tab(view):
 class CompassFocusListener(sublime_plugin.EventListener):
     def on_query_context(self, view, key, operator, operand, match_all):
         if key == "compass" and operator == 0 and operand is True:
-            return True
+            return len(STACK) > 0
         return False
 
     def on_load_project_async(self, window):

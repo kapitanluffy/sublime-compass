@@ -32,6 +32,7 @@ __all__ = [
     "load",
 
     # stack functions
+    "STACK",
     "hydrate_stack",
     "cache_stack",
     "push_sheets",
