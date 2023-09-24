@@ -57,6 +57,7 @@ __all__ = [
     "CompassShowCommand",
     "CompassDumpStackCommand",
     "CompassClearCacheCommand",
+    "CompassIndexFilesCommand",
 
     # src.events
     "CompassFocusListener"
