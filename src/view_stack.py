@@ -21,7 +21,7 @@ class ViewStack():
     def __init__(self, window: sublime.Window, group: int):
         self.window = window
         self.group = group
-        self.stack: List[SheetGroup] = convert_stack_to_sheet_group(window, group)
+        self.stack: List[SheetGroup] = []
 
     def get(self, index: int):
         """
@@ -34,7 +34,6 @@ class ViewStack():
     def push(self, window: sublime.Window, sheets: List[sublime.Sheet], group: int = 0, focused: Optional[sublime.Sheet] = None):
         # sheet_group = SheetGroup(sheets)
         push_sheets(window, sheets, group, focused)
-        self.stack: List[SheetGroup] = convert_stack_to_sheet_group(window, group)
 
     def append(self, window: sublime.Window, sheets: List[sublime.Sheet], group: int = 0):
         """
@@ -45,7 +44,6 @@ class ViewStack():
 
     def remove(self, sheet: sublime.Sheet):
         remove_sheet(sheet)
-        self.stack: List[SheetGroup] = convert_stack_to_sheet_group(self.window, self.group)
         cache_stack(self.window)
 
     def clear(self):
@@ -55,7 +53,7 @@ class ViewStack():
         self.stack = []
 
     def all(self) -> List[SheetGroup]:
-        return self.stack
+        return convert_stack_to_sheet_group(self.window, self.group)
 
     def sheet_total(self):
         """
