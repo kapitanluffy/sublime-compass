@@ -1,7 +1,7 @@
 import sublime
 from typing import List, Optional
 from .sheet_group import SheetGroup
-from .stack import get_stack, push_sheets, remove_sheet
+from .stack import cache_stack, get_head, get_stack, push_sheets, remove_sheet
 
 def convert_stack_to_sheet_group(window, group):
     stack = get_stack(window, group) or []
@@ -46,6 +46,7 @@ class ViewStack():
     def remove(self, sheet: sublime.Sheet):
         remove_sheet(sheet)
         self.stack: List[SheetGroup] = convert_stack_to_sheet_group(self.window, self.group)
+        cache_stack(self.window)
 
     def clear(self):
         """

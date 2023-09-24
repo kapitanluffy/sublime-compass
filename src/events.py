@@ -3,7 +3,7 @@ import sublime_plugin
 from .stack_manager import StackManager
 from .commands.build_stack import CompassBuildStackCommand
 from ..utils import *
-from .stack import STACK, cache_stack, hydrate_stack, remove_window
+from .stack import STACK, append_sheets, cache_stack, hydrate_stack, remove_window
 
 # Build the stack from window object
 def build_stack(window):
@@ -71,7 +71,6 @@ class CompassFocusListener(sublime_plugin.EventListener):
         group = window.active_group()
         stack = StackManager.get(window, group)
         stack.remove(sheet)
-        cache_stack(window)
 
     def on_activated_async(self, view: sublime.View):
         sheet = view.sheet()
