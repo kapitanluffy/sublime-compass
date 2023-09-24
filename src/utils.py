@@ -186,3 +186,43 @@ def parse_sheet(sheet: sublime.Sheet):
     file = sheet.file_name()
 
     return {"name": name, "preview": preview, "kind": kind, "tags": tags, "file": file}
+
+
+def generate_file_per_folder(directory="."):
+    settings = plugin_settings()
+    ripgrep = str(settings.get("ripgrep_path", ""))
+
+    if ripgrep == "" or os.path.exists(ripgrep) is False:
+        return None
+
+    command = [settings["ripgrep_path"], "--files", directory]
+
+    try:
+        process = subprocess.Popen(
+            command,
+            stdout=subprocess.PIPE,
+            text=True,
+            bufsize=1,
+            universal_newlines=True,
+            creationflags=subprocess.CREATE_NO_WINDOW,
+        )
+
+        if process.stdout is None:
+            return None
+
+        for line in process.stdout:
+            yield line.strip()
+        process.wait()
+    except Exception as e:
+        print(f"An error occurred: {e}")
+    return None
+
+
+def generate_files(window: sublime.Window):
+    folders = window.folders()
+
+    for folder in folders:
+        for file in generate_file_per_folder(folder):
+            if file is None:
+                return None
+            yield File(file, folder)
