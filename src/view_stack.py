@@ -1,7 +1,7 @@
 import sublime
 from typing import List, Optional
 from .sheet_group import SheetGroup
-from .stack import get_stack, push_sheets
+from .stack import get_stack, push_sheets, remove_sheet
 
 def convert_stack_to_sheet_group(window, group):
     stack = get_stack(window, group) or []
@@ -37,16 +37,15 @@ class ViewStack():
         self.stack: List[SheetGroup] = convert_stack_to_sheet_group(window, group)
 
     def append(self, window: sublime.Window, sheets: List[sublime.Sheet], group: int = 0):
+        """
+        @deprecated
+        """
         self.stack = [item for item in self.stack if item != sheets]
         self.stack.append(SheetGroup(sheets))
 
     def remove(self, sheet: sublime.Sheet):
-        for i, sheet_stack in enumerate(self.stack):
-            if sheet in sheet_stack:
-                self.stack[i].remove(sheet)
-                if len(self.stack[i]) <= 0:
-                    self.stack.pop(i)
-                break
+        remove_sheet(sheet)
+        self.stack: List[SheetGroup] = convert_stack_to_sheet_group(self.window, self.group)
 
     def clear(self):
         """
