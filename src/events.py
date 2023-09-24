@@ -3,7 +3,7 @@ import sublime_plugin
 from .stack_manager import StackManager
 from .commands.build_stack import CompassBuildStackCommand
 from ..utils import *
-from .stack import STACK, cache_stack, hydrate_stack, push_sheets, remove_sheet, remove_window
+from .stack import STACK, cache_stack, hydrate_stack, remove_sheet, remove_window
 
 # Build the stack from window object
 def build_stack(window):
@@ -13,7 +13,6 @@ def build_stack(window):
         group = sheet.group()
         stack = StackManager.get(window, group)
         stack.push(window, [sheet], group)
-        push_sheets(window, [sheet], group)
 
 def is_view_valid_tab(view):
     return view.element() is not None and view.element() != "find_in_files:output"
@@ -109,6 +108,5 @@ class CompassFocusListener(sublime_plugin.EventListener):
                 head.set_focused(view.sheet())
             return
 
-        stack.push(window, sheets, group)
-        push_sheets(window, sheets, group, view.sheet())
+        stack.push(window, sheets, group, view.sheet())
         cache_stack(window)
