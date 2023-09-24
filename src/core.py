@@ -8,4 +8,4 @@ def load():
     windows = sublime.windows()
 
     for window in windows:
-        load_window(window)
+        sublime.set_timeout_async(lambda : load_window(window))
