@@ -67,6 +67,4 @@ class ViewStack():
         return total
 
     def head(self):
-        if self.stack.__len__() > 0:
-            return self.stack[0]
-        return None
+        return get_head(self.window, self.group)

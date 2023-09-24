@@ -50,6 +50,12 @@ def remove_window(window: sublime.Window):
        if window.id() == block[0]:
            STACK.remove(block)
 
+def get_head(window: sublime.Window, group: Optional[int] = 0):
+    for item in STACK:
+        if window.id() == item[0] and group == item[1]:
+            return item
+    return None
+
 def get_stack(window: sublime.Window, group: Optional[int] = None):
     items: StackItem = []
     for block in STACK:
