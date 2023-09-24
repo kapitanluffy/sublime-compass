@@ -12,7 +12,7 @@ def build_stack(window):
     for sheet in sheets:
         group = sheet.group()
         stack = StackManager.get(window, group)
-        stack.push([sheet])
+        stack.push(window, [sheet], group)
         push_sheets(window, [sheet], group)
 
 def is_view_valid_tab(view):
@@ -26,6 +26,12 @@ class CompassFocusListener(sublime_plugin.EventListener):
 
     def on_load_project_async(self, window):
         is_hydrated = hydrate_stack(window)
+
+        if is_hydrated is True:
+            groups = window.num_groups()
+            for group in range(groups):
+                StackManager.get(window, group)
+
         if is_hydrated is False:
             build_stack(window)
 
@@ -103,6 +109,6 @@ class CompassFocusListener(sublime_plugin.EventListener):
                 head.set_focused(view.sheet())
             return
 
-        stack.push(sheets)
+        stack.push(window, sheets, group)
         push_sheets(window, sheets, group, view.sheet())
         cache_stack(window)

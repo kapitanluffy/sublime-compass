@@ -1,5 +1,5 @@
 import sublime
-from . import STACK, append_sheets, push_sheets, build_stack, hydrate_stack, get_item
+from . import STACK, append_sheets, build_stack, hydrate_stack, get_item, StackManager
 
 def load_window(window: sublime.Window):
     is_hydrated = hydrate_stack(window)
@@ -8,6 +8,11 @@ def load_window(window: sublime.Window):
         for sheet in window.sheets():
             if get_item(sheet) is None:
                 append_sheets(window, [sheet])
+
+    if is_hydrated is True:
+        groups = window.num_groups()
+        for group in range(groups):
+            StackManager.get(window, group)
 
     if is_hydrated is False:
         build_stack(window)

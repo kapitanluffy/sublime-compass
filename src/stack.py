@@ -1,12 +1,27 @@
 import sublime
-from typing import List, Optional, Union
-from .stack_manager import StackManager
+from typing import List, Optional, Tuple, Union
 from os import path
 
-STACK = []
+SheetList = List[int]
+FocusedSheet = int
+Group = int
+Window = int
 
-# Stack item tuple
-# (window id, group id, List[sheet ids], Optional(List[file paths]))
+StackItem = List[Tuple[Window, Group, SheetList, FocusedSheet]]
+"""
+StackItem
+
+```py
+Tuple[int, int, List[int], int, Optional[List[str]]]
+#      ^    ^       ^       ^            ^- file paths
+#      |    |       |       |- focused sheet
+#      |    |       |- sheets
+#      |    |- group id
+#      |- window id
+```
+"""
+
+STACK: StackItem = []
 
 def create_item(window: sublime.Window, sheets: List[sublime.Sheet], group: int = 0, focused: Optional[sublime.Sheet] = None):
     if len(sheets) <= 0:
@@ -36,7 +51,7 @@ def remove_window(window: sublime.Window):
            STACK.remove(block)
 
 def get_stack(window: sublime.Window, group: Optional[int] = None):
-    items = []
+    items: StackItem = []
     for block in STACK:
        if window.id() == block[0] and group is not None and group == block[1]:
             items.append(block)
@@ -78,7 +93,6 @@ def get_item(sheet: sublime.Sheet):
 def push_sheets(window: sublime.Window, sheets: List[sublime.Sheet], group: int = 0, focused: Optional[sublime.Sheet] = None):
     for sheet in sheets:
         remove_sheet(sheet)
-
     item = create_item(window, sheets, group, focused)
     STACK.insert(0, item)
 
@@ -163,8 +177,6 @@ def hydrate_stack(window):
             print("Cache item invalid", cache_item)
             continue
 
-        stack = StackManager.get(sheet_window, group)
-        stack.append(sheets)
         append_sheets(sheet_window, sheets, group, focused)
 
     return True
