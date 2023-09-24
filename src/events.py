@@ -77,6 +77,9 @@ class CompassFocusListener(sublime_plugin.EventListener):
     def on_activated_async(self, view: sublime.View):
         sheet = view.sheet()
 
+        if sheet is None:
+            return
+
         if sheet is not None and sheet.is_transient():
             return
 
@@ -98,15 +101,5 @@ class CompassFocusListener(sublime_plugin.EventListener):
         group = window.active_group()
         stack = StackManager.get(window, group)
         sheets = window.selected_sheets_in_group(group)
-
-        # skip pushing to sheets if current it is already current sheet group
-        head = stack.head()
-
-        if head is not None and view.sheet() in head:
-            # set the focused sheet if there are more than 1 sheet selected
-            if len(head) > 1:
-                head.set_focused(view.sheet())
-            return
-
-        stack.push(window, sheets, group, view.sheet())
+        stack.push(window, sheets, group, sheet)
         cache_stack(window)
