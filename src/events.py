@@ -6,13 +6,15 @@ from ..utils import *
 from .stack import STACK, append_sheets, cache_stack, hydrate_stack, remove_window
 
 # Build the stack from window object
-def build_stack(window):
+def build_stack(window: sublime.Window):
     sheets = window.sheets()
+    groups = window.num_groups()
 
-    for sheet in sheets:
-        group = sheet.group()
-        stack = StackManager.get(window, group)
-        stack.push(window, [sheet], group)
+    for group in range(groups):
+        sheets = window.sheets_in_group(group)
+        for sheet in sheets:
+            append_sheets(window, [sheet], group)
+        StackManager.get(window, group)
 
 def is_view_valid_tab(view):
     return view.element() is not None and view.element() != "find_in_files:output"
