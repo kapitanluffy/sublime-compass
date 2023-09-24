@@ -1,9 +1,23 @@
 import sublime
-from typing import List, Union
+from typing import List, Optional, Union
 from .stack_manager import StackManager
 from os import path
 
 STACK = []
+
+# Stack item tuple
+# (window id, group id, List[sheet ids], Optional(List[file paths]))
+
+def create_item(window: sublime.Window, sheets: List[sublime.Sheet], group: int = 0, focused: Optional[sublime.Sheet] = None):
+    if len(sheets) <= 0:
+        raise Exception('Cannot create stack item from empty sheets')
+
+    if focused is None:
+        focused = sheets[0]
+
+    sheet_ids = [sheet.id() for sheet in sheets]
+
+    return (window.id(), group, sheet_ids, focused.id())
 
 def get_sheet_name(sheet: sublime.Sheet):
     name = "Untitled #%s" % sheet.id()
@@ -21,73 +35,59 @@ def remove_window(window: sublime.Window):
        if window.id() == block[0]:
            STACK.remove(block)
 
+def get_stack(window: sublime.Window, group: Optional[int] = None):
+    items = []
+    for block in STACK:
+       if window.id() == block[0] and group is not None and group == block[1]:
+            items.append(block)
+       if window.id() == block[0] and group is None:
+            items.append(block)
+    return items
+
 def remove_sheet(sheet: sublime.Sheet):
-    window = sheet.window()
-    group = sheet.group()
+    item = get_item(sheet)
 
-    window_id = 0
-    if window is not None:
-        window_id = window.id()
-
-    item = (window_id, group, [sheet.id()])
-
-    if item in STACK:
+    if item is not None:
         STACK.remove(item)
-        return
 
-    for block in STACK:
-        if sheet.id() in block[2]:
-            STACK.remove(block)
-            return
+    return item is not None
 
-def get_item(sheet: sublime.Sheet):
+def get_item_index(sheet: sublime.Sheet):
     window = sheet.window()
     group = sheet.group()
 
-    window_id = 0
-    if window is not None:
-        window_id = window.id()
+    if window is None or group is None:
+        return None
 
-    item = (window_id, group, [sheet.id()])
+    item = create_item(window, [sheet], group)
 
     if item in STACK:
-        index = STACK.index(item)
-        return STACK[index]
+        return STACK.index(item)
 
-    for block in STACK:
+    # look deeper, sheet is in a multi-select sheet
+    for index, block in enumerate(STACK):
         if sheet.id() in block[2]:
-            return block
+            return index
 
     return None
 
-def append_sheet(sheet: sublime.Sheet):
-    window = sheet.window()
-    group = sheet.group()
-    view = sheet.view()
+def get_item(sheet: sublime.Sheet):
+    index = get_item_index(sheet)
+    return STACK[index] if index is not None else None
 
-    if window is None or group is None or view is None:
-        return False
-
-    STACK.append((window.id(), group, [sheet.id()]))
-    return True
-
-def push_sheets(window: sublime.Window, group: int, sheets: List[sublime.Sheet]):
-    sheet_ids = []
-    window_id = window.id()
-
+def push_sheets(window: sublime.Window, sheets: List[sublime.Sheet], group: int = 0, focused: Optional[sublime.Sheet] = None):
     for sheet in sheets:
         remove_sheet(sheet)
-        sheet_ids.append(sheet.id())
-    STACK.insert(0, (window_id, group, sheet_ids))
 
-def append_sheets(window: sublime.Window, group: int, sheets: List[sublime.Sheet]):
-    sheet_ids = []
-    window_id = window.id()
+    item = create_item(window, sheets, group, focused)
+    STACK.insert(0, item)
 
+def append_sheets(window: sublime.Window, sheets: List[sublime.Sheet], group: int = 0, focused: Optional[sublime.Sheet] = None):
     for sheet in sheets:
         remove_sheet(sheet)
-        sheet_ids.append(sheet.id())
-    STACK.append((window_id, group, sheet_ids))
+
+    item = create_item(window, sheets, group, focused)
+    STACK.append(item)
 
 def cache_stack(window: sublime.Window):
     window_settings = window.settings()
@@ -101,7 +101,7 @@ def cache_stack(window: sublime.Window):
         for sheet_id in block[2]:
             sheet = sublime.Sheet(sheet_id)
             sheet_files.append(get_sheet_name(sheet))
-        project_stack.append((block[0], block[1], block[2], sheet_files))
+        project_stack.append((block[0], block[1], block[2], block[3], sheet_files))
 
     window_settings.set('compass_stack_cache', project_stack)
 
@@ -132,6 +132,7 @@ def hydrate_stack(window):
         sheet_window = None
         group = None
         sheets = []
+        focused = sublime.Sheet(cache_item[3]) if cache_item is not None else None
 
         for index, sheet_id in enumerate(sheet_ids):
             sheet = sublime.Sheet(sheet_id)
@@ -141,7 +142,7 @@ def hydrate_stack(window):
 
             if sheet_window is None or view is None or group is None:
                 sheet = None
-                file_name = cache_item[3][index]
+                file_name = cache_item[4][index]
 
                 if path.exists(file_name) is False:
                     sheet = get_sheet_from_window(file_name, window)
@@ -164,6 +165,6 @@ def hydrate_stack(window):
 
         stack = StackManager.get(sheet_window, group)
         stack.append(sheets)
-        append_sheets(sheet_window, group, sheets)
+        append_sheets(sheet_window, sheets, group, focused)
 
     return True

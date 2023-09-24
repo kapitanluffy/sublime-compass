@@ -13,7 +13,7 @@ def build_stack(window):
         group = sheet.group()
         stack = StackManager.get(window, group)
         stack.push([sheet])
-        push_sheets(window, group, [sheet])
+        push_sheets(window, [sheet], group)
 
 def is_view_valid_tab(view):
     return view.element() is not None and view.element() != "find_in_files:output"
@@ -104,5 +104,5 @@ class CompassFocusListener(sublime_plugin.EventListener):
             return
 
         stack.push(sheets)
-        push_sheets(window, group, sheets)
+        push_sheets(window, sheets, group, view.sheet())
         cache_stack(window)
