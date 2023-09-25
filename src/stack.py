@@ -122,8 +122,7 @@ def append_sheets(window: sublime.Window, sheets: List[sublime.Sheet], group: in
 
 def cache_stack(window: sublime.Window):
     window_settings = window.settings()
-    project_stack = list(filter(lambda block: block[0] == window.id(), STACK))
-    project_stack = []
+    stack = []
     for block in STACK:
         if block[0] != window.id():
             continue
@@ -132,9 +131,9 @@ def cache_stack(window: sublime.Window):
         for sheet_id in block[2]:
             sheet = sublime.Sheet(sheet_id)
             sheet_files.append(get_sheet_name(sheet))
-        project_stack.append((block[0], block[1], block[2], block[3], sheet_files))
+        stack.append((block[0], block[1], block[2], block[3], sheet_files))
 
-    window_settings.set('compass_stack_cache', project_stack)
+    window_settings.set('compass_stack_cache', stack)
 
 def get_sheet_from_window(sheet_name: str, window: sublime.Window):
     sheets = window.sheets()
