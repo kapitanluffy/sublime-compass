@@ -1,9 +1,9 @@
 import sublime
 import sublime_plugin
-from .stack_manager import StackManager
 from .commands.build_stack import CompassBuildStackCommand
 from ..utils import *
 from .stack import STACK, append_sheets, cache_stack, hydrate_stack, remove_window
+from .view_stack import ViewStack
 
 # Build the stack from window object
 def build_stack(window: sublime.Window):
@@ -14,7 +14,6 @@ def build_stack(window: sublime.Window):
         sheets = window.sheets_in_group(group)
         for sheet in sheets:
             append_sheets(window, [sheet], group)
-        StackManager.get(window, group)
 
 def is_view_valid_tab(view):
     return view.element() is not None and view.element() != "find_in_files:output"
@@ -32,15 +31,9 @@ class CompassFocusListener(sublime_plugin.EventListener):
             build_stack(window)
 
     def on_pre_close_window(self, window: sublime.Window):
-        group = window.active_group()
-        stack = StackManager.get(window, group)
-        StackManager.remove(stack)
         remove_window(window)
 
     def on_pre_close_project(self, window: sublime.Window):
-        group = window.active_group()
-        stack = StackManager.get(window, group)
-        StackManager.remove(stack)
         remove_window(window)
 
     def on_pre_close(self, view: sublime.View):
@@ -66,7 +59,7 @@ class CompassFocusListener(sublime_plugin.EventListener):
         window.run_command("compass_close")
 
         group = window.active_group()
-        stack = StackManager.get(window, group)
+        stack = ViewStack(window, group)
         stack.remove(sheet)
 
     def on_activated_async(self, view: sublime.View):
@@ -97,7 +90,7 @@ class CompassFocusListener(sublime_plugin.EventListener):
             return
 
         group = sheet.group() or window.active_group()
-        stack = StackManager.get(window, group)
+        stack = ViewStack(window, group)
         sheets = window.selected_sheets_in_group(group)
         stack.push(window, sheets, group, sheet)
         cache_stack(window)

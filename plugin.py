@@ -20,7 +20,3 @@ from .src import *
 def plugin_loaded():
     reset_plugin_state()
     load()
-
-def plugin_unloaded():
-    # remove all stacks when unloading
-    StackManager.clear()
