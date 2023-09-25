@@ -22,12 +22,18 @@ Compass provides you a visual guide of where you have been.
 
 ---
 
-### How To Use
+### Installation
 
-You must first enable the keybindings. 
-The plugin already has pre-commented keybinds that you can just copy or you can set it to your preferred keybinds
+1. In your package directory, clone the repo
+```
+git clone git@github.com:kapitanluffy/sublime-compass.git "Compass Navigator"
+```
 
-#### Open Navigation Quick Panel
+2. Run `Preferences: Compass Keybindings` and copy pre-commented the keybindings (or you can set it to your preferred keybinds)
+
+3. Press `ctrl+tab` to show the Compass 🧭
+
+#### Open Compass
 
 > `ctrl+tab`
 
@@ -42,14 +48,14 @@ You can do this by pressing `ctrl+tab` on the first and second items
 https://github.com/kapitanluffy/sublime-compass/assets/485799/d051d3f1-90f2-4849-99fa-0c46b908391e
 
 
-#### Select Current Highlight
+#### Close Compass and select Current Highlight
 
 > `ctrl+ctrl`
 
 Select the current highlight and close the quick panel
 
 
-#### Cancel Selection
+#### Close Compass and go back to initial view
 
 > `alt+alt`
 
