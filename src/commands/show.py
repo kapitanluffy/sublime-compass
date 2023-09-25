@@ -139,7 +139,6 @@ class CompassShowCommand(sublime_plugin.WindowCommand):
         settings = plugin_settings()
         state = plugin_state()
 
-        self.highlighted_index = -1
         is_forward = kwargs.get('forward', True)
 
         group = self.window.active_group()
@@ -270,7 +269,8 @@ class CompassShowCommand(sublime_plugin.WindowCommand):
             raise Exception("Cannot highlight index: -1")
 
         sheets = items_meta[index]
-        self.highlighted_index = index
+        state = plugin_state()
+        state["highlighted_index"] = index
 
         if isinstance(sheets, File) and sheets is not None:
             self.window.open_file(sheets.get_full_path(), sublime.TRANSIENT)
@@ -278,16 +278,13 @@ class CompassShowCommand(sublime_plugin.WindowCommand):
         if isinstance(sheets, SheetGroup) and sheets is not None:
             self.window.select_sheets(sheets)
 
-        state = plugin_state()
-        state["highlighted_index"] = index
-
         CompassShowCommand.ignore_highlight=False
 
     def on_done(self, index, items, stack: ViewStack, selection, items_meta: List[Union[SheetGroup, File]]):
         state = plugin_state()
 
         if index == -1:
-            index = self.highlighted_index
+            index = state["highlighted_index"]
 
         if state["is_reset"] == True:
             index = 0
