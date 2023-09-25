@@ -101,7 +101,7 @@ class CompassFocusListener(sublime_plugin.EventListener):
         if window.views().__len__() <= 0:
             return
 
-        group = window.active_group()
+        group = sheet.group() or window.active_group()
         stack = StackManager.get(window, group)
         sheets = window.selected_sheets_in_group(group)
         stack.push(window, sheets, group, sheet)
