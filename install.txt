@@ -13,3 +13,10 @@ Compass provides you a visual guide of where you have been.
 ### How To Use
 
 You must first enable the keybindings. The plugin already has pre-commented keybinds that you can just copy or you can set it to your preferred keybinds
+
+v2.0
+- Compass will now cache the stack so it can be loaded again when Sublime restarts
+- Filter #empty is now called #scratch
+- Filter #type is now removed
+- Builds a stack on all existing windows on load in a separate thread
+- Fix when closing tabs does not go back to initial tab
