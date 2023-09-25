@@ -143,6 +143,8 @@ def get_sheet_from_window(sheet_name: str, window: sublime.Window):
             continue
         if view.name() == sheet_name:
             return sheet
+        if view.file_name() == sheet_name:
+            return sheet
 
 def get_sheet_from_filepath(file_path: str, window: sublime.Window):
     open_file: Union[sublime.View, None] = window.find_open_file(file_path)
@@ -181,7 +183,7 @@ def hydrate_stack(window):
                     sheet = get_sheet_from_filepath(file_name, window)
 
                 if sheet is None:
-                    print("Sheet invalid2", cache_item)
+                    print("Invalid cache item", cache_item)
                     continue
 
                 sheet_window = sheet.window()
@@ -190,7 +192,6 @@ def hydrate_stack(window):
             sheets.append(sheet)
 
         if sheet_window is None or group is None:
-            print("Cache item invalid", cache_item)
             continue
 
         append_sheets(sheet_window, sheets, group, focused)
