@@ -28,11 +28,6 @@ class CompassFocusListener(sublime_plugin.EventListener):
     def on_load_project_async(self, window):
         is_hydrated = hydrate_stack(window)
 
-        if is_hydrated is True:
-            groups = window.num_groups()
-            for group in range(groups):
-                StackManager.get(window, group)
-
         if is_hydrated is False:
             build_stack(window)
 
