@@ -2,7 +2,7 @@ from typing import List, Union
 import sublime
 import sublime_plugin
 from ...utils import plugin_settings, plugin_state
-from .. import StackManager, File, ViewStack, SheetGroup
+from .. import File, ViewStack, SheetGroup
 from ..utils import parse_listed_files
 import os
 import re
@@ -144,7 +144,7 @@ class CompassShowCommand(sublime_plugin.WindowCommand):
 
         group = self.window.active_group()
         # @todo fix grouping support
-        stack = StackManager.get(self.window, group)
+        stack = ViewStack(self.window, group)
 
         # @note show quick panel even if window is empty
 

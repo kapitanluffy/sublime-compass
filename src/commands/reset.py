@@ -1,6 +1,5 @@
 import sublime_plugin
 from .. import ViewStack
-from ..stack_manager import StackManager
 from .show import CompassShowCommand
 from ...utils import plugin_settings, plugin_state
 

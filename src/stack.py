@@ -9,19 +9,30 @@ Window = int
 
 StackItem = List[Tuple[Window, Group, SheetList, FocusedSheet]]
 """
-StackItem
+    `StackItem` represents a "view" (not the View object)
 
-```py
-Tuple[int, int, List[int], int, Optional[List[str]]]
-#      ^    ^       ^       ^            ^- file paths
-#      |    |       |       |- focused sheet
-#      |    |       |- sheets
-#      |    |- group id
-#      |- window id
-```
+    This "view" consists of the following:
+        - The active window
+        - The active group within the active window
+        - The selected sheets within the active group
+        - The focused sheet within the selected sheets
+
+    ```py
+    Tuple[int, int, List[int], int, Optional[List[str]]]
+    #      ^    ^       ^       ^            ^- file paths
+    #      |    |       |       |- focused sheet
+    #      |    |       |- selected sheets
+    #      |    |- group id
+    #      |- window id
+    ```
 """
 
 STACK: StackItem = []
+"""
+    `STACK` is the list of StackItems representing the "view"
+
+    The first StackItem in the STACK is the current "view"
+"""
 
 def create_item(window: sublime.Window, sheets: List[sublime.Sheet], group: int = 0, focused: Optional[sublime.Sheet] = None):
     if len(sheets) <= 0:
