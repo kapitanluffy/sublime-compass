@@ -50,6 +50,7 @@ __all__ = [
     "CompassBuildStackCommand",
     "CompassShowCommand",
     "CompassDumpStackCommand",
+    "CompassClearCacheCommand",
 
     # src.events
     "CompassFocusListener"
