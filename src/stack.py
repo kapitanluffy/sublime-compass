@@ -1,3 +1,4 @@
+import re
 import sublime
 from typing import List, Optional, Tuple, Union
 from os import path
@@ -135,8 +136,7 @@ def cache_stack(window: sublime.Window):
 
     window_settings.set('compass_stack_cache', stack)
 
-def get_sheet_from_window(sheet_name: str, window: sublime.Window):
-    sheets = window.sheets()
+def get_sheet_from_window(sheet_name: str, sheets: List[sublime.Sheet]):
     for sheet in sheets:
         view = sheet.view()
         if view is None:
@@ -144,6 +144,10 @@ def get_sheet_from_window(sheet_name: str, window: sublime.Window):
         if view.name() == sheet_name:
             return sheet
         if view.file_name() == sheet_name:
+            return sheet
+        if  view.name() == "" and view.file_name() == None and re.match(r'^Untitled #\d+', sheet_name):
+            # @note for now, if view has empty name and file name treat is as "untitled"
+            #       in the future, we would want to save identifiers in the view itself to match with the cache
             return sheet
 
 def get_sheet_from_filepath(file_path: str, window: sublime.Window):
@@ -155,6 +159,7 @@ def get_sheet_from_filepath(file_path: str, window: sublime.Window):
 def hydrate_stack(window):
     window_settings = window.settings()
     stack_cache = window_settings.get('compass_stack_cache', [])
+    window_sheets = window.sheets()
 
     if len(stack_cache) <= 0:
         return False;
@@ -177,7 +182,9 @@ def hydrate_stack(window):
                 file_name = cache_item[4][index]
 
                 if path.exists(file_name) is False:
-                    sheet = get_sheet_from_window(file_name, window)
+                    sheet = get_sheet_from_window(file_name, window_sheets)
+                    if sheet is not None:
+                        window_sheets.remove(sheet)
 
                 if path.exists(file_name) is True:
                     sheet = get_sheet_from_filepath(file_name, window)
