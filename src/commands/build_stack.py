@@ -35,7 +35,7 @@ class CompassBuildStackCommand(sublime_plugin.WindowCommand):
             return
 
         sheets = self.window.selected_sheets()
-        stack.append(sheets)
+        stack.append(self.window, sheets, group)
 
         if settings["debug"] is True:
             self._dump_stack(sheets)

@@ -1,9 +1,10 @@
 from ..plugin import reload
 
 reload("src", [
+    "stack_manager",
+    "stack",
     "file",
     "sheet_group",
-    "stack_manager",
     "view_stack",
     "events",
     "utils",
@@ -11,9 +12,10 @@ reload("src", [
 ])
 reload("src.commands")
 
+from .stack_manager import *
+from .stack import *
 from .file import *
 from .sheet_group import *
-from .stack_manager import *
 from .commands import *
 from .view_stack import *
 from .events import *
@@ -29,6 +31,14 @@ __all__ = [
     # core
     "load",
 
+    # stack functions
+    "STACK",
+    "hydrate_stack",
+    "cache_stack",
+    "push_sheets",
+    "remove_sheet",
+    "remove_window",
+
     # functions
     "build_stack",
     "list_files",
@@ -38,8 +48,9 @@ __all__ = [
     "CompassCloseCommand",
     "CompassMoveCommand",
     "CompassBuildStackCommand",
-    "CompassResetCommand",
     "CompassShowCommand",
+    "CompassDumpStackCommand",
+    "CompassClearCacheCommand",
 
     # src.events
     "CompassFocusListener"

@@ -2,7 +2,8 @@
     // close quick panel and goto to initial view
     // {
     //     "keys": ["alt", "alt"],
-    //     "command": "compass_reset",
+    //     "command": "compass_close",
+    //     "args": { "reset": true },
     //     "context": [
     //         { "key": "overlay_visible", "operator": "equal", "operand": true },
     //         { "key": "panel_has_focus", "operator": "equal", "operand": false },
@@ -64,4 +65,7 @@
     //         { "key": "compass" },
     //     ]
     // },
+
+    { "keys": ["alt+up", "d"], "command": "compass_dump_stack" },
+    { "keys": ["alt+up", "c"], "command": "compass_clear_cache" },
 ]

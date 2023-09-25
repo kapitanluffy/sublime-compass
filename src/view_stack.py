@@ -1,6 +1,18 @@
 import sublime
-from typing import List
+from typing import List, Optional
 from .sheet_group import SheetGroup
+from .stack import cache_stack, get_head, get_stack, push_sheets, remove_sheet
+
+def convert_stack_to_sheet_group(window, group):
+    stack = get_stack(window, group) or []
+    sheets_stack: List[SheetGroup] = []
+    for item in stack:
+        sheets = SheetGroup()
+        for sheet_id in item[2]:
+            sheets.append(sublime.Sheet(sheet_id))
+        sheets.set_focused(sublime.Sheet(item[3]))
+        sheets_stack.append(sheets)
+    return sheets_stack
 
 """
 This is more like Sheet stack
@@ -12,56 +24,45 @@ class ViewStack():
         self.stack: List[SheetGroup] = []
 
     def get(self, index: int):
+        """
+        @deprecated
+        """
         if 0 <= index < len(self.stack):
             return self.stack[index]
         return None
 
-    def push(self, sheets: List[sublime.Sheet]):
-        sheets = SheetGroup(sheets)
+    def push(self, window: sublime.Window, sheets: List[sublime.Sheet], group: int = 0, focused: Optional[sublime.Sheet] = None):
+        # sheet_group = SheetGroup(sheets)
+        push_sheets(window, sheets, group, focused)
 
-        for sheet in sheets:
-            for i, sheet_stack in enumerate(self.stack):
-                if sheet in sheet_stack:
-                    self.stack[i].remove(sheet)
-
-                    # remove if empty
-                    if len(self.stack[i]) <= 0:
-                        self.stack.pop(i)
-                    break
-
-        if len(sheets) == 1:
-            sheets.set_focused(sheets[0])
-
-        self.stack.insert(0, sheets)
-
-    def append(self, sheets: List[sublime.Sheet]):
+    def append(self, window: sublime.Window, sheets: List[sublime.Sheet], group: int = 0):
+        """
+        @deprecated
+        """
         self.stack = [item for item in self.stack if item != sheets]
         self.stack.append(SheetGroup(sheets))
 
     def remove(self, sheet: sublime.Sheet):
-        for i, sheet_stack in enumerate(self.stack):
-            if sheet in sheet_stack:
-                self.stack[i].remove(sheet)
-                if len(self.stack[i]) <= 0:
-                    self.stack.pop(i)
-                break
+        remove_sheet(sheet)
+        cache_stack(self.window)
 
     def clear(self):
+        """
+        @deprecated
+        """
         self.stack = []
 
     def all(self) -> List[SheetGroup]:
-        return self.stack
+        return convert_stack_to_sheet_group(self.window, self.group)
 
     def sheet_total(self):
+        """
+        @deprecated
+        """
         total = 0
         for sheets in self.stack:
             total = total + sheets.__len__()
         return total
 
     def head(self):
-        if self.stack.__len__() > 0:
-            return self.stack[0]
-        return None
-
-    def _sheet_filter(self, sheet: sublime.Sheet, new_sheet: sublime.Sheet):
-        return sheet.id() != new_sheet.id()
+        return get_head(self.window, self.group)
