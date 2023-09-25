@@ -48,7 +48,6 @@ __all__ = [
     "CompassCloseCommand",
     "CompassMoveCommand",
     "CompassBuildStackCommand",
-    "CompassResetCommand",
     "CompassShowCommand",
     "CompassDumpStackCommand",
 
