@@ -75,6 +75,9 @@ class CompassFocusListener(sublime_plugin.EventListener):
         stack.remove(sheet)
 
     def on_activated_async(self, view: sublime.View):
+        if (len(STACK) <= 0):
+            return
+
         sheet = view.sheet()
 
         if sheet is None:
