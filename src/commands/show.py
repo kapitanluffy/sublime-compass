@@ -109,6 +109,11 @@ def get_visible_lines(view: sublime.View, visible_lines, view_selection):
 
 def generate_preview(view: sublime.View):
     visible_lines = view.lines(view.visible_region())
+    selection = view.sel()
+
+    if len(selection) <= 0:
+        return ""
+
     view_selection = view.line(view.sel()[0].a)
     preview = view.substr(view_selection).strip()
 
@@ -248,14 +253,15 @@ class CompassShowCommand(sublime_plugin.WindowCommand):
                 #     file_types_items.append(item)
                 #     file_types_meta.append(file)
 
-        state["is_quick_panel_open"] = True
-        state["highlighted_index"] = selected_index
 
         items = items + post_list + unopened_files_items + file_types_items
         items_meta = items_meta + post_list_meta + unopened_files_meta + file_types_meta
 
         if len(items) <= 0 or len(items_meta) <= 0:
             return
+
+        state["is_quick_panel_open"] = True
+        state["highlighted_index"] = selected_index
 
         self.window.show_quick_panel(
             items=items,
@@ -273,9 +279,11 @@ class CompassShowCommand(sublime_plugin.WindowCommand):
         state["highlighted_index"] = index
 
         if isinstance(sheets, File) and sheets is not None:
+            state["is_quick_panel_open"] = False
             self.window.open_file(sheets.get_full_path(), sublime.TRANSIENT)
 
         if isinstance(sheets, SheetGroup) and sheets is not None:
+            state["is_quick_panel_open"] = False
             self.window.select_sheets(sheets)
 
         CompassShowCommand.ignore_highlight=False
@@ -292,20 +300,20 @@ class CompassShowCommand(sublime_plugin.WindowCommand):
 
         sheets = items_meta[index]
 
-        state["is_quick_panel_open"] = False
-
         class_name = type(sheets).__name__
         item_type = items[index].kind[2]
         sub_commands = ["OpenFile", "FileType"]
         is_file = item_type in sub_commands and class_name == "File"
 
         if sheets is not None and (isinstance(sheets, File) or is_file is True):
+            state["is_quick_panel_open"] = False
             assert isinstance(sheets, File)
             self.window.open_file(sheets.get_full_path())
             return
 
         # @todo on plugin reload, sheets are still SheetGroup because it is a subclass of List.
         if isinstance(sheets, SheetGroup) and sheets is not None:
+            state["is_quick_panel_open"] = False
             self.window.select_sheets(sheets)
 
             # refocus on the selected sheet

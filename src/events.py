@@ -56,11 +56,14 @@ class CompassFocusListener(sublime_plugin.EventListener):
             plugin_debug("Sheet for View #%s is gone" % view.id())
             return
 
-        window.run_command("compass_close", { "reset": True })
 
         group = window.active_group()
         stack = ViewStack(window, group)
         stack.remove(sheet)
+
+        state = plugin_state()
+        if state["is_quick_panel_open"] is True:
+            window.run_command("compass_close", { "reset": True })
 
     def on_activated_async(self, view: sublime.View):
         if (len(STACK) <= 0):
