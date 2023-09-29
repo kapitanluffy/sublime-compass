@@ -205,20 +205,22 @@ class CompassShowCommand(sublime_plugin.WindowCommand):
             items.append(item)
             items_meta.append(sheets)
 
-            file_label: str | None = files[0]
+            for index, file in enumerate(files):
+                file_label: str | None = file
 
-            if file_label is not None:
-                open_folders = self.window.folders()
+                if file_label is not None:
+                    open_folders = self.window.folders()
 
-                for folder in open_folders:
-                    file_label = file_label.replace("%s%s" % (folder, os.path.sep), "")
+                    for folder in open_folders:
+                        file_label = file_label.replace("%s%s" % (folder, os.path.sep), "")
 
-            if file_label is None:
-                file_label = names[0]
+                if file_label is None:
+                    file_label = names[index]
 
-            if is_tags_enabled is True:
-                expandedTrigger = "%s%s%s" % (joinedTags, ' | ', file_label)
-                item = sublime.QuickPanelItem(trigger=expandedTrigger, kind=kind, annotation=trigger)
+                if is_tags_enabled is True and len(tags) > 0:
+                    file_label = "%s%s%s" % (joinedTags, ' | ', file_label)
+
+                item = sublime.QuickPanelItem(trigger=file_label, kind=kind, annotation=trigger)
                 post_list.append(item)
                 post_list_meta.append(sheets)
 
