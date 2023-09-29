@@ -9,6 +9,20 @@ import os
 KIND_FILE_OPEN = (sublime.KindId.COLOR_YELLOWISH, "f", "OpenFile")
 
 
+def generate_post_file_item(window: sublime.Window, file_label, tags, kind, annotation):
+    settings = plugin_settings()
+    open_folders = window.folders()
+    is_tags_enabled = settings.get("enable_tags")
+
+    for folder in open_folders:
+        file_label = file_label.replace("%s%s" % (folder, os.path.sep), "")
+
+    if is_tags_enabled is True and len(tags) > 0:
+        file_label = "%s%s%s" % (' '.join(tags), ' | ', file_label)
+
+    return sublime.QuickPanelItem(trigger=file_label, kind=kind, annotation=annotation)
+
+
 class CompassShowCommand(sublime_plugin.WindowCommand):
     def run(self, **kwargs):
         settings = plugin_settings()
@@ -68,29 +82,13 @@ class CompassShowCommand(sublime_plugin.WindowCommand):
             if names.__len__() <= 0:
                 continue
 
-            is_tags_enabled = settings.get("enable_tags")
             trigger = ' + '.join(names)
-            joinedTags = ' '.join(tags) if is_tags_enabled else ''
-            item = sublime.QuickPanelItem(trigger=trigger, kind=kind, details=preview, annotation=joinedTags)
+            item = sublime.QuickPanelItem(trigger=trigger, kind=kind, details=preview)
             items.append(item)
             items_meta.append(sheets)
 
             for index, file in enumerate(files):
-                file_label: str | None = file
-
-                if file_label is not None:
-                    open_folders = self.window.folders()
-
-                    for folder in open_folders:
-                        file_label = file_label.replace("%s%s" % (folder, os.path.sep), "")
-
-                if file_label is None:
-                    file_label = names[index]
-
-                if is_tags_enabled is True and len(tags) > 0:
-                    file_label = "%s%s%s" % (joinedTags, ' | ', file_label)
-
-                item = sublime.QuickPanelItem(trigger=file_label, kind=kind, annotation=trigger)
+                item = generate_post_file_item(self.window, file or names[index], tags, kind, trigger)
                 post_list.append(item)
                 post_list_meta.append(sheets)
 
@@ -112,18 +110,10 @@ class CompassShowCommand(sublime_plugin.WindowCommand):
         if unopened_files is not None:
             for file in unopened_files:
                 filename = file.get_file_name()
-                extension = file.get_extension()[1:]
-
                 trigger = "#open > %s" % (filename)
                 item = sublime.QuickPanelItem(trigger=trigger, kind=KIND_FILE_OPEN)
                 unopened_files_items.append(item)
                 unopened_files_meta.append(file)
-
-                # if extension != "":
-                #     trigger = "#type > %s | %s" % (extension, filename)
-                #     item = sublime.QuickPanelItem(trigger=trigger, kind=KIND_FILE_TYPE, annotation=filename)
-                #     file_types_items.append(item)
-                #     file_types_meta.append(file)
 
         items = items + post_list + unopened_files_items + file_types_items
         items_meta = items_meta + post_list_meta + unopened_files_meta + file_types_meta
