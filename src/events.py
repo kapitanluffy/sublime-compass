@@ -56,8 +56,7 @@ class CompassFocusListener(sublime_plugin.EventListener):
             plugin_debug("Sheet for View #%s is gone" % view.id())
             return
 
-
-        group = window.active_group()
+        group = sheet.group() or window.active_group()
         stack = ViewStack(window, group)
         stack.remove(sheet)
 
