@@ -14,4 +14,7 @@
 
     // Enable filterable tags
     "enable_tags": false,
+
+    // Preview when an item gets highlighted
+    "preview_on_highlight": true,
 }

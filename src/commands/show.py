@@ -255,7 +255,6 @@ class CompassShowCommand(sublime_plugin.WindowCommand):
                 #     file_types_items.append(item)
                 #     file_types_meta.append(file)
 
-
         items = items + post_list + unopened_files_items + file_types_items
         items_meta = items_meta + post_list_meta + unopened_files_meta + file_types_meta
 
@@ -276,9 +275,16 @@ class CompassShowCommand(sublime_plugin.WindowCommand):
         if index == -1:
             raise Exception("Cannot highlight index: -1")
 
+        settings = plugin_settings()
         sheets = items_meta[index]
         state = plugin_state()
         state["highlighted_index"] = index
+
+        is_preview_on_highlight = settings.get("preview_on_highlight", True)
+
+        if is_preview_on_highlight is False:
+            state["is_quick_panel_open"] = False
+            return
 
         if isinstance(sheets, File) and sheets is not None:
             state["is_quick_panel_open"] = False
