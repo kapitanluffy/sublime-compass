@@ -43,6 +43,12 @@ __all__ = [
     "build_stack",
     "list_files",
     "parse_listed_files",
+    "generate_view_meta",
+    "guess_sheet_name",
+    "replace_spaces_with_spaces",
+    "get_visible_lines",
+    "generate_preview",
+    "parse_sheet",
 
     # src.commands
     "CompassCloseCommand",
