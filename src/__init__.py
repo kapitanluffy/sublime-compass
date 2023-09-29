@@ -11,6 +11,7 @@ reload("src", [
     "core"
 ])
 reload("src.commands")
+reload("src.plugins.bookmarks")
 
 from .stack_manager import *
 from .stack import *
@@ -21,6 +22,7 @@ from .view_stack import *
 from .events import *
 from .utils import *
 from .core import *
+from .plugins.bookmarks import *
 
 __all__ = [
     "File",
@@ -53,5 +55,9 @@ __all__ = [
     "CompassClearCacheCommand",
 
     # src.events
-    "CompassFocusListener"
+    "CompassFocusListener",
+
+    # plugins
+    "CompassBookmarksListener",
+    "bookmarks_generate_items"
 ]

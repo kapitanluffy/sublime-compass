@@ -2,7 +2,7 @@ from typing import List, Union
 import sublime
 import sublime_plugin
 from ...utils import plugin_settings, plugin_state
-from .. import File, ViewStack, SheetGroup
+from .. import File, ViewStack, SheetGroup, bookmarks_generate_items
 from ..utils import parse_listed_files
 import os
 import re
@@ -253,9 +253,10 @@ class CompassShowCommand(sublime_plugin.WindowCommand):
                 #     file_types_items.append(item)
                 #     file_types_meta.append(file)
 
+        bookmark_items, bookmark_items_meta = bookmarks_generate_items()
 
-        items = items + post_list + unopened_files_items + file_types_items
-        items_meta = items_meta + post_list_meta + unopened_files_meta + file_types_meta
+        items = items + bookmark_items + post_list + unopened_files_items + file_types_items
+        items_meta = items_meta + bookmark_items_meta + post_list_meta + unopened_files_meta + file_types_meta
 
         if len(items) <= 0 or len(items_meta) <= 0:
             return
@@ -304,6 +305,19 @@ class CompassShowCommand(sublime_plugin.WindowCommand):
         item_type = items[index].kind[2]
         sub_commands = ["OpenFile", "FileType"]
         is_file = item_type in sub_commands and class_name == "File"
+
+        if item_type == 'Bookmark':
+            state["is_quick_panel_open"] = False
+            assert isinstance(sheets, SheetGroup)
+            self.window.select_sheets(sheets)
+            focused = sheets.get_focused()
+            if len(sheets) > 0 and focused is not None:
+                self.window.focus_sheet(focused)
+                view = self.window.active_view()
+                if view is not None:
+                    view.sel().clear()
+                    view.sel().add(sublime.Region(*items[index].kind[3]))
+            return
 
         if sheets is not None and (isinstance(sheets, File) or is_file is True):
             state["is_quick_panel_open"] = False
