@@ -17,4 +17,7 @@
 
     // Preview when an item gets highlighted
     "preview_on_highlight": true,
+
+    // Add a line previewing the cursor position in that view
+    "enable_context_preview": true,
 }

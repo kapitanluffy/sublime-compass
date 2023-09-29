@@ -173,12 +173,13 @@ def generate_preview(view: sublime.View):
 
 def parse_sheet(sheet: sublime.Sheet):
     view = sheet.view()
+    settings = plugin_settings()
 
     if view is None or view.is_valid() is False:
         return False
 
     name = guess_sheet_name(sheet)
-    preview = generate_preview(view)
+    preview = generate_preview(view) if settings.get("enable_context_preview", True) else ""
     viewMeta = generate_view_meta(view)
     kind = viewMeta['kind']
     tags = viewMeta['tags']
