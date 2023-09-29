@@ -165,3 +165,18 @@ def bookmarks_generate_items():
         items.append(generate_quickpanel_item((key, item)))
         meta.append(SheetGroup([sublime.Sheet(sheet) for sheet in item[2]]))
     return (items, meta)
+
+
+def bookmarks_handle_selection(window: sublime.Window, sheets: SheetGroup, bookmark: sublime.Region):
+    window.select_sheets(sheets)
+    focused = sheets.get_focused()
+
+    if len(sheets) > 0 and focused is not None:
+        window.focus_sheet(focused)
+        view = window.active_view()
+
+        if view is None:
+            return
+
+        view.sel().clear()
+        view.sel().add(bookmark)

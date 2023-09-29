@@ -59,5 +59,6 @@ __all__ = [
 
     # plugins
     "CompassBookmarksListener",
-    "bookmarks_generate_items"
+    "bookmarks_generate_items",
+    "bookmarks_handle_selection",
 ]

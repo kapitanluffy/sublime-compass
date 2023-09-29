@@ -10,5 +10,6 @@ from .events import *
 
 __all__ = [
     "CompassBookmarksListener",
-    "bookmarks_generate_items"
+    "bookmarks_generate_items",
+    "bookmarks_handle_selection",
 ]

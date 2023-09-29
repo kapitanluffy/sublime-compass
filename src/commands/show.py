@@ -2,7 +2,10 @@ from typing import List, Union
 import sublime
 import sublime_plugin
 from ...utils import plugin_settings, plugin_state
-from .. import File, ViewStack, SheetGroup, bookmarks_generate_items
+from .. import File, ViewStack, SheetGroup
+from ..plugins.bookmarks import \
+    bookmarks_generate_items, \
+    bookmarks_handle_selection
 from ..utils import parse_listed_files
 import os
 import re
@@ -275,9 +278,20 @@ class CompassShowCommand(sublime_plugin.WindowCommand):
         if index == -1:
             raise Exception("Cannot highlight index: -1")
 
+        selected_item = items[index]
         sheets = items_meta[index]
         state = plugin_state()
         state["highlighted_index"] = index
+
+        if selected_item.kind[2] == 'Bookmark':
+            state["is_quick_panel_open"] = False
+            assert isinstance(sheets, SheetGroup)
+            bookmarks_handle_selection(
+                self.window,
+                sheets,
+                sublime.Region(*selected_item.kind[3])
+            )
+            return
 
         if isinstance(sheets, File) and sheets is not None:
             state["is_quick_panel_open"] = False
@@ -309,14 +323,11 @@ class CompassShowCommand(sublime_plugin.WindowCommand):
         if item_type == 'Bookmark':
             state["is_quick_panel_open"] = False
             assert isinstance(sheets, SheetGroup)
-            self.window.select_sheets(sheets)
-            focused = sheets.get_focused()
-            if len(sheets) > 0 and focused is not None:
-                self.window.focus_sheet(focused)
-                view = self.window.active_view()
-                if view is not None:
-                    view.sel().clear()
-                    view.sel().add(sublime.Region(*items[index].kind[3]))
+            bookmarks_handle_selection(
+                self.window,
+                sheets,
+                sublime.Region(*items[index].kind[3])
+            )
             return
 
         if sheets is not None and (isinstance(sheets, File) or is_file is True):
