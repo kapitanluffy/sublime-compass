@@ -5,6 +5,7 @@ from ..utils import *
 from .stack import STACK, append_sheets, cache_stack, hydrate_stack, remove_window
 from .view_stack import ViewStack
 
+MAX_SHEETS_OPEN = 100
 
 # Build the stack from window object
 def build_stack(window: sublime.Window):
@@ -19,6 +20,33 @@ def build_stack(window: sublime.Window):
 
 def is_view_valid_tab(view):
     return view.element() is not None and view.element() != "find_in_files:output"
+
+
+def cleanup_sheets(stack: ViewStack):
+    if stack.length() <= MAX_SHEETS_OPEN:
+        return True
+
+    stack_length = stack.length()
+    print("too many sheets open!", stack.length())
+    for si in range(stack_length):
+        index = stack_length - (si + 1)
+        last_sheet_group = stack.all()[index]
+
+        for s in last_sheet_group:
+            sview = s.view()
+
+            if sview is None:
+                print("cleanup: view is none")
+                continue
+
+            print("cleaning up", sview.file_name() or sview.name())
+
+            if sview.is_dirty() or sview.is_scratch():
+                print("cleanup: view is dirty or scratch", sview.is_dirty(), sview.is_scratch())
+                continue
+
+            s.close()
+            return True
 
 
 class CompassFocusListener(sublime_plugin.EventListener):
@@ -95,4 +123,5 @@ class CompassFocusListener(sublime_plugin.EventListener):
         stack = ViewStack(window, group)
         sheets = window.selected_sheets_in_group(group)
         stack.push(window, sheets, group, sheet)
+        cleanup_sheets(stack)
         cache_stack(window)
