@@ -23,7 +23,7 @@ def generate_view_meta(view: sublime.View):
     # Set item type
     # Normal sheet
     if view.file_name() is not None and view.element() is None:
-        tags.add("#files")
+        tags.add("#tabs")
 
     # Scratch sheet
     if view.file_name() is None and view.element() is None:
@@ -31,8 +31,8 @@ def generate_view_meta(view: sublime.View):
         kind = KIND_VIEW_SCRATCH
 
     # Dirty sheets
-    if  view.file_name() is not None and view.is_dirty():
-        tags.discard('#files')
+    if view.file_name() is not None and view.is_dirty():
+        tags.discard('#tabs')
         tags.add("#dirty")
         kind = KIND_VIEW_DIRTY
 
@@ -51,7 +51,7 @@ def generate_view_meta(view: sublime.View):
         tags.add("#clones")
         kind = KIND_VIEW_CLONE
 
-    return { "kind": kind, "tags": tags }
+    return {"kind": kind, "tags": tags}
 
 def guess_sheet_name(sheet: sublime.Sheet):
     name = "Untitled #%s" % sheet.id()
