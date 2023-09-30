@@ -83,7 +83,9 @@ class CompassShowCommand(sublime_plugin.WindowCommand):
                 continue
 
             trigger = ' + '.join(names)
-            item = sublime.QuickPanelItem(trigger=trigger, kind=kind, details=preview)
+            is_tags_enabled = settings.get('enable_tags', False)
+            annotation = ' '.join(tags) if is_tags_enabled else ''
+            item = sublime.QuickPanelItem(trigger=trigger, kind=kind, details=preview, annotation=annotation)
             items.append(item)
             items_meta.append(sheets)
 
