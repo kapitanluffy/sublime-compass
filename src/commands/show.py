@@ -1,12 +1,10 @@
 from typing import List, Union
 import sublime
 import sublime_plugin
-from ...utils import plugin_settings, plugin_state
-from .. import File, ViewStack, SheetGroup
+from ...utils import plugin_debug, plugin_settings, plugin_state
+from .. import File, ViewStack, SheetGroup, FilesStack
 from ..utils import parse_listed_files, parse_sheet
 import os
-
-KIND_FILE_OPEN = (sublime.KindId.COLOR_YELLOWISH, "f", "OpenFile")
 
 
 def generate_post_file_item(window: sublime.Window, file_label, tags, kind, annotation):
@@ -95,28 +93,9 @@ class CompassShowCommand(sublime_plugin.WindowCommand):
                     post_list.append(item)
                     post_list_meta.append(sheets)
 
-        unopened_files = None
-        unopened_files_items: List[sublime.QuickPanelItem] = []
-        unopened_files_meta = []
         file_types_items: List[sublime.QuickPanelItem] = []
         file_types_meta = []
-
-        only_show_unopened_files_on_empty_window = settings.get("only_show_unopened_files_on_empty_window", True)
-
-        if only_show_unopened_files_on_empty_window is False:
-            unopened_files = parse_listed_files(self.window)
-
-        if only_show_unopened_files_on_empty_window is True and self.window.sheets().__len__() <= 0:
-            unopened_files = parse_listed_files(self.window)
-
-        # @todo refactor and put inside parse_listed_files and maybe rething items+meta
-        if unopened_files is not None:
-            for file in unopened_files:
-                filename = file.get_file_name()
-                trigger = "#open > %s" % (filename)
-                item = sublime.QuickPanelItem(trigger=trigger, kind=KIND_FILE_OPEN)
-                unopened_files_items.append(item)
-                unopened_files_meta.append(file)
+        unopened_files_items, unopened_files_meta = FilesStack.generate_items()
 
         items = items + post_list + unopened_files_items + file_types_items
         items_meta = items_meta + post_list_meta + unopened_files_meta + file_types_meta
@@ -134,10 +113,11 @@ class CompassShowCommand(sublime_plugin.WindowCommand):
             on_highlight=lambda index: self.on_highlight(index, items, stack, initial_selection, items_meta)
         )
 
-    def on_highlight(self, index: int, items, stack: ViewStack, selection, items_meta: List[Union[SheetGroup, File]]):
+    def on_highlight(self, index: int, items: List[sublime.QuickPanelItem], stack: ViewStack, selection, items_meta: List[Union[SheetGroup, File]]):
         if index == -1:
             raise Exception("Cannot highlight index: -1")
 
+        selected_item = items[index]
         settings = plugin_settings()
         sheets = items_meta[index]
         state = plugin_state()
@@ -149,9 +129,10 @@ class CompassShowCommand(sublime_plugin.WindowCommand):
             state["is_quick_panel_open"] = False
             return
 
-        if isinstance(sheets, File) and sheets is not None:
+        if FilesStack.is_applicable(selected_item):
             state["is_quick_panel_open"] = False
-            self.window.open_file(sheets.get_full_path(), sublime.TRANSIENT)
+            FilesStack.on_highlight(selected_item, self.window)
+            return
 
         if isinstance(sheets, SheetGroup) and sheets is not None:
             state["is_quick_panel_open"] = False
@@ -168,16 +149,10 @@ class CompassShowCommand(sublime_plugin.WindowCommand):
             state["is_reset"] = False
 
         sheets = items_meta[index]
-
-        class_name = type(sheets).__name__
-        item_type = items[index].kind[2]
-        sub_commands = ["OpenFile", "FileType"]
-        is_file = item_type in sub_commands and class_name == "File"
-
-        if sheets is not None and (isinstance(sheets, File) or is_file is True):
+        selected_item = items[index]
+        if FilesStack.is_applicable(selected_item):
             state["is_quick_panel_open"] = False
-            assert isinstance(sheets, File)
-            self.window.open_file(sheets.get_full_path())
+            FilesStack.on_select(selected_item, self.window)
             return
 
         # @todo on plugin reload, sheets are still SheetGroup because it is a subclass of List.
