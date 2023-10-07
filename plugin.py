@@ -22,4 +22,3 @@ from .src import *
 def plugin_loaded():
     reset_plugin_state()
     load()
-    FilePluginLoaded()

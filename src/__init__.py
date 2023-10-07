@@ -13,7 +13,7 @@ reload("src", [
 reload("src.commands")
 reload("src.plugins.files")
 
-from .plugins.files import Stack as FilesStack, CompassFilesPluginListener, plugin_loaded as FilePluginLoaded
+from .plugins.files import CompassPluginFileStack, CompassPluginFilesListener
 from .stack_manager import *
 from .stack import *
 from .file import *
@@ -65,7 +65,6 @@ __all__ = [
     "CompassFocusListener",
 
     # Files
-    "FilesStack",
-    "FilePluginLoaded",
-    "CompassFilesPluginListener"
+    "CompassPluginFileStack",
+    "CompassPluginFilesListener"
 ]
