@@ -121,7 +121,6 @@ class Stack():
         key: Tuple[str, str] = item.kind[3]
         file = File(*key)
         window.open_file(file.get_full_path())
-        pass
 
 
 def list_files(directory="."):
