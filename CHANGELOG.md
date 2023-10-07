@@ -1,3 +1,9 @@
+v2.1.1
+- Add menu items
+- Improve dump stack command
+- Disable clear cache command
+- Add "Show Compass" in command palette
+
 v2.1
 - Add setting to toggle previewing when highlighting items
 - Add setting to toggle item context previews
