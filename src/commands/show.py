@@ -2,7 +2,7 @@ from typing import List, Union
 import sublime
 import sublime_plugin
 from ...utils import plugin_debug, plugin_settings, plugin_state
-from .. import File, ViewStack, SheetGroup, FilesStack
+from .. import File, ViewStack, SheetGroup, CompassPluginFileStack
 from ..utils import parse_listed_files, parse_sheet
 import os
 
@@ -95,7 +95,7 @@ class CompassShowCommand(sublime_plugin.WindowCommand):
 
         file_types_items: List[sublime.QuickPanelItem] = []
         file_types_meta = []
-        unopened_files_items, unopened_files_meta = FilesStack.generate_items()
+        unopened_files_items, unopened_files_meta = CompassPluginFileStack.generate_items()
 
         items = items + post_list + unopened_files_items + file_types_items
         items_meta = items_meta + post_list_meta + unopened_files_meta + file_types_meta
@@ -129,9 +129,9 @@ class CompassShowCommand(sublime_plugin.WindowCommand):
             state["is_quick_panel_open"] = False
             return
 
-        if FilesStack.is_applicable(selected_item):
+        if CompassPluginFileStack.is_applicable(selected_item):
             state["is_quick_panel_open"] = False
-            FilesStack.on_highlight(selected_item, self.window)
+            CompassPluginFileStack.on_highlight(selected_item, self.window)
             return
 
         if isinstance(sheets, SheetGroup) and sheets is not None:
@@ -150,9 +150,9 @@ class CompassShowCommand(sublime_plugin.WindowCommand):
 
         sheets = items_meta[index]
         selected_item = items[index]
-        if FilesStack.is_applicable(selected_item):
+        if CompassPluginFileStack.is_applicable(selected_item):
             state["is_quick_panel_open"] = False
-            FilesStack.on_select(selected_item, self.window)
+            CompassPluginFileStack.on_select(selected_item, self.window)
             return
 
         # @todo on plugin reload, sheets are still SheetGroup because it is a subclass of List.

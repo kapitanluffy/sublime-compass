@@ -37,14 +37,17 @@ class FilePluginItem():
         self.file = file
         self.item = item
 
-    def to_tuple(self):
+    def key(self):
         file = self.file.get_full_path()
         folder = self.file.get_folder()
+        return (file, folder)
+
+    def value(self):
         item = self.item.to_tuple() if self.item is not None else None
-        return ((file, folder), item)
+        return item
 
 
-class Stack():
+class CompassPluginFileStack():
     @classmethod
     def get(cls, key: Tuple[str, str]):
         """
@@ -66,7 +69,8 @@ class Stack():
         """
         Push an item to the head of the stack
         """
-        key, value = item.to_tuple()
+        key = item.key()
+        value = item.value()
         FILE_STACK[key] = value
         FILE_STACK.move_to_end(key, False)
 
@@ -75,7 +79,8 @@ class Stack():
         """
         Push an item at the end of the stack
         """
-        key, value = item.to_tuple()
+        key = item.key()
+        value = item.value()
         FILE_STACK[key] = value
         FILE_STACK.move_to_end(key)
 
@@ -153,4 +158,4 @@ def parse_listed_files(window: sublime.Window):
             return None
         for file in files:
             item = FilePluginItem(File(file, folder), None)
-            Stack.append(item)
+            CompassPluginFileStack.append(item)

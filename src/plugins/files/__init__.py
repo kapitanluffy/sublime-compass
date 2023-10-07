@@ -11,6 +11,6 @@ from .stack import *
 from .events import *
 
 __all__ = [
-    "Stack",
-    "CompassFilesPluginListener"
+    "CompassPluginFileStack",
+    "CompassPluginFilesListener",
 ]
