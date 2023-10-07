@@ -4,7 +4,7 @@
         "caption": "Preferences: Compass Settings",
         "command": "edit_settings",
         "args": {
-            "base_file": "${packages}/Compass Navigator/Compass.sublime-settings",
+            "base_file": "${packages}/Compass Navigator/Compass Navigator.sublime-settings",
             "default": "{\n$0\n}\n"
         }
     },
