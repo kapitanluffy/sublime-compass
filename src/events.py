@@ -5,6 +5,7 @@ from ..utils import *
 from .stack import STACK, append_sheets, cache_stack, hydrate_stack, remove_window
 from .view_stack import ViewStack
 
+
 # Build the stack from window object
 def build_stack(window: sublime.Window):
     sheets = window.sheets()
@@ -15,8 +16,10 @@ def build_stack(window: sublime.Window):
         for sheet in sheets:
             append_sheets(window, [sheet], group)
 
+
 def is_view_valid_tab(view):
     return view.element() is not None and view.element() != "find_in_files:output"
+
 
 class CompassFocusListener(sublime_plugin.EventListener):
     def on_query_context(self, view, key, operator, operand, match_all):
@@ -62,7 +65,7 @@ class CompassFocusListener(sublime_plugin.EventListener):
 
         state = plugin_state()
         if state["is_quick_panel_open"] is True:
-            window.run_command("compass_close", { "reset": True })
+            window.run_command("compass_close", {"reset": True})
 
     def on_activated_async(self, view: sublime.View):
         if (len(STACK) <= 0):

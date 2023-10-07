@@ -1,5 +1,5 @@
 [
-    // close quick panel and goto to initial view
+    // // close quick panel and goto to initial view
     // {
     //     "keys": ["alt", "alt"],
     //     "command": "compass_close",
@@ -11,7 +11,7 @@
     //     ]
     // },
 
-    // close quick panel and select the highlighted view
+    // // close quick panel and select the highlighted view
     // {
     //     "keys": ["ctrl", "ctrl"],
     //     "command": "compass_close",
@@ -22,7 +22,7 @@
     //     ]
     // },
 
-    // override next/prev view stack keybinds
+    // // override next/prev view stack keybinds
     // {
     //     "keys": ["ctrl+tab"],
     //     "command": "compass_show",
@@ -46,7 +46,7 @@
     //     ]
     // },
 
-    // move up and down the quick panel even with ctrl pressed
+    // // move up and down the quick panel even with ctrl pressed
     // {
     //     "keys": ["ctrl+tab"],
     //     "command": "compass_move",
