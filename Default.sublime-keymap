@@ -65,7 +65,4 @@
     //         { "key": "compass" },
     //     ]
     // },
-
-    { "keys": ["alt+up", "d"], "command": "compass_dump_stack" },
-    { "keys": ["alt+up", "c"], "command": "compass_clear_cache" },
 ]

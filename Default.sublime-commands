@@ -1,6 +1,5 @@
 [
-    { "caption": "Compass: Rebuild Recently Used Stack", "command": "compass_build_stack" },
-    { "caption": "Compass: Show Recently Used Tabs/Views", "command": "compass_show", "args": { "forward": true } },
+    { "caption": "Compass: Show Compass", "command": "compass_show", "args": { "forward": true } },
     {
         "caption": "Preferences: Compass Settings",
         "command": "edit_settings",
@@ -16,5 +15,9 @@
             "base_file": "${packages}/Compass Navigator/Default.sublime-keymap",
             "default": "[\n$0\n]\n"
         }
+    },
+    {
+        "caption": "Compass: Dump Stack",
+        "command": "compass_dump_stack"
     },
 ]
