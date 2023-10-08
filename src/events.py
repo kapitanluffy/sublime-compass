@@ -68,9 +68,6 @@ class CompassFocusListener(sublime_plugin.EventListener):
             window.run_command("compass_close", {"reset": True})
 
     def on_activated_async(self, view: sublime.View):
-        if (len(STACK) <= 0):
-            return
-
         sheet = view.sheet()
 
         if sheet is None:
