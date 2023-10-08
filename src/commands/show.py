@@ -89,10 +89,11 @@ class CompassShowCommand(sublime_plugin.WindowCommand):
             items.append(item)
             items_meta.append(sheets)
 
-            for index, file in enumerate(files):
-                item = generate_post_file_item(self.window, file or names[index], tags, kind, trigger)
-                post_list.append(item)
-                post_list_meta.append(sheets)
+            if is_tags_enabled:
+                for index, file in enumerate(files):
+                    item = generate_post_file_item(self.window, file or names[index], tags, kind, trigger)
+                    post_list.append(item)
+                    post_list_meta.append(sheets)
 
         unopened_files = None
         unopened_files_items: List[sublime.QuickPanelItem] = []
