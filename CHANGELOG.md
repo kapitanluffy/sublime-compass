@@ -1,3 +1,7 @@
+v2.1.2
+- Weird duplicate items from #tabs filter will not show anymore if disabled
+- Fix only_show_unopened_files_on_empty_window setting not working properly when enabled
+
 v2.1.1
 - Add menu items
 - Improve dump stack command
