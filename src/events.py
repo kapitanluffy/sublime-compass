@@ -24,7 +24,7 @@ def is_view_valid_tab(view):
 class CompassFocusListener(sublime_plugin.EventListener):
     def on_query_context(self, view, key, operator, operand, match_all):
         if key == "compass" and operator == 0 and operand is True:
-            return len(STACK) > 0
+            return True
         return False
 
     def on_load_project_async(self, window):
