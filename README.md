@@ -3,7 +3,7 @@
 <p align="center">
 <a href="https://www.sublimetext.com/">
     <img src="https://img.shields.io/badge/Made%20For-Sublime-ff9800?logo=sublime%20text" /></a>
-<a href="https://packagecontrol.io/packages/compass-navigator"> 
+<a href="https://packagecontrol.io/packages/Compass%20Navigator"> 
     <img src="https://img.shields.io/packagecontrol/dt/Compass%20Navigator" /></a>
 <a href="https://github.com/kapitanluffy/sublime-compass/releases">
     <img src="https://img.shields.io/github/v/tag/kapitanluffy/sublime-compass?label=release" /></a>
