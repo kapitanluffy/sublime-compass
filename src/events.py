@@ -1,6 +1,5 @@
 import sublime
 import sublime_plugin
-from .commands.build_stack import CompassBuildStackCommand
 from ..utils import *
 from .stack import STACK, append_sheets, cache_stack, hydrate_stack, remove_window
 from .view_stack import ViewStack
@@ -102,9 +101,6 @@ class CompassFocusListener(sublime_plugin.EventListener):
             return
 
         if sheet is not None and sheet.is_transient():
-            return
-
-        if CompassBuildStackCommand.is_building is True:
             return
 
         if is_view_valid_tab(view):

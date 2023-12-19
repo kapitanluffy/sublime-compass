@@ -55,7 +55,6 @@ __all__ = [
     # src.commands
     "CompassCloseCommand",
     "CompassMoveCommand",
-    "CompassBuildStackCommand",
     "CompassShowCommand",
     "CompassDumpStackCommand",
     "CompassClearCacheCommand",
