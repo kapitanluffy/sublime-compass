@@ -5,7 +5,6 @@ from ..utils import *
 from .stack import STACK, append_sheets, cache_stack, hydrate_stack, remove_window
 from .view_stack import ViewStack
 
-MAX_SHEETS_OPEN = 100
 
 # Build the stack from window object
 def build_stack(window: sublime.Window):
@@ -23,11 +22,14 @@ def is_view_valid_tab(view):
 
 
 def cleanup_sheets(stack: ViewStack):
-    if stack.length() <= MAX_SHEETS_OPEN:
+    settings = plugin_settings()
+    max_open_tabs = settings.get('max_open_tabs', 100)  # type: int
+
+    if max_open_tabs == 0 or stack.length() <= max_open_tabs:
         return True
 
     stack_length = stack.length()
-    print("too many sheets open!", stack.length())
+
     for si in range(stack_length):
         index = stack_length - (si + 1)
         last_sheet_group = stack.all()[index]
@@ -36,14 +38,12 @@ def cleanup_sheets(stack: ViewStack):
             sview = s.view()
 
             if sview is None:
-                print("cleanup: view is none")
+                continue
+
+            if sview.is_dirty() or sview.is_scratch():
                 continue
 
             print("cleaning up", sview.file_name() or sview.name())
-
-            if sview.is_dirty() or sview.is_scratch():
-                print("cleanup: view is dirty or scratch", sview.is_dirty(), sview.is_scratch())
-                continue
 
             s.close()
             return True

@@ -66,3 +66,6 @@ class ViewStack():
 
     def head(self):
         return get_head(self.window, self.group)
+
+    def length(self):
+        return len(get_stack(self.window, self.group))

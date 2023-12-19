@@ -20,4 +20,7 @@
 
     // Add a line previewing the cursor position in that view
     "enable_context_preview": true,
+
+    // Max limit of opened tabs. Set to 0 to disable
+    "max_open_tabs": 100,
 }
