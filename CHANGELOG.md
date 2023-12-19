@@ -1,3 +1,6 @@
+v2.1.3
+- Automatically close extra tabs based on max_open_tabs setting
+
 v2.1.2
 - Weird duplicate items from #tabs filter will not show anymore if disabled
 - Fix only_show_unopened_files_on_empty_window setting not working properly when enabled
