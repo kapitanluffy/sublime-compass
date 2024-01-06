@@ -42,22 +42,6 @@ def list_files(directory="."):
         print(f"An error occurred: {e}")
 
 
-def parse_listed_files(window: sublime.Window):
-    folders = window.folders()
-    items: List[File] = []
-
-    for folder in folders:
-        files = list_files(folder)
-
-        if files is None:
-            return None
-
-        for file in files:
-            items.append(File(file, folder))
-
-        return items
-
-
 def generate_view_meta(view: sublime.View):
     tags = set()
     kind = KIND_VIEW

@@ -145,7 +145,7 @@ def get_sheet_from_window(sheet_name: str, sheets: List[sublime.Sheet]):
             return sheet
         if view.file_name() == sheet_name:
             return sheet
-        if  view.name() == "" and view.file_name() == None and re.match(r'^Untitled #\d+', sheet_name):
+        if view.name() == "" and view.file_name() is None and re.match(r'^Untitled #\d+', sheet_name):
             # @note for now, if view has empty name and file name treat is as "untitled"
             #       in the future, we would want to save identifiers in the view itself to match with the cache
             return sheet
