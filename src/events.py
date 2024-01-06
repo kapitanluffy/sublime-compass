@@ -1,7 +1,7 @@
 import sublime
 import sublime_plugin
 from ..utils import *
-from .stack import STACK, append_sheets, cache_stack, hydrate_stack, remove_window
+from .stack import cache_stack, hydrate_stack, remove_window
 from .view_stack import ViewStack
 
 
@@ -9,6 +9,7 @@ def is_view_valid_tab(view):
     return view.element() is not None and view.element() != "find_in_files:output"
 
 
+# Discard the most unused item if max_open_tabs is met
 def cleanup_sheets(stack: ViewStack):
     settings = plugin_settings()
     max_open_tabs = settings.get('max_open_tabs', 100)  # type: int
@@ -53,40 +54,37 @@ class CompassFocusListener(sublime_plugin.EventListener):
         remove_window(window)
 
     def on_pre_close(self, view: sublime.View):
+        state = plugin_state()
         sheet = view.sheet()
 
-        if sheet is not None and sheet.is_transient():
+        if sheet is None:
             return
 
         if is_view_valid_tab(view):
             return
 
         window = view.window()
-        sheet = view.sheet()
 
         if window is None:
             # plugin_debug("Window for View #%s is gone" % view.id())
             return
 
-        if sheet is None:
-            plugin_debug("Sheet for View #%s is gone" % view.id())
+        if sheet.is_transient():
+            if state["is_quick_panel_open"] is True:
+                window.run_command("compass_close", {"reset": True})
             return
 
         group = sheet.group() or window.active_group()
         stack = ViewStack(window, group)
         stack.remove(sheet)
 
-        state = plugin_state()
         if state["is_quick_panel_open"] is True:
             window.run_command("compass_close", {"reset": True})
 
     def on_activated_async(self, view: sublime.View):
         sheet = view.sheet()
 
-        if sheet is None:
-            return
-
-        if sheet is not None and sheet.is_transient():
+        if sheet is None or sheet.is_transient():
             return
 
         if is_view_valid_tab(view):

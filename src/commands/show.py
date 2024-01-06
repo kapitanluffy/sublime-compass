@@ -126,16 +126,13 @@ class CompassShowCommand(sublime_plugin.WindowCommand):
         is_preview_on_highlight = settings.get("preview_on_highlight", True)
 
         if is_preview_on_highlight is False:
-            state["is_quick_panel_open"] = False
             return
 
         if CompassPluginFileStack.is_applicable(selected_item):
-            state["is_quick_panel_open"] = False
             CompassPluginFileStack.on_highlight(selected_item, self.window)
             return
 
         if isinstance(sheets, SheetGroup) and sheets is not None:
-            state["is_quick_panel_open"] = False
             self.window.select_sheets(sheets)
 
     def on_done(self, index, items, stack: ViewStack, selection, items_meta: List[Union[SheetGroup, File]]):
