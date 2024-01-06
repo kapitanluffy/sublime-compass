@@ -156,13 +156,26 @@ def get_sheet_from_filepath(file_path: str, window: sublime.Window):
         return None
     return open_file.sheet()
 
+
+# Build the stack from window object
+def build_stack(window: sublime.Window):
+    sheets = window.sheets()
+    groups = window.num_groups()
+
+    for group in range(groups):
+        sheets = window.sheets_in_group(group)
+        for sheet in sheets:
+            append_sheets(window, [sheet], group)
+
+
 def hydrate_stack(window):
     window_settings = window.settings()
     stack_cache = window_settings.get('compass_stack_cache', [])
     window_sheets = window.sheets()
 
     if len(stack_cache) <= 0:
-        return False;
+        build_stack(window)
+        return True
 
     for cache_item in stack_cache:
         sheet_ids = cache_item[2]

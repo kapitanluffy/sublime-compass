@@ -5,17 +5,6 @@ from .stack import STACK, append_sheets, cache_stack, hydrate_stack, remove_wind
 from .view_stack import ViewStack
 
 
-# Build the stack from window object
-def build_stack(window: sublime.Window):
-    sheets = window.sheets()
-    groups = window.num_groups()
-
-    for group in range(groups):
-        sheets = window.sheets_in_group(group)
-        for sheet in sheets:
-            append_sheets(window, [sheet], group)
-
-
 def is_view_valid_tab(view):
     return view.element() is not None and view.element() != "find_in_files:output"
 
@@ -55,10 +44,7 @@ class CompassFocusListener(sublime_plugin.EventListener):
         return False
 
     def on_load_project_async(self, window):
-        is_hydrated = hydrate_stack(window)
-
-        if is_hydrated is False:
-            build_stack(window)
+        hydrate_stack(window)
 
     def on_pre_close_window(self, window: sublime.Window):
         remove_window(window)
@@ -120,4 +106,6 @@ class CompassFocusListener(sublime_plugin.EventListener):
         sheets = window.selected_sheets_in_group(group)
         stack.push(window, sheets, group, sheet)
         cleanup_sheets(stack)
+
+        # Save the stack cache on every view change
         cache_stack(window)
