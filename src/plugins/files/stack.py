@@ -92,6 +92,10 @@ class CompassPluginFileStack():
         return FILE_STACK
 
     @classmethod
+    def clear(cls):
+        FILE_STACK.clear()
+
+    @classmethod
     def generate_quickpanel_item(cls, key: Tuple[str, str], item):
         file = File(key[0], key[1])
 

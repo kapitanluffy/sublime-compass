@@ -1,5 +1,5 @@
 from typing import List
-from .stack import parse_listed_files
+from .stack import CompassPluginFileStack, parse_listed_files
 import sublime
 import sublime_plugin
 
@@ -20,3 +20,14 @@ class CompassPluginFilesListener(sublime_plugin.EventListener):
 
     def on_init(self, views: List[sublime.View]):
         print("plugin init!")
+
+    def on_pre_close_window(self, window: sublime.Window):
+        CompassPluginFileStack.clear()
+        print("on_pre_close_window", CompassPluginFileStack.get_stack().__len__())
+
+    def on_pre_close_project(self, window: sublime.Window):
+        CompassPluginFileStack.clear()
+        print("on_pre_close_project", CompassPluginFileStack.get_stack().__len__())
+
+    def on_load_project_async(self, window):
+        CompassPluginFilesListener.on_plugin_loaded()
