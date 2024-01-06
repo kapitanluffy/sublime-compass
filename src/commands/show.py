@@ -3,7 +3,7 @@ import sublime
 import sublime_plugin
 from ...utils import plugin_debug, plugin_settings, plugin_state
 from .. import File, ViewStack, SheetGroup, CompassPluginFileStack
-from ..utils import parse_listed_files, parse_sheet
+from ..utils import parse_sheet
 import os
 
 

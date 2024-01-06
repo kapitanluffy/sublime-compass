@@ -44,7 +44,6 @@ __all__ = [
     # functions
     "build_stack",
     "list_files",
-    "parse_listed_files",
     "generate_view_meta",
     "guess_sheet_name",
     "replace_spaces_with_spaces",
