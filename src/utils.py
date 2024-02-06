@@ -70,6 +70,10 @@ def parse_listed_files(window: sublime.Window):
 def generate_view_meta(view: sublime.View):
     tags = set()
     kind = KIND_VIEW
+    sheet = view.sheet()
+
+    if view.element() is None and sheet is not None and sheet.group() is not None and sheet.group() != 0:
+        tags.add("#group%s" % sheet.group())
 
     # Set item type
     # Normal sheet

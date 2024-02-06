@@ -31,7 +31,10 @@ class CompassShowCommand(sublime_plugin.WindowCommand):
         is_forward = kwargs.get('forward', True)
 
         group = self.window.active_group()
-        # @todo fix grouping support
+
+        if settings.get('only_show_items_in_focused_group', True) is False:
+            group = None
+
         stack = ViewStack(self.window, group)
 
         # @note show quick panel even if window is empty
@@ -39,7 +42,7 @@ class CompassShowCommand(sublime_plugin.WindowCommand):
         items: List[sublime.QuickPanelItem] = []
         # @note showing quickpanel does not need a current_view
 
-        initial_selection = self.window.selected_sheets_in_group(group)
+        initial_selection = self.window.selected_sheets_in_group(self.window.active_group())
         stack_length = len(stack.all())
         selected_index = 0
         # stack_sheets = copy.deepcopy(stack.all())
@@ -130,11 +133,11 @@ class CompassShowCommand(sublime_plugin.WindowCommand):
         self.window.show_quick_panel(
             items=items,
             selected_index=selected_index,
-            on_select=lambda index: self.on_done(index, items, stack, initial_selection, items_meta),
-            on_highlight=lambda index: self.on_highlight(index, items, stack, initial_selection, items_meta)
+            on_select=lambda index: self.on_done(index, items, items_meta),
+            on_highlight=lambda index: self.on_highlight(index, items, initial_selection, items_meta)
         )
 
-    def on_highlight(self, index: int, items, stack: ViewStack, selection, items_meta: List[Union[SheetGroup, File]]):
+    def on_highlight(self, index: int, items, initial_selection, items_meta: List[Union[SheetGroup, File]]):
         if index == -1:
             raise Exception("Cannot highlight index: -1")
 
@@ -155,9 +158,15 @@ class CompassShowCommand(sublime_plugin.WindowCommand):
 
         if isinstance(sheets, SheetGroup) and sheets is not None:
             state["is_quick_panel_open"] = False
-            self.window.select_sheets(sheets)
 
-    def on_done(self, index, items, stack: ViewStack, selection, items_meta: List[Union[SheetGroup, File]]):
+            # Select sheets (for preview) only when head's group is the active group
+            # use the inital selection if not
+            if len(sheets) > 0 and sheets[0].group() == self.window.active_group():
+                self.window.select_sheets(sheets)
+            else:
+                self.window.select_sheets(initial_selection)
+
+    def on_done(self, index, items, items_meta: List[Union[SheetGroup, File]]):
         state = plugin_state()
 
         if index == -1:

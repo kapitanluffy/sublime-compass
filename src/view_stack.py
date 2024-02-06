@@ -3,6 +3,7 @@ from typing import List, Optional
 from .sheet_group import SheetGroup
 from .stack import cache_stack, get_head, get_stack, push_sheets, remove_sheet
 
+
 def convert_stack_to_sheet_group(window, group):
     stack = get_stack(window, group) or []
     sheets_stack: List[SheetGroup] = []
@@ -18,7 +19,7 @@ def convert_stack_to_sheet_group(window, group):
 This is more like Sheet stack
 """
 class ViewStack():
-    def __init__(self, window: sublime.Window, group: int):
+    def __init__(self, window: sublime.Window, group: Optional[int]):
         self.window = window
         self.group = group
         self.stack: List[SheetGroup] = []
