@@ -2,6 +2,7 @@ import sublime
 import os
 import re
 import subprocess
+import platform
 from typing import List
 from ..utils import plugin_settings
 from . import File
@@ -26,13 +27,21 @@ def list_files(directory="."):
 
     try:
         # Run the command and capture the output
-        result = subprocess.run(
-            command,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True,  # This makes sure the output is treated as text (str) rather than bytes
-            creationflags=subprocess.CREATE_NO_WINDOW,
-        )
+        if platform.system() == "Windows":
+            result = subprocess.run(
+                command,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,  # This makes sure the output is treated as text (str) rather than bytes
+                creationflags=subprocess.CREATE_NO_WINDOW,
+            )
+        else:
+            subprocess.run(
+                command,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,  # This makes sure the output is treated as text (str) rather than bytes
+            )
 
         if result.returncode != 0:
             print(result.stderr)
@@ -45,6 +54,10 @@ def list_files(directory="."):
 def generate_view_meta(view: sublime.View):
     tags = set()
     kind = KIND_VIEW
+    sheet = view.sheet()
+
+    if view.element() is None and sheet is not None and sheet.group() is not None and sheet.group() != 0:
+        tags.add("#group%s" % sheet.group())
 
     # Set item type
     # Normal sheet

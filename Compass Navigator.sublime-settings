@@ -23,4 +23,7 @@
 
     // Max limit of opened tabs. Set to 0 to disable
     "max_open_tabs": 100,
+
+    // Whether we show items across groups or only the active group
+    "only_show_items_in_focused_group": true,
 }
