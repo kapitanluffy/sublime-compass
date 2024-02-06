@@ -98,6 +98,9 @@ class CompassShowCommand(sublime_plugin.WindowCommand):
         unopened_files_items, unopened_files_meta = CompassPluginFileStack.generate_items()
 
         items = items + post_list + unopened_files_items + file_types_items
+
+        # Right now, the items_meta is just for checking sheet_groups
+        # We are slowly moving away from sheet_groups
         items_meta = items_meta + post_list_meta + unopened_files_meta + file_types_meta
 
         if len(items) <= 0 or len(items_meta) <= 0:

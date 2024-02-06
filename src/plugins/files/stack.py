@@ -101,6 +101,8 @@ class CompassPluginFileStack():
 
         tags = '#open'
         annotation = 'files'
+        # We inject an extra metadata on the kind param to pass around
+        # In this context, the key contains the details of the file's full path
         kind = (*KIND_FILE_PLUGIN_FILE_ITEM_TYPE, key)
         trigger = "%s | %s" % (tags, file.get_file_name())
         return sublime.QuickPanelItem(trigger=trigger, kind=kind, annotation=annotation)
@@ -121,6 +123,7 @@ class CompassPluginFileStack():
 
     @classmethod
     def on_highlight(cls, item: sublime.QuickPanelItem, window: sublime.Window):
+        # We use the injected data in 102 to create a File object instance
         key: Tuple[str, str] = item.kind[3]
         file = File(*key)
         window.open_file(file.get_full_path(), sublime.TRANSIENT)
@@ -133,6 +136,7 @@ class CompassPluginFileStack():
 
 
 def list_files(directory="."):
+    # @todo use the ripgrep_path setting
     command = ["d:\\~\\bin\\ripgrep\\rg.exe", "--files", directory]
 
     try:
