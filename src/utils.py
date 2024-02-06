@@ -2,6 +2,7 @@ import sublime
 import os
 import re
 import subprocess
+import platform
 from typing import List
 from ..utils import plugin_settings
 from . import File
@@ -26,13 +27,21 @@ def list_files(directory="."):
 
     try:
         # Run the command and capture the output
-        result = subprocess.run(
-            command,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True,  # This makes sure the output is treated as text (str) rather than bytes
-            creationflags=subprocess.CREATE_NO_WINDOW,
-        )
+        if platform.system() == "Windows":
+            result = subprocess.run(
+                command,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,  # This makes sure the output is treated as text (str) rather than bytes
+                creationflags=subprocess.CREATE_NO_WINDOW,
+            )
+        else:
+            subprocess.run(
+                command,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,  # This makes sure the output is treated as text (str) rather than bytes
+            )
 
         if result.returncode != 0:
             print(result.stderr)
