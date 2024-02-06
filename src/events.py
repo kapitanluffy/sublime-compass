@@ -70,8 +70,6 @@ class CompassFocusListener(sublime_plugin.EventListener):
             return
 
         if sheet.is_transient():
-            if state["is_quick_panel_open"] is True:
-                window.run_command("compass_close", {"reset": True})
             return
 
         group = sheet.group() or window.active_group()
