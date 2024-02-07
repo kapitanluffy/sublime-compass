@@ -36,7 +36,7 @@ def list_files(directory="."):
                 creationflags=subprocess.CREATE_NO_WINDOW,
             )
         else:
-            subprocess.run(
+            result = subprocess.run(
                 command,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
