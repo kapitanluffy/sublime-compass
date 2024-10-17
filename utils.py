@@ -4,6 +4,7 @@ PLUGIN_STATE = {
     "is_quick_panel_open": False,
     "highlighted_index": 0,
     "is_reset": False,
+    "is_compass": False,
 }
 
 
@@ -16,6 +17,7 @@ def reset_plugin_state():
     state["is_quick_panel_open"] = False
     state["highlighted_index"] = 0
     state["is_reset"] = False
+    state["is_compass"] = False
 
 
 def plugin_debug(*message):

@@ -130,6 +130,7 @@ class CompassShowCommand(sublime_plugin.WindowCommand):
         state["is_quick_panel_open"] = True
         state["highlighted_index"] = selected_index
 
+        state["is_compass"] = True
         self.window.show_quick_panel(
             items=items,
             selected_index=selected_index,
@@ -187,6 +188,7 @@ class CompassShowCommand(sublime_plugin.WindowCommand):
             state["is_quick_panel_open"] = False
             assert isinstance(sheets, File)
             self.window.open_file(sheets.get_full_path())
+            state["is_compass"] = False
             return
 
         # @todo on plugin reload, sheets are still SheetGroup because it is a subclass of List.
@@ -198,4 +200,8 @@ class CompassShowCommand(sublime_plugin.WindowCommand):
             focused = sheets.get_focused()
             if len(sheets) > 0 and focused is not None:
                 self.window.focus_sheet(focused)
+            state["is_compass"] = False
             return
+
+        state["is_compass"] = False
+
