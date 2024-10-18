@@ -145,7 +145,7 @@ def get_sheet_from_window(sheet_name: str, sheets: List[sublime.Sheet]):
             return sheet
         if view.file_name() == sheet_name:
             return sheet
-        if  view.name() == "" and view.file_name() == None and re.match(r'^Untitled #\d+', sheet_name):
+        if view.name() == "" and view.file_name() is None and re.match(r'^Untitled #\d+', sheet_name):
             # @note for now, if view has empty name and file name treat is as "untitled"
             #       in the future, we would want to save identifiers in the view itself to match with the cache
             return sheet
@@ -156,13 +156,26 @@ def get_sheet_from_filepath(file_path: str, window: sublime.Window):
         return None
     return open_file.sheet()
 
+
+# Build the stack from window object
+def build_stack(window: sublime.Window):
+    sheets = window.sheets()
+    groups = window.num_groups()
+
+    for group in range(groups):
+        sheets = window.sheets_in_group(group)
+        for sheet in sheets:
+            append_sheets(window, [sheet], group)
+
+
 def hydrate_stack(window):
     window_settings = window.settings()
     stack_cache = window_settings.get('compass_stack_cache', [])
     window_sheets = window.sheets()
 
     if len(stack_cache) <= 0:
-        return False;
+        build_stack(window)
+        return True
 
     for cache_item in stack_cache:
         sheet_ids = cache_item[2]

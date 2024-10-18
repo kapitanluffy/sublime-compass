@@ -65,4 +65,5 @@
     //         { "key": "compass" },
     //     ]
     // },
+    { "keys": ["alt+up", "i"], "command": "compass_index_files" },
 ]
