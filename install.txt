@@ -1,6 +1,5 @@
 🧭 Compass - Better Code Navigation
 
-
 Lost? Tired of endlessly scrolling through tabs just to find the previous file you were working on?
 
 Compass provides you the list of most-recently used tabs. It also helps you filter them by special tags!
@@ -13,3 +12,21 @@ Compass provides you a visual guide of where you have been.
 ### How To Use
 
 You must first enable the keybindings. The plugin already has pre-commented keybinds that you can just copy or you can set it to your preferred keybinds
+
+---
+
+### Support ☕
+
+Like my Sublime plugins? Keep the updates coming by supporting me on GitHub Sponsors, Ko-fi, or Patreon.
+Your support will help fuel my coffee for my next coding session!
+
+- https://github.com/sponsors/kapitanluffy
+- https://patreon.com/kapitanluffy
+- https://ko-fi.com/kapitanluffy
+
+---
+
+### Changes ✨
+
+- Fix compass_close does not reset to initial tab properly
+- Increase max_open_tabs to 1000

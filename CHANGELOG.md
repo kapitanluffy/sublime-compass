@@ -1,3 +1,7 @@
+v2.2.2
+- Fix compass_close does not reset to initial tab properly
+- Increase max_open_tabs to 1000
+
 v2.2
 - Add `only_show_items_in_focused_group` setting. Allows user to show items across groups in a window.
 - Fix ripgrep support not working on non-windows platforms
