@@ -23,7 +23,6 @@ from .view_stack import *
 from .events import *
 from .utils import *
 from .core import *
-from .file_watcher import *
 
 __all__ = [
     "File",
