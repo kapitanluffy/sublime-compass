@@ -99,6 +99,8 @@ class CompassPluginFileStack():
 
     @classmethod
     def generate_quickpanel_item(cls, key: Tuple[str, str], item):
+        settings = plugin_settings()
+        is_tags_enabled = settings.get('enable_tags', False)
         file = File(key[0], key[1])
 
         tags = '#open'
@@ -106,7 +108,7 @@ class CompassPluginFileStack():
         # We inject an extra metadata on the kind param to pass around
         # In this context, the key contains the details of the file's full path
         kind = (*KIND_FILE_PLUGIN_FILE_ITEM_TYPE, key)
-        trigger = "%s | %s" % (tags, file.get_file_name())
+        trigger = "%s | %s" % (tags, file.get_file_name()) if is_tags_enabled else "%s" % (file.get_file_name())
         return sublime.QuickPanelItem(trigger=trigger, kind=kind, annotation=annotation)
 
     @classmethod
