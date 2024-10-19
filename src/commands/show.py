@@ -3,7 +3,7 @@ import sublime
 import sublime_plugin
 from ...utils import plugin_debug, plugin_settings, plugin_state
 from .. import File, ViewStack, SheetGroup, CompassPluginFileStack
-from ..utils import parse_sheet
+from ..utils import parse_sheet, dict_deep_get
 import os
 
 
@@ -98,7 +98,18 @@ class CompassShowCommand(sublime_plugin.WindowCommand):
 
         file_types_items: List[sublime.QuickPanelItem] = []
         file_types_meta = []
-        unopened_files_items, unopened_files_meta = CompassPluginFileStack.generate_items()
+
+        only_show_unopened_files_on_empty_window = settings.get("only_show_unopened_files_on_empty_window", True)
+        plugin_files_enable_cache = dict_deep_get(settings, "plugins.files.enable_cache")
+        plugin_files_enabled = dict_deep_get(settings, "plugins.files.enabled")
+
+        # @todo might need to move this chunk inside generate_items?
+        if plugin_files_enabled is True and plugin_files_enable_cache is False and \
+           only_show_unopened_files_on_empty_window is False or \
+           (only_show_unopened_files_on_empty_window is True and len(self.window.sheets()) <= 0):
+            CompassPluginFileStack.refresh_cache(self.window)
+
+        unopened_files_items, unopened_files_meta = CompassPluginFileStack.generate_items() if plugin_files_enabled is True else ([], [])
 
         items = items + post_list + unopened_files_items + file_types_items
 

@@ -136,12 +136,16 @@ class CompassPluginFileStack():
         file = File(*key)
         window.open_file(file.get_full_path())
 
+    @classmethod
+    def refresh_cache(cls, window: sublime.Window):
+        parse_listed_files(window)
 
 def list_files(directory="."):
     settings = plugin_settings()
     ripgrep = str(settings.get("ripgrep_path", ""))
 
     if ripgrep == "" or os.path.exists(ripgrep) is False:
+        print("⚠ To enable Files plugin in Compass, you need to set the ripgrep path.")
         return None
 
     command = [settings["ripgrep_path"], "--files", directory]

@@ -23,6 +23,7 @@ from .view_stack import *
 from .events import *
 from .utils import *
 from .core import *
+from .file_watcher import *
 
 __all__ = [
     "File",
@@ -50,6 +51,7 @@ __all__ = [
     "get_visible_lines",
     "generate_preview",
     "parse_sheet",
+    "dict_deep_get",
 
     # src.commands
     "CompassCloseCommand",

@@ -5,7 +5,7 @@ import subprocess
 import platform
 from typing import List
 from ..utils import plugin_settings
-from . import File
+from .file import File
 
 KIND_VIEW = (sublime.KindId.COLOR_REDISH, "f", "File")
 KIND_VIEW_SCRATCH = (sublime.KindId.COLOR_GREENISH, "s", "Scratch")
@@ -223,3 +223,12 @@ def generate_files(window: sublime.Window):
             if file is None:
                 return None
             yield File(file, folder)
+
+
+def dict_deep_get(dictionary, keys, default=None):
+    keys = keys.split('.')
+    for key in keys:
+        dictionary = dictionary.get(key)
+        if dictionary is None:
+            return default
+    return dictionary

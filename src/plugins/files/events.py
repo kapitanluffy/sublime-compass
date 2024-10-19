@@ -1,4 +1,6 @@
 from typing import List
+
+from ...utils import dict_deep_get, plugin_settings
 from .stack import CompassPluginFileStack, parse_listed_files
 import sublime
 import sublime_plugin
@@ -8,7 +10,12 @@ class CompassPluginFilesListener(sublime_plugin.EventListener):
     @classmethod
     def on_plugin_loaded(cls):
         print("CompassNavigator loaded!")
-        settings = sublime.load_settings("Compass Navigator.sublime-settings")
+        settings = plugin_settings()
+
+        is_enabled = dict_deep_get(settings, "plugins.files.enabled", True)
+        if is_enabled is False:
+            return
+
         only_show_unopened_files_on_empty_window = settings.get("only_show_unopened_files_on_empty_window", True)
         windows = sublime.windows()
         # @todo watch setting if changed
