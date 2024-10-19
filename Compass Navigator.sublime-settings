@@ -31,8 +31,7 @@
     "plugins": {
         "files": {
             "enabled": true,
-            // Enabling cache will prevent ripgrep from re-fetching files
-            // This is good for large projects
+            // Enabling this will not see newly created files
             "enable_cache": false
         }
     }
