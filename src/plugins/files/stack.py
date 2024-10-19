@@ -1,7 +1,9 @@
 from collections import OrderedDict
+import os
 import subprocess
 from typing import List, Optional, Tuple, OrderedDict as TOrderedDict
 import sublime
+from ....utils import plugin_settings
 from .file import File
 
 ITEM_TYPE = "compass_plugin_file_open_file"
@@ -136,8 +138,13 @@ class CompassPluginFileStack():
 
 
 def list_files(directory="."):
-    # @todo use the ripgrep_path setting
-    command = ["d:\\~\\bin\\ripgrep\\rg.exe", "--files", directory]
+    settings = plugin_settings()
+    ripgrep = str(settings.get("ripgrep_path", ""))
+
+    if ripgrep == "" or os.path.exists(ripgrep) is False:
+        return None
+
+    command = [settings["ripgrep_path"], "--files", directory]
 
     try:
         # Run the command and capture the output
