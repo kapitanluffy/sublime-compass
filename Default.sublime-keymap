@@ -3,7 +3,6 @@
     // {
     //     "keys": ["alt", "alt"],
     //     "command": "compass_close",
-    //     "args": { "reset": true },
     //     "context": [
     //         { "key": "overlay_visible", "operator": "equal", "operand": true },
     //         { "key": "panel_has_focus", "operator": "equal", "operand": false },
@@ -15,6 +14,7 @@
     // {
     //     "keys": ["ctrl", "ctrl"],
     //     "command": "compass_close",
+    //     "args": { "reset": false },
     //     "context": [
     //         { "key": "overlay_visible", "operator": "equal", "operand": true },
     //         { "key": "panel_has_focus", "operator": "equal", "operand": false },

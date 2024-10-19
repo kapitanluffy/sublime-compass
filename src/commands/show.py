@@ -149,12 +149,12 @@ class CompassShowCommand(sublime_plugin.WindowCommand):
     def on_done(self, index, items, items_meta: List[Union[SheetGroup, File]]):
         state = plugin_state()
 
-        if index == -1:
-            index = state["highlighted_index"]
-
-        if state["is_reset"] is True:
+        if index == -1 and state["is_reset"] is True:
             index = 0
-            state["is_reset"] = False
+
+        if index == -1 and state["is_reset"] is False:
+            index = state["highlighted_index"]
+            state["is_reset"] = True
 
         sheets = items_meta[index]
         selected_item = items[index]

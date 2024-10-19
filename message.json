@@ -1,3 +1,4 @@
 {
-    "install": "install.txt"
+    "install": "install.txt",
+    "2.2.2": "install.txt"
 }
