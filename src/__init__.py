@@ -11,7 +11,9 @@ reload("src", [
     "core"
 ])
 reload("src.commands")
+reload("src.plugins.files")
 
+from .plugins.files import CompassPluginFileStack, CompassPluginFilesListener
 from .stack_manager import *
 from .stack import *
 from .file import *
@@ -42,22 +44,26 @@ __all__ = [
     # functions
     "build_stack",
     "list_files",
-    "parse_listed_files",
     "generate_view_meta",
     "guess_sheet_name",
     "replace_spaces_with_spaces",
     "get_visible_lines",
     "generate_preview",
     "parse_sheet",
+    "dict_deep_get",
 
     # src.commands
     "CompassCloseCommand",
     "CompassMoveCommand",
-    "CompassBuildStackCommand",
     "CompassShowCommand",
     "CompassDumpStackCommand",
     "CompassClearCacheCommand",
+    "CompassIndexFilesCommand",
 
     # src.events
-    "CompassFocusListener"
+    "CompassFocusListener",
+
+    # Files
+    "CompassPluginFileStack",
+    "CompassPluginFilesListener"
 ]

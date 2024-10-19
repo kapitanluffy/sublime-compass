@@ -33,48 +33,83 @@ git clone git@github.com:kapitanluffy/sublime-compass.git "Compass Navigator"
 
 3. Press `ctrl+tab` to show the Compass 🧭
 
-#### Open Compass
+### Contents
+- [Opening Compass](#opening-compass)
+- [Quick Switching](#quick-switching)
+- [Selecting an Item](#selecting-an-item)
+- [Closing Compass](#closing-compass)
+- [Filtering Items](#filtering-items)
+- [Opening Files](#opening-files)
+- [Auto Closing Tabs](#auto-close-tabs)
+- [Caching Items](#caching-items)
+
+### Support ☕
+
+Like my Sublime plugins? Keep the updates coming by supporting me on GitHub Sponsors, Ko-fi, or Patreon.
+Your support will help fuel my coffee for my next coding session!
+
+- https://github.com/sponsors/kapitanluffy
+- https://patreon.com/kapitanluffy
+- https://ko-fi.com/kapitanluffy
+
+---
+
+#### Opening Compass
 
 > `ctrl+tab`
 
 Open the quick panel. Displays most-recently used tabs by default.
 
-https://github.com/kapitanluffy/sublime-compass/assets/485799/b62c1d9b-3a10-4aba-9c0f-ccadac667f01
+![Opening Compass](./previews/open-compass.gif)
 
 #### Quick switching
 
 You can do this by pressing `ctrl+tab` on the first and second items
 
-https://github.com/kapitanluffy/sublime-compass/assets/485799/d051d3f1-90f2-4849-99fa-0c46b908391e
+![Quick Switching](./previews/quick-switching.gif)
 
+#### Selecting an Item
 
-#### Close Compass and select Current Highlight
-
-> `ctrl+ctrl`
+> `ctrl+ctrl` (or press `enter`)
 
 Select the current highlight and close the quick panel
 
 
-#### Close Compass and go back to initial view
+#### Closing Compass
 
-> `alt+alt`
+> `alt+alt` (or press `escape`)
 
 Go back to the initial tab and close the quick panel
 
-https://github.com/kapitanluffy/sublime-compass/assets/485799/b0613890-8b93-4c6f-b7c2-f66e4739eb11
+![Closing Compass](./previews/close-compass.gif)
 
+#### Filtering Items
 
-#### Filtering
+To enable filters, you need to set `enable_tags` to `True`.
+After that, you can filter items by typing `#`
 
-Type a query. `#` are for filters
-
-https://github.com/kapitanluffy/sublime-compass/assets/485799/a37b6f12-0c00-4120-933e-1a9e7b74b3f4
-
+![Filtering Items](./previews/filtering-items.gif)
 
 #### Opening files
 
 If you have [ripgrep](https://github.com/BurntSushi/ripgrep) set in the settings, you can enable this feature.
 Please note that this will be slow in large projects!
 
-https://github.com/kapitanluffy/sublime-compass/assets/485799/7e3282b6-46d0-4c76-ba6e-69aebb376891
+![Opening Files](./previews/opening-files.gif)
 
+#### Auto Close Tabs
+Compass will automatically close the least used tab when you open the 1001th tab.
+You can manage this limit by changing `max_open_tabs` or disable it by setting to `0`
+
+#### Caching Items
+Internally, Compass caches the MRU tabs. Reopening Sublime Text will not rebuild the MRU stack
+
+The "Files" plugin which allows you to navigate to unopened files does not do this unfortunately.
+By default, each time you open compass, the Files plugin will always refetch your file list
+
+This sucks when you have a very large project. Enabling caching helps with showing 
+compass immediately. The downside of this is that it won't see newly created files. 
+I am currently working on fixing this with the help of another plugin called [FileWatcher](https://packagecontrol.io/packages/FileWatcher). 
+For now, you can run `Compass: Reindex` to recognize new files.
+
+If your Compass does not show up immediately, try enabling the cache under `plugins.files.enable_cache` in the settings

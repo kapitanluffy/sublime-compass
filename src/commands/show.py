@@ -1,12 +1,10 @@
 from typing import List, Union
 import sublime
 import sublime_plugin
-from ...utils import plugin_settings, plugin_state
-from .. import File, ViewStack, SheetGroup
-from ..utils import parse_listed_files, parse_sheet
+from ...utils import plugin_debug, plugin_settings, plugin_state
+from .. import File, ViewStack, SheetGroup, CompassPluginFileStack
+from ..utils import parse_sheet, dict_deep_get
 import os
-
-KIND_FILE_OPEN = (sublime.KindId.COLOR_YELLOWISH, "f", "OpenFile")
 
 
 def generate_post_file_item(window: sublime.Window, file_label, tags, kind, annotation):
@@ -98,30 +96,25 @@ class CompassShowCommand(sublime_plugin.WindowCommand):
                     post_list.append(item)
                     post_list_meta.append(sheets)
 
-        unopened_files = None
-        unopened_files_items: List[sublime.QuickPanelItem] = []
-        unopened_files_meta = []
         file_types_items: List[sublime.QuickPanelItem] = []
         file_types_meta = []
 
         only_show_unopened_files_on_empty_window = settings.get("only_show_unopened_files_on_empty_window", True)
+        plugin_files_enable_cache = dict_deep_get(settings, "plugins.files.enable_cache")
+        plugin_files_enabled = dict_deep_get(settings, "plugins.files.enabled")
 
-        if only_show_unopened_files_on_empty_window is False:
-            unopened_files = parse_listed_files(self.window)
+        # @todo might need to move this chunk inside generate_items?
+        if plugin_files_enabled is True and plugin_files_enable_cache is False and \
+           only_show_unopened_files_on_empty_window is False or \
+           (only_show_unopened_files_on_empty_window is True and len(self.window.sheets()) <= 0):
+            CompassPluginFileStack.refresh_cache(self.window)
 
-        if only_show_unopened_files_on_empty_window is True and self.window.sheets().__len__() <= 0:
-            unopened_files = parse_listed_files(self.window)
-
-        # @todo refactor and put inside parse_listed_files and maybe rething items+meta
-        if unopened_files is not None:
-            for file in unopened_files:
-                filename = file.get_file_name()
-                trigger = "#open > %s" % (filename)
-                item = sublime.QuickPanelItem(trigger=trigger, kind=KIND_FILE_OPEN)
-                unopened_files_items.append(item)
-                unopened_files_meta.append(file)
+        unopened_files_items, unopened_files_meta = CompassPluginFileStack.generate_items() if plugin_files_enabled is True else ([], [])
 
         items = items + post_list + unopened_files_items + file_types_items
+
+        # Right now, the items_meta is just for checking sheet_groups
+        # We are slowly moving away from sheet_groups
         items_meta = items_meta + post_list_meta + unopened_files_meta + file_types_meta
 
         if len(items) <= 0 or len(items_meta) <= 0:
@@ -141,6 +134,7 @@ class CompassShowCommand(sublime_plugin.WindowCommand):
         if index == -1:
             raise Exception("Cannot highlight index: -1")
 
+        selected_item = items[index]
         settings = plugin_settings()
         sheets = items_meta[index]
         state = plugin_state()
@@ -149,16 +143,13 @@ class CompassShowCommand(sublime_plugin.WindowCommand):
         is_preview_on_highlight = settings.get("preview_on_highlight", True)
 
         if is_preview_on_highlight is False:
-            state["is_quick_panel_open"] = False
             return
 
-        if isinstance(sheets, File) and sheets is not None:
-            state["is_quick_panel_open"] = False
-            self.window.open_file(sheets.get_full_path(), sublime.TRANSIENT)
+        if CompassPluginFileStack.is_applicable(selected_item):
+            CompassPluginFileStack.on_highlight(selected_item, self.window)
+            return
 
         if isinstance(sheets, SheetGroup) and sheets is not None:
-            state["is_quick_panel_open"] = False
-
             # Select sheets (for preview) only when head's group is the active group
             # use the inital selection if not
             if len(sheets) > 0 and sheets[0].group() == self.window.active_group():
@@ -177,16 +168,10 @@ class CompassShowCommand(sublime_plugin.WindowCommand):
             state["is_reset"] = True
 
         sheets = items_meta[index]
-
-        class_name = type(sheets).__name__
-        item_type = items[index].kind[2]
-        sub_commands = ["OpenFile", "FileType"]
-        is_file = item_type in sub_commands and class_name == "File"
-
-        if sheets is not None and (isinstance(sheets, File) or is_file is True):
+        selected_item = items[index]
+        if CompassPluginFileStack.is_applicable(selected_item):
             state["is_quick_panel_open"] = False
-            assert isinstance(sheets, File)
-            self.window.open_file(sheets.get_full_path())
+            CompassPluginFileStack.on_select(selected_item, self.window)
             return
 
         # @todo on plugin reload, sheets are still SheetGroup because it is a subclass of List.

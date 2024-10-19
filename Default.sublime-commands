@@ -20,4 +20,8 @@
         "caption": "Compass: Dump Stack",
         "command": "compass_dump_stack"
     },
+    {
+        "caption": "Compass: Reindex",
+        "command": "compass_index_files"
+    },
 ]

@@ -5,7 +5,7 @@ import subprocess
 import platform
 from typing import List
 from ..utils import plugin_settings
-from . import File
+from .file import File
 
 KIND_VIEW = (sublime.KindId.COLOR_REDISH, "f", "File")
 KIND_VIEW_SCRATCH = (sublime.KindId.COLOR_GREENISH, "s", "Scratch")
@@ -49,22 +49,6 @@ def list_files(directory="."):
         return result.stdout.splitlines()
     except Exception as e:
         print(f"An error occurred: {e}")
-
-
-def parse_listed_files(window: sublime.Window):
-    folders = window.folders()
-    items: List[File] = []
-
-    for folder in folders:
-        files = list_files(folder)
-
-        if files is None:
-            return None
-
-        for file in files:
-            items.append(File(file, folder))
-
-        return items
 
 
 def generate_view_meta(view: sublime.View):
@@ -199,3 +183,52 @@ def parse_sheet(sheet: sublime.Sheet):
     file = sheet.file_name()
 
     return {"name": name, "preview": preview, "kind": kind, "tags": tags, "file": file}
+
+
+def generate_file_per_folder(directory="."):
+    settings = plugin_settings()
+    ripgrep = str(settings.get("ripgrep_path", ""))
+
+    if ripgrep == "" or os.path.exists(ripgrep) is False:
+        return None
+
+    command = [settings["ripgrep_path"], "--files", directory]
+
+    try:
+        process = subprocess.Popen(
+            command,
+            stdout=subprocess.PIPE,
+            text=True,
+            bufsize=1,
+            universal_newlines=True,
+            creationflags=subprocess.CREATE_NO_WINDOW,
+        )
+
+        if process.stdout is None:
+            return None
+
+        for line in process.stdout:
+            yield line.strip()
+        process.wait()
+    except Exception as e:
+        print(f"An error occurred: {e}")
+    return None
+
+
+def generate_files(window: sublime.Window):
+    folders = window.folders()
+
+    for folder in folders:
+        for file in generate_file_per_folder(folder):
+            if file is None:
+                return None
+            yield File(file, folder)
+
+
+def dict_deep_get(dictionary, keys, default=None):
+    keys = keys.split('.')
+    for key in keys:
+        dictionary = dictionary.get(key)
+        if dictionary is None:
+            return default
+    return dictionary

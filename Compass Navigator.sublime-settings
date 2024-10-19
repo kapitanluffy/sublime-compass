@@ -26,4 +26,13 @@
 
     // Whether we show items across groups or only the active group
     "only_show_items_in_focused_group": true,
+
+    // Settings for compass plugins
+    "plugins": {
+        "files": {
+            "enabled": true,
+            // Enabling this will not see newly created files
+            "enable_cache": false
+        }
+    }
 }
