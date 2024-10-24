@@ -1,3 +1,6 @@
+v3.0.1
+- Fix CREATE_NO_WINDOW flag not in subprocess for non-window platforms
+
 v3.0.0
 
 This update is generally refactoring the internals
