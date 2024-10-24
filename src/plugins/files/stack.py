@@ -153,13 +153,17 @@ def list_files(directory="."):
     command = [settings["ripgrep_path"], "--files", directory]
 
     try:
+        cmdFlags = 0
+        if sublime.platform() == "windows":
+            cmdFlags = subprocess.CREATE_NO_WINDOW
+
         # Run the command and capture the output
         result = subprocess.run(
             command,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True,  # This makes sure the output is treated as text (str) rather than bytes
-            creationflags=subprocess.CREATE_NO_WINDOW,
+            creationflags=cmdFlags,
         )
 
         if result.returncode != 0:
