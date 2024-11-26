@@ -21,13 +21,19 @@ The plugin already has pre-commented keybinds that you can just copy
 Like my Sublime plugins? Keep the updates coming by supporting me on GitHub Sponsors, Ko-fi, or Patreon.
 Your support will help fuel my coffee for my next coding session!
 
+- https://ko-fi.com/kapitanluffy
 - https://github.com/sponsors/kapitanluffy
 - https://patreon.com/kapitanluffy
-- https://ko-fi.com/kapitanluffy
 
 ---
 
 ### Changes ✨
+
+v3.0.2
+No updates right now. Just a version bump to fix this message you are reading right now.
+I do apologize for investing little time in Compass 🙇‍♂️
+
+With that said, feel free to follow me in my socials (https://x.com/kapitanluffy) for updates and random blurbs
 
 v3.0.1
 - Fix CREATE_NO_WINDOW flag not in subprocess for non-window platforms
