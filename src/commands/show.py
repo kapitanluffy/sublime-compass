@@ -109,7 +109,9 @@ class CompassShowCommand(sublime_plugin.WindowCommand):
            (only_show_unopened_files_on_empty_window is True and len(self.window.sheets()) <= 0):
             CompassPluginFileStack.refresh_cache(self.window)
 
-        unopened_files_items, unopened_files_meta = CompassPluginFileStack.generate_items() if plugin_files_enabled is True else ([], [])
+        # @todo need to make this identifier more portable
+        projectId = self.window.project_file_name() or str(self.window.id())
+        unopened_files_items, unopened_files_meta = CompassPluginFileStack.generate_items(projectId) if plugin_files_enabled is True else ([], [])
 
         items = items + post_list + unopened_files_items + file_types_items
 

@@ -8,7 +8,7 @@ from .file import File
 
 ITEM_TYPE = "compass_plugin_file_open_file"
 CompassItemTuple = Tuple[int, int, List[int], int]
-FILE_STACK: TOrderedDict[Tuple[str, str], Optional[CompassItemTuple]] = OrderedDict()
+FILE_STACK: TOrderedDict[Tuple[str, str, str], Optional[CompassItemTuple]] = OrderedDict()
 KIND_FILE_PLUGIN_FILE_ITEM_TYPE = (sublime.KindId.COLOR_YELLOWISH, "f", ITEM_TYPE)
 
 
@@ -42,7 +42,8 @@ class FilePluginItem():
     def key(self):
         file = self.file.get_full_path()
         folder = self.file.get_folder()
-        return (file, folder)
+        window = self.file.get_window()
+        return (file, folder, window)
 
     def value(self):
         item = self.item.to_tuple() if self.item is not None else None
@@ -51,7 +52,7 @@ class FilePluginItem():
 
 class CompassPluginFileStack():
     @classmethod
-    def get(cls, key: Tuple[str, str]):
+    def get(cls, key: Tuple[str, str, str]):
         """
         Get an item from stack
         """
@@ -60,7 +61,7 @@ class CompassPluginFileStack():
         return None
 
     @classmethod
-    def remove(cls, key: Tuple[str, str]):
+    def remove(cls, key: Tuple[str, str, str]):
         """
         Remove an item from stack
         """
@@ -98,10 +99,10 @@ class CompassPluginFileStack():
         FILE_STACK.clear()
 
     @classmethod
-    def generate_quickpanel_item(cls, key: Tuple[str, str], item):
+    def generate_quickpanel_item(cls, key: Tuple[str, str, str], item) -> sublime.QuickPanelItem:
         settings = plugin_settings()
         is_tags_enabled = settings.get('enable_tags', False)
-        file = File(key[0], key[1])
+        file = File(key[0], key[1], key[2])
 
         tags = '#open'
         annotation = 'files'
@@ -112,11 +113,14 @@ class CompassPluginFileStack():
         return sublime.QuickPanelItem(trigger=trigger, kind=kind, annotation=annotation)
 
     @classmethod
-    def generate_items(cls):
+    def generate_items(cls, projectId):
         meta = []
-        items = []
+        items: list[sublime.QuickPanelItem] = []
         for key, item in FILE_STACK.items():
-            file = File(key[0], key[1])
+            # Skip file if not for the current window
+            if key[2] != projectId:
+                continue
+            file = File(key[0], key[1], key[2])
             items.append(cls.generate_quickpanel_item(key, item))
             meta.append(file)
         return (items, meta)
@@ -128,13 +132,13 @@ class CompassPluginFileStack():
     @classmethod
     def on_highlight(cls, item: sublime.QuickPanelItem, window: sublime.Window):
         # We use the injected data in 102 to create a File object instance
-        key: Tuple[str, str] = item.kind[3]
+        key: Tuple[str, str, str] = item.kind[3]
         file = File(*key)
         window.open_file(file.get_full_path(), sublime.TRANSIENT)
 
     @classmethod
     def on_select(cls, item: sublime.QuickPanelItem, window: sublime.Window):
-        key: Tuple[str, str] = item.kind[3]
+        key: Tuple[str, str, str] = item.kind[3]
         file = File(*key)
         window.open_file(file.get_full_path())
 
@@ -177,10 +181,12 @@ def list_files(directory="."):
 
 def parse_listed_files(window: sublime.Window):
     folders = window.folders()
+    projectId = window.project_file_name() or str(window.id())
+
     for folder in folders:
         files = list_files(folder)
         if files is None:
             return None
         for file in files:
-            item = FilePluginItem(File(file, folder), None)
+            item = FilePluginItem(File(file, folder, projectId), None)
             CompassPluginFileStack.append(item)
