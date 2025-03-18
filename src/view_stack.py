@@ -45,7 +45,7 @@ class ViewStack():
 
     def remove(self, sheet: sublime.Sheet):
         remove_sheet(sheet)
-        cache_stack(self.window)
+        cache_stack(self.window, True)
 
     def clear(self):
         """

@@ -2,6 +2,7 @@ import re
 import sublime
 from typing import List, Optional, Tuple, Union
 from os import path
+from time import time
 
 SheetList = List[int]
 FocusedSheet = int
@@ -34,6 +35,11 @@ STACK: StackItem = []
 
     The first StackItem in the STACK is the current "view"
 """
+
+STACK_UPDATE_TIME: float = time()
+
+# @todo move to setting
+STACK_EXPIRY_TIME: int = 30
 
 def create_item(window: sublime.Window, sheets: List[sublime.Sheet], group: int = 0, focused: Optional[sublime.Sheet] = None):
     if len(sheets) <= 0:
@@ -121,7 +127,13 @@ def append_sheets(window: sublime.Window, sheets: List[sublime.Sheet], group: in
     item = create_item(window, sheets, group, focused)
     STACK.append(item)
 
-def cache_stack(window: sublime.Window):
+def cache_stack(window: sublime.Window, force: bool=False):
+    global STACK_UPDATE_TIME
+    cache_delta = time() - STACK_UPDATE_TIME
+    if cache_delta < STACK_EXPIRY_TIME and force is not True:
+        return
+    STACK_UPDATE_TIME = time()
+
     window_settings = window.settings()
     stack = []
     for block in STACK:
