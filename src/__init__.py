@@ -1,18 +1,3 @@
-from ..plugin import reload
-
-reload("src", [
-    "stack_manager",
-    "stack",
-    "file",
-    "sheet_group",
-    "view_stack",
-    "events",
-    "utils",
-    "core"
-])
-reload("src.commands")
-reload("src.plugins.files")
-
 from .plugins.files import CompassPluginFileStack, CompassPluginFilesListener
 from .stack_manager import *
 from .stack import *
