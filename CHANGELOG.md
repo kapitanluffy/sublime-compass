@@ -1,3 +1,12 @@
+v3.0.3
+- Fix files showing from other projects
+- Fix compass constantly caching when changing views
+- Fix compass randomly redirecting to wrong buffer when navigating (thanks @MarketHubb)
+
+v3.0.2
+No updates right now. Just a version bump to fix this message you are reading right now.
+I do apologize for investing little time in Compass 🙇‍♂️
+
 v3.0.1
 - Fix CREATE_NO_WINDOW flag not in subprocess for non-window platforms
 
