@@ -62,17 +62,18 @@ class CompassShowCommand(sublime_plugin.WindowCommand):
             preview = ""
             kind = None
             tags = set()
+            valid_sheets = []
 
             for sheet in sheets:
                 parsedSheet = parse_sheet(sheet)
 
                 if parsedSheet is False:
-                    stack.remove(sheet)
                     continue
 
                 names.append(parsedSheet['name'])
                 files.append(parsedSheet['file'])
                 tags = tags.union(parsedSheet['tags'])
+                valid_sheets.append(sheet)
 
                 if preview == "":
                     preview = parsedSheet['preview']
@@ -82,6 +83,10 @@ class CompassShowCommand(sublime_plugin.WindowCommand):
 
             if names.__len__() <= 0:
                 continue
+
+            # Update the sheets in the stack with only valid sheets
+            if len(valid_sheets) > 0 and len(valid_sheets) != len(sheets):
+                sheets[:] = valid_sheets
 
             trigger = ' + '.join(names)
             is_tags_enabled = settings.get('enable_tags', False)
