@@ -16,6 +16,6 @@ def load():
     windows = sublime.windows()
 
     for window in windows:
-        sublime.set_timeout_async(lambda: load_window(window))
+        sublime.set_timeout_async(lambda w=window: load_window(w))
 
     CompassPluginFilesListener.on_plugin_loaded()
