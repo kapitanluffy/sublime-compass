@@ -64,9 +64,7 @@ def get_sheet_name(sheet: sublime.Sheet):
     return name
 
 def remove_window(window: sublime.Window):
-    for block in STACK:
-       if window.id() == block[0]:
-           STACK.remove(block)
+    STACK[:] = [b for b in STACK if b[0] != window.id()]
 
 def get_head(window: sublime.Window, group: Optional[int] = 0):
     for item in STACK:
