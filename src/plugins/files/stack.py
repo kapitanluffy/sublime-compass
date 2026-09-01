@@ -99,6 +99,11 @@ class CompassPluginFileStack():
         FILE_STACK.clear()
 
     @classmethod
+    def clear_project(cls, projectId):
+        for key in [k for k in FILE_STACK if k[2] == projectId]:
+            FILE_STACK.pop(key, None)
+
+    @classmethod
     def generate_quickpanel_item(cls, key: Tuple[str, str, str], item) -> sublime.QuickPanelItem:
         settings = plugin_settings()
         is_tags_enabled = settings.get('enable_tags', False)
