@@ -24,7 +24,7 @@ Sublime Text plugin (Python 3.8 per `.python-version`, runs inside Sublime's emb
 - Untracked WIP: `src/file_watcher.py` (stub `CompassFileEventListener` for `FileWatcher` broadcast) and `src/plugins_registry.py` (empty `CompassPluginsRegistry`). `artifacts/` is not tracked.
 
 ## Verification (no test suite exists)
-- Syntax: `python -m py_compile plugin.py utils.py` or `python -m compileall src`
+- Syntax: `python -m py_compile plugin.py utils.py` or `python -m compileall src` — checks for syntax errors in all .py files. Run this after every code change.
 - Manual: symlink/clone repo as `Compass Navigator` into Sublime `Packages/` dir, restart Sublime, `compass_show` via `ctrl+tab` (after enabling keymap), check console for `plugin_debug` (requires `"debug": true`).
 - No CI workflows, no pre-commit hooks.
 

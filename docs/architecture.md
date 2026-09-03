@@ -55,11 +55,9 @@ Each entry represents a **group of tabs** in a specific Sublime group:
 
 ### SheetGroup
 
-`src/sheet_group.py` — a `List[sublime.Sheet]` with a `.focused` attribute. Used when converting raw STACK tuples into Sublime Sheet objects for `select_sheets()` / `focus_sheet()`.
+`src/sheet_group.py` — a `List[sublime.Sheet]` with a `.focused` attribute. Also serves as the type discriminator in `items_meta` (mixed list of `SheetGroup` and `File`): `isinstance(meta, SheetGroup)` tells `on_highlight` and `on_done` which code path to take — select sheets vs open a file.
 
 Created by `convert_stack_to_sheet_group()` in `view_stack.py`.
-
-**Why it exists (not just a wrapper):** `items_meta` in `show.py` is a mixed list of `SheetGroup` and `File` objects. `isinstance(meta, SheetGroup)` is the type discriminator that tells `on_highlight` and `on_done` which code path to take — select sheets vs open a file. Deleting it would require another mechanism for type discrimination. At 16 lines, it's the right abstraction for this purpose.
 
 ### FILE_STACK (unopened files)
 
@@ -175,18 +173,3 @@ Returns True for views whose `element()` is non-None and not `"find_in_files:out
 4. **Two File classes:** `src/file.py` (2-arg) for general use, `src/plugins/files/file.py` (3-arg with project ID) for the file plugin. Both have Windows-only path separators.
 
 5. **Keymap is commented out:** Users must manually enable keybindings via "Preferences: Compass Keybindings". This is intentional — the keymap file in the repo is a template.
-
-## Known Issues
-
-- **STR-5 (fixed):** Startup hydration only hydrating the last window — closure captured wrong variable.
-- **STR-6 (fixed):** `load_window` appending sheets with hardcoded `group=0`.
-- **STR-7 (fixed):** `remove_window` mutating STACK during iteration.
-- **STR-8 (fixed):** `FILE_STACK.clear()` wiping all projects on any window close.
-- **STR-14 (fixed):** Dead `StackManager` class — never imported, deleted.
-- **STR-16 (fixed):** Stale `focused` pointer causing wrong view focus on selection.
-- **STR-9 (canceled):** Escape/cancel behavior — not reproducible, `alt+alt` navigates to index 0 by design.
-- **STR-10 (open):** Global ripgrep deduplication across searches.
-- **STR-11 (open):** Unify the two File classes into one.
-- **STR-12 (open):** Add LineNumber/Point attributes to Viewport.
-- **STR-13 (canceled):** SheetGroup stays — it's a type discriminator, not just a wrapper.
-- **STR-15 (open):** Move `.sublime-settings` inside the package dir.
