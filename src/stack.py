@@ -3,6 +3,7 @@ import sublime
 from typing import List, Optional, Tuple, Union
 from os import path
 from time import time
+from ..utils import plugin_settings
 
 SheetList = List[int]
 FocusedSheet = int
@@ -38,8 +39,9 @@ STACK: StackItem = []
 
 STACK_UPDATE_TIME: float = time()
 
-# @todo move to setting
-STACK_EXPIRY_TIME: int = 30
+def stack_cache_throttle() -> int:
+    throttle = int(plugin_settings().get("stack_cache_throttle", 30))
+    return max(throttle, 30)
 
 def create_item(window: sublime.Window, sheets: List[sublime.Sheet], group: int = 0, focused: Optional[sublime.Sheet] = None):
     if len(sheets) <= 0:
@@ -128,7 +130,7 @@ def append_sheets(window: sublime.Window, sheets: List[sublime.Sheet], group: in
 def cache_stack(window: sublime.Window, force: bool=False):
     global STACK_UPDATE_TIME
     cache_delta = time() - STACK_UPDATE_TIME
-    if cache_delta < STACK_EXPIRY_TIME and force is not True:
+    if cache_delta < stack_cache_throttle() and force is not True:
         return
     STACK_UPDATE_TIME = time()
 

@@ -14,7 +14,7 @@ Sublime Text plugin (Python 3.8 per `.python-version`, runs inside Sublime's emb
 - `plugin.py` - entrypoint: `plugin_loaded()` -> `reset_plugin_state()` (`utils.py`) + `load()` (`src/core.py`)
 - `utils.py` - global `PLUGIN_STATE` (`is_quick_panel_open`, `highlighted_index`, `is_reset`), `plugin_settings()`, `plugin_debug()`
 - `src/__init__.py` - re-exports everything; `src/core.py` hydrates `STACK` on load via `hydrate_stack()` / `build_stack()`
-- `src/stack.py` - `STACK: List[Tuple[window_id, group, sheet_ids, focused_id]]` + `STACK_UPDATE_TIME`/`STACK_EXPIRY_TIME=30s`; cached to `window.settings().set('compass_stack_cache', ...)`
+- `src/stack.py` - `STACK: List[Tuple[window_id, group, sheet_ids, focused_id]]` + `STACK_UPDATE_TIME`; cached to `window.settings().set('compass_stack_cache', ...)`. Cache write throttle read from `stack_cache_throttle` setting (min 30, default 30).
 - `src/view_stack.py` - `ViewStack` is a per-`(window.id, group)` facade over global `STACK`
 - `src/sheet_group.py` - `SheetGroup(List[Sheet])` with `.focused`
 - `src/events.py` - `CompassFocusListener` (`on_activated_async`, `on_pre_close`, `on_pre_close_window`, `on_pre_close_project`, `on_load_project_async`, `on_query_context`). A view is skipped (not pushed/removed from the stack) when `sheet.is_transient()` is True OR `should_skip_view(view)` is True, where `should_skip_view` returns True for views whose `element()` is non-None and not `"find_in_files:output"`. So find-in-files output (`element()=="find_in_files:output"`) is NOT ignored — it is tracked and tagged `#search` in `generate_view_meta`; other special panels (non-None element) are ignored. Re-verify Sublime's real `is_transient()` behavior for the find output panel.
@@ -27,7 +27,7 @@ Sublime Text plugin (Python 3.8 per `.python-version`, runs inside Sublime's emb
 - Relative imports only (`from .utils import *`, `from .src import *`) - will not import/run outside Sublime; `sublime`/`sublime_plugin` are host-provided.
 - `Default.sublime-keymap` is entirely commented out. Users must enable via `Preferences: Compass Keybindings` command. Don't uncomment in repo.
 - Settings-driven: `enable_tags`, `ripgrep_path`, `only_show_items_in_focused_group`, `jump_to_most_recent_on_show`, `max_open_tabs` (0=disable auto-close), `plugins.files.enabled`/`enable_cache`. Tags only emit when `enable_tags==True`.
-- MRU logic: `push_sheets` moves to head of `STACK`; `cache_stack()` saves the window cache. Called throttled (30s, `STACK_EXPIRY_TIME`) from `on_activated_async` (tab switch), and forced (`force=True`) from `show.py:on_done` (compass close) and `ViewStack.remove` (tab close). Groups are preserved because `push_sheets` operates on the full `selected_sheets_in_group` set.
+- MRU logic: `push_sheets` moves to head of `STACK`; `cache_stack()` saves the window cache. Called throttled (30s, `stack_cache_throttle` setting, min 30) from `on_activated_async` (tab switch), and forced (`force=True`) from `show.py:on_done` (compass close) and `ViewStack.remove` (tab close). Groups are preserved because `push_sheets` operates on the full `selected_sheets_in_group` set.
 - Untracked WIP: `src/file_watcher.py` (stub `CompassFileEventListener` for `FileWatcher` broadcast) and `src/plugins_registry.py` (empty `CompassPluginsRegistry`). `artifacts/` is not tracked.
 
 ## Verification (no test suite exists)

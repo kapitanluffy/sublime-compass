@@ -24,6 +24,10 @@
     // Max limit of opened tabs. Set to 0 to disable
     "max_open_tabs": 1000,
 
+    // How often (seconds) the view stack cache is written on tab switch.
+    // Minimum is 30. Set high to reduce disk writes on large projects.
+    "stack_cache_throttle": 30,
+
     // Whether we show items across groups or only the active group
     "only_show_items_in_focused_group": true,
 
