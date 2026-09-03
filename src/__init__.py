@@ -1,6 +1,5 @@
 from .plugins.files import CompassPluginFileStack, CompassPluginFilesListener
 from .stack import *
-from .file import *
 from .sheet_group import *
 from .commands import *
 from .view_stack import *
@@ -9,7 +8,6 @@ from .utils import *
 from .core import *
 
 __all__ = [
-    "File",
     "SheetGroup",
     "ViewStack",
 

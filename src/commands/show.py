@@ -2,10 +2,10 @@ from typing import List, Union
 import sublime
 import sublime_plugin
 from ...utils import plugin_debug, plugin_settings, plugin_state
-from ..file import File
 from ..view_stack import ViewStack
 from ..sheet_group import SheetGroup
 from ..plugins.files import CompassPluginFileStack
+from ..plugins.files.file import File
 from ..stack import STACK, cache_stack
 from ..utils import parse_sheet, dict_deep_get
 import os

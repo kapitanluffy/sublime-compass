@@ -5,8 +5,7 @@ class File():
         self.file = file
         self.folder = folder
         self.window = window
-        filename = file.replace("%s\\" % folder, "")
-        self.relative = "%s" % (filename)
+        self.relative = os.path.relpath(file, folder)
 
     def get_window(self):
         return self.window
