@@ -2,7 +2,7 @@ from typing import List, Union
 import sublime
 import sublime_plugin
 from ...utils import plugin_debug, plugin_settings, plugin_state
-from .. import File, ViewStack, SheetGroup, CompassPluginFileStack
+from .. import File, ViewStack, SheetGroup, CompassPluginFileStack, STACK
 from ..utils import parse_sheet, dict_deep_get
 import os
 
@@ -19,6 +19,20 @@ def generate_post_file_item(window: sublime.Window, file_label, tags, kind, anno
         file_label = "%s%s%s" % (' '.join(tags), ' | ', file_label)
 
     return sublime.QuickPanelItem(trigger=file_label, kind=kind, annotation=annotation)
+
+
+def _sheet_name(sid: int) -> str:
+    sheet = sublime.Sheet(sid)
+    view = sheet.view()
+    if view is None:
+        return "DEAD:%d" % sid
+    fname = view.file_name()
+    if fname:
+        return fname
+    vname = view.name()
+    if vname:
+        return vname
+    return "NOFILE:%d" % sid
 
 
 class CompassShowCommand(sublime_plugin.WindowCommand):
@@ -41,6 +55,7 @@ class CompassShowCommand(sublime_plugin.WindowCommand):
         # @note showing quickpanel does not need a current_view
 
         initial_selection = self.window.selected_sheets_in_group(self.window.active_group())
+        state["initial_selection_ids"] = [s.id() for s in initial_selection]
         stack_length = len(stack.all())
         selected_index = 0
         # stack_sheets = copy.deepcopy(stack.all())
@@ -167,6 +182,40 @@ class CompassShowCommand(sublime_plugin.WindowCommand):
     def on_done(self, index, items, items_meta: List[Union[SheetGroup, File]]):
         state = plugin_state()
 
+        try:
+            if 0 <= index < len(items):
+                selected_item = items[index]
+                meta = items_meta[index]
+
+                if isinstance(meta, SheetGroup) and len(meta) > 0:
+                    window_sheet_ids = [s.id() for s in self.window.sheets()]
+                    row_ids = [s.id() for s in meta]
+                    focused = meta.get_focused()
+                    stack_ids = [block for block in STACK if block[0] == self.window.id()]
+                    print("COMPASS_HUNT on_done sheet_group", {
+                        "index": index,
+                        "trigger": selected_item.trigger,
+                        "row_sheet_ids": ["%s(%d)" % (_sheet_name(s), s) for s in row_ids],
+                        "row_transient": [s.is_transient() for s in meta],
+                        "focused_id": focused.id() if focused is not None else None,
+                        "focused_name": _sheet_name(focused.id()) if focused is not None else None,
+                        "focused_in_window": focused is not None and focused.id() in window_sheet_ids,
+                        "focused_in_row": focused is not None and focused.id() in row_ids,
+                        "active_group": self.window.active_group(),
+                        "meta_group": meta[0].group(),
+                        "initial_selection_ids": state.get("initial_selection_ids", []),
+                        "stack_blocks": [{"group": b[1], "ids": [_sheet_name(i) for i in b[2]], "focused": _sheet_name(b[3])} for b in stack_ids],
+                        "window_sheet_ids": len(window_sheet_ids),
+                    })
+                elif isinstance(meta, File):
+                    print("COMPASS_HUNT on_done file", {
+                        "index": index,
+                        "trigger": selected_item.trigger,
+                        "full_path": meta.get_full_path(),
+                    })
+        except Exception as e:
+            print("COMPASS_HUNT error", e)
+
         if index == -1 and state["is_reset"] is True:
             index = 0
 
@@ -179,6 +228,11 @@ class CompassShowCommand(sublime_plugin.WindowCommand):
         if CompassPluginFileStack.is_applicable(selected_item):
             state["is_quick_panel_open"] = False
             CompassPluginFileStack.on_select(selected_item, self.window)
+            sublime.set_timeout(lambda item=selected_item: print("COMPASS_HUNT after_file_open", {
+                "target": item.kind[3][0],
+                "active_file": self.window.active_view().file_name() if self.window.active_view() is not None else None,
+                "active_sheet_id": self.window.active_sheet().id() if self.window.active_sheet() is not None else None,
+            }), 0)
             return
 
         # @todo on plugin reload, sheets are still SheetGroup because it is a subclass of List.
@@ -188,6 +242,15 @@ class CompassShowCommand(sublime_plugin.WindowCommand):
 
             # refocus on the selected sheet
             focused = sheets.get_focused()
+            sheet_ids = [s.id() for s in sheets]
+            if focused is None or focused.id() not in sheet_ids:
+                focused = sheets[0] if len(sheets) > 0 else None
             if len(sheets) > 0 and focused is not None:
                 self.window.focus_sheet(focused)
+                sublime.set_timeout(lambda f=focused: print("COMPASS_HUNT after_focus_sheet", {
+                    "target_focused_id": f.id(),
+                    "target_focused_name": _sheet_name(f.id()),
+                    "active_file": self.window.active_view().file_name() if self.window.active_view() is not None else None,
+                    "active_sheet_id": self.window.active_sheet().id() if self.window.active_sheet() is not None else None,
+                }), 0)
             return

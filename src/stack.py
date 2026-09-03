@@ -224,6 +224,9 @@ def hydrate_stack(window):
         if sheet_window is None or group is None:
             continue
 
+        if focused is not None and not any(s.id() == focused.id() for s in sheets):
+            focused = sheets[0] if sheets else None
+
         append_sheets(sheet_window, sheets, group, focused)
 
     return True
