@@ -12,7 +12,6 @@ from .core import *
 __all__ = [
     "File",
     "SheetGroup",
-    "StackManager",
     "ViewStack",
 
     # core
