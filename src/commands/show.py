@@ -187,8 +187,6 @@ class CompassShowCommand(sublime_plugin.WindowCommand):
         state = plugin_state()
         state["is_quick_panel_open"] = False
         cache_stack(self.window, force=True)
-        state["is_quick_panel_open"] = False
-        cache_stack(self.window, force=True)
 
         try:
             if 0 <= index < len(items):
