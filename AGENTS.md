@@ -27,7 +27,7 @@ Sublime Text plugin (Python 3.8 per `.python-version`, runs inside Sublime's emb
 - Relative imports only (`from .utils import *`, `from .src import *`) - will not import/run outside Sublime; `sublime`/`sublime_plugin` are host-provided.
 - `Default.sublime-keymap` is entirely commented out. Users must enable via `Preferences: Compass Keybindings` command. Don't uncomment in repo.
 - Settings-driven: `enable_tags`, `ripgrep_path`, `only_show_items_in_focused_group`, `jump_to_most_recent_on_show`, `max_open_tabs` (0=disable auto-close), `plugins.files.enabled`/`enable_cache`. Tags only emit when `enable_tags==True`.
-- MRU logic: `push_sheets` moves to head of `STACK`; `cache_stack()` throttled to 30s unless `force=True`.
+- MRU logic: `push_sheets` moves to head of `STACK`; `cache_stack()` saves the window cache. Called throttled (30s, `STACK_EXPIRY_TIME`) from `on_activated_async` (tab switch), and forced (`force=True`) from `show.py:on_done` (compass close) and `ViewStack.remove` (tab close). Groups are preserved because `push_sheets` operates on the full `selected_sheets_in_group` set.
 - Untracked WIP: `src/file_watcher.py` (stub `CompassFileEventListener` for `FileWatcher` broadcast) and `src/plugins_registry.py` (empty `CompassPluginsRegistry`). `artifacts/` is not tracked.
 
 ## Verification (no test suite exists)
