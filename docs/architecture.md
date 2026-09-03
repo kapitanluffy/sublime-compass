@@ -59,6 +59,8 @@ Each entry represents a **group of tabs** in a specific Sublime group:
 
 Created by `convert_stack_to_sheet_group()` in `view_stack.py`.
 
+**Why it exists (not just a wrapper):** `items_meta` in `show.py` is a mixed list of `SheetGroup` and `File` objects. `isinstance(meta, SheetGroup)` is the type discriminator that tells `on_highlight` and `on_done` which code path to take — select sheets vs open a file. Deleting it would require another mechanism for type discrimination. At 16 lines, it's the right abstraction for this purpose.
+
 ### FILE_STACK (unopened files)
 
 `src/plugins/files/stack.py` — separate from STACK. An `OrderedDict` keyed by `(file, folder, projectId)`. Populated by `ripgrep --files`. Only shown in the quick panel when `ripgrep_path` is set.
@@ -131,16 +133,16 @@ CompassPluginFileStack.on_select(item, window)  # window.open_file(path)
 
 | Event | Action |
 |---|---|
-| `on_activated_async` | `push_sheets(window, [view.sheet()], group, focused)` — moves to MRU head. Skips if `is_transient()` or `is_view_valid_tab()` returns True. |
+| `on_activated_async` | `push_sheets(window, [view.sheet()], group, focused)` — moves to MRU head. Skips if `is_transient()` or `should_skip_view()` returns True. |
 | `on_pre_close` | `remove_sheet(sheet)` — removes from STACK. Closes panel if open. |
 | `on_pre_close_window` | `remove_window(window)` — clears all entries for this window. |
 | `on_pre_close_project` | `remove_window(window)` — same. |
 | `on_load_project_async` | `hydrate_stack(window)` — re-hydrate from cache. |
 | `on_query_context` | Returns True for `key == "compass"` — enables keybinding context. |
 
-### is_view_valid_tab
+### should_skip_view (was is_view_valid_tab)
 
-Returns True for views whose `element()` is non-None and not `"find_in_files:output"`. When True, the view is **skipped** (not tracked in STACK). This ignores special panels (settings, console) but DOES track find-in-files output.
+Returns True for views whose `element()` is non-None and not `"find_in_files:output"`. When True, the view is **skipped** (not tracked in STACK). This ignores special panels (settings, console) but DOES track find-in-files output. Name was renamed from `is_view_valid_tab` because the return value is inverted — True means "skip this view."
 
 ### Auto-close Tabs
 
@@ -180,10 +182,11 @@ Returns True for views whose `element()` is non-None and not `"find_in_files:out
 - **STR-6 (fixed):** `load_window` appending sheets with hardcoded `group=0`.
 - **STR-7 (fixed):** `remove_window` mutating STACK during iteration.
 - **STR-8 (fixed):** `FILE_STACK.clear()` wiping all projects on any window close.
+- **STR-14 (fixed):** Dead `StackManager` class — never imported, deleted.
 - **STR-16 (fixed):** Stale `focused` pointer causing wrong view focus on selection.
 - **STR-9 (canceled):** Escape/cancel behavior — not reproducible, `alt+alt` navigates to index 0 by design.
 - **STR-10 (open):** Global ripgrep deduplication across searches.
 - **STR-11 (open):** Unify the two File classes into one.
 - **STR-12 (open):** Add LineNumber/Point attributes to Viewport.
-- **STR-13 (open):** Delete SheetGroup, inline its logic.
+- **STR-13 (canceled):** SheetGroup stays — it's a type discriminator, not just a wrapper.
 - **STR-15 (open):** Move `.sublime-settings` inside the package dir.

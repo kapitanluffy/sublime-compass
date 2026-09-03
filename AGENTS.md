@@ -8,9 +8,9 @@ Sublime Text plugin (Python 3.8 per `.python-version`, runs inside Sublime's emb
 - `utils.py` - global `PLUGIN_STATE` (`is_quick_panel_open`, `highlighted_index`, `is_reset`), `plugin_settings()`, `plugin_debug()`
 - `src/__init__.py` - re-exports everything; `src/core.py` hydrates `STACK` on load via `hydrate_stack()` / `build_stack()`
 - `src/stack.py` - `STACK: List[Tuple[window_id, group, sheet_ids, focused_id]]` + `STACK_UPDATE_TIME`/`STACK_EXPIRY_TIME=30s`; cached to `window.settings().set('compass_stack_cache', ...)`
-- `src/view_stack.py` + `src/stack_manager.py` - `ViewStack`/`StackManager` are per-`(window.id, group)` facades over global `STACK`
+- `src/view_stack.py` - `ViewStack` is a per-`(window.id, group)` facade over global `STACK`
 - `src/sheet_group.py` - `SheetGroup(List[Sheet])` with `.focused`
-- `src/events.py` - `CompassFocusListener` (`on_activated_async`, `on_pre_close`, `on_pre_close_window`, `on_pre_close_project`, `on_load_project_async`, `on_query_context`). A view is skipped (not pushed/removed from the stack) when `sheet.is_transient()` is True OR `is_view_valid_tab(view)` is True, where `is_view_valid_tab` returns True for views whose `element()` is non-None and not `"find_in_files:output"`. So find-in-files output (`element()=="find_in_files:output"`) is NOT ignored — it is tracked and tagged `#search` in `generate_view_meta`; other special panels (non-None element) are ignored. Re-verify Sublime's real `is_transient()` behavior for the find output panel.
+- `src/events.py` - `CompassFocusListener` (`on_activated_async`, `on_pre_close`, `on_pre_close_window`, `on_pre_close_project`, `on_load_project_async`, `on_query_context`). A view is skipped (not pushed/removed from the stack) when `sheet.is_transient()` is True OR `should_skip_view(view)` is True, where `should_skip_view` returns True for views whose `element()` is non-None and not `"find_in_files:output"`. So find-in-files output (`element()=="find_in_files:output"`) is NOT ignored — it is tracked and tagged `#search` in `generate_view_meta`; other special panels (non-None element) are ignored. Re-verify Sublime's real `is_transient()` behavior for the find output panel.
 - `src/commands/` - `compass_show` (`show.py`), `compass_move`, `compass_close`, `compass_index_files`, `compass_dump_stack`, `compass_clear_cache`
 - `src/plugins/files/` - separate `FILE_STACK: OrderedDict[(file,folder,projectId), tuple]`; filtered by `projectId = project_file_name or window.id()`
 - `src/utils.py` - `list_files()` shells `ripgrep --files`, `generate_view_meta()`/`parse_sheet()` for tags/kind
@@ -31,6 +31,7 @@ Sublime Text plugin (Python 3.8 per `.python-version`, runs inside Sublime's emb
 ## Conventions
 - Python 3.8 syntax only.
 - Keep executable source of truth over docs; do not add generic lint/test scaffolding not already present.
+- Evergreen docs: when changing code behavior, update the relevant doc in `docs/` in the same changeset.
 
 ## Workflow: Plan first, then wait for explicit "Go"
 - Before changing code or implementing anything, always show the user a clear plan first (what you'll change, why, and any options/tradeoffs).
