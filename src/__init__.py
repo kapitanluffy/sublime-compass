@@ -1,5 +1,4 @@
 from .plugins.files import CompassPluginFileStack, CompassPluginFilesListener
-from .stack_manager import *
 from .stack import *
 from .file import *
 from .sheet_group import *
