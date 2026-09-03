@@ -187,9 +187,6 @@ def hydrate_stack(window):
         build_stack(window)
         return True
 
-    # Clear existing entries for this window so the cache is the sole source of truth
-    STACK[:] = [b for b in STACK if b[0] != window.id()]
-
     for cache_item in stack_cache:
         sheet_ids = cache_item[2]
         sheet_window = None
