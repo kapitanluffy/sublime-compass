@@ -27,27 +27,17 @@ Your support will help fuel my coffee for my next coding session!
 
 ---
 
-### Changes ✨
+### What's new in 3.0.4 ✨
 
-v3.0.3
-- Fix files showing from other projects
-- Fix compass constantly caching when changing views
-- Fix compass randomly redirecting to wrong buffer when navigating (thanks @MarketHubb)
+Big round of bug fixes this time — if something felt off before, it's probably fixed now.
 
-v3.0.2
-No updates right now. Just a version bump to fix this message you are reading right now.
-I do apologize for investing little time in Compass 🙇‍♂️
+Tabs that vanished from Compass after a restart, wrong files when navigating, projects bleeding into each other's stacks — all patched. Multi-selected tab groups (Ctrl+click) finally stay put the way you'd expect.
 
-With that said, feel free to follow me in my socials (https://x.com/kapitanluffy) for updates and random blurbs
+Other things we squashed:
+- Every open window now restores its own tab history, not just the last one
+- A crash when closing windows mid-operation
 
-v3.0.1
-- Fix CREATE_NO_WINDOW flag not in subprocess for non-window platforms
+New setting:
+  "stack_cache_throttle": 30
 
-v3.0.0
-
-This update is generally refactoring the internals
-and preparing Compass to support multiple "sources" via plugins
-
-- Add compass caching (disabled by default)
-- Rework internals to support plugins
-- A lot of bug fixes
+This one's for the power users — it controls how often your tab history is saved to disk. Bump it up if you're on a big project and want to cut down on writes. Minimum is 30.

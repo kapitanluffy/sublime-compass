@@ -1,3 +1,19 @@
+v3.0.4
+
+Bug fixes
+- Fix multi-sheet groups (multi-selected tabs) disappearing from Compass after switching tabs or restarting
+- Fix Compass redirecting to the wrong view when the focused tab reference went stale
+- Fix files from other projects leaking into the stack in multi-project windows
+- Fix only the last open window's stack being restored on startup
+- Fix crash when closing a window while iterating the view stack
+
+Features
+- Add `stack_cache_throttle` setting (seconds, min 30) to control how often the tab history is saved
+
+Internal
+- Remove dead code: unused 2-arg File class, unused ripgrep wrappers, dead StackManager
+- Untrack generated files (.pyc, artifacts) from the repository
+
 v3.0.3
 - Fix files showing from other projects
 - Fix compass constantly caching when changing views
