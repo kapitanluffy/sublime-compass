@@ -8,6 +8,7 @@ Sublime Text plugin (Python 3.8 per `.python-version`, runs inside Sublime's emb
 - Do NOT edit files, commit, run commands, or otherwise implement until the user gives explicit approval (e.g. "Go", "proceed", "yes").
 - If the plan involves multiple options or ambiguity, surface the choices with your recommendation and let the user decide.
 - After approval, implement and verify, then report back concisely; continue any follow-up work only when the plan covered it or the user asks.
+- Never state facts without a reference or evidence. If an assumption is needed, explicitly say so and explain why.
 
 ## Structure
 - `plugin.py` - entrypoint: `plugin_loaded()` -> `reset_plugin_state()` (`utils.py`) + `load()` (`src/core.py`)
