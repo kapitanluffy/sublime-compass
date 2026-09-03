@@ -3,6 +3,12 @@
 ## Project
 Sublime Text plugin (Python 3.8 per `.python-version`, runs inside Sublime's embedded interpreter - not standalone). Package dir name is `Compass Navigator` (space matters for `${packages}` paths). No build/test/lint toolchain, no package manager.
 
+## Workflow: Plan first, then wait for explicit "Go"
+- On every prompt, provide a high-level overview of your plan before doing anything.
+- Do NOT edit files, commit, run commands, or otherwise implement until the user gives explicit approval (e.g. "Go", "proceed", "yes").
+- If the plan involves multiple options or ambiguity, surface the choices with your recommendation and let the user decide.
+- After approval, implement and verify, then report back concisely; continue any follow-up work only when the plan covered it or the user asks.
+
 ## Structure
 - `plugin.py` - entrypoint: `plugin_loaded()` -> `reset_plugin_state()` (`utils.py`) + `load()` (`src/core.py`)
 - `utils.py` - global `PLUGIN_STATE` (`is_quick_panel_open`, `highlighted_index`, `is_reset`), `plugin_settings()`, `plugin_debug()`
@@ -32,9 +38,3 @@ Sublime Text plugin (Python 3.8 per `.python-version`, runs inside Sublime's emb
 - Python 3.8 syntax only.
 - Keep executable source of truth over docs; do not add generic lint/test scaffolding not already present.
 - Evergreen docs: when changing code behavior, update the relevant doc in `docs/` in the same changeset.
-
-## Workflow: Plan first, then wait for explicit "Go"
-- Before changing code or implementing anything, always show the user a clear plan first (what you'll change, why, and any options/tradeoffs).
-- Do NOT edit files, commit, or otherwise implement until the user gives explicit approval (e.g. "Go", "proceed", "yes").
-- If the plan involves multiple options or ambiguity, surface the choices with your recommendation and let the user decide.
-- After approval, implement and verify, then report back concisely; continue any follow-up work only when the plan covered it or the user asks.
