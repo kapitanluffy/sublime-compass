@@ -1,5 +1,6 @@
 {
-    "debug": true,
+    // Enable console debug output (plugin_debug). Keep true while developing.
+    "debug": false,
 
     // This will allow you to jump to the most
     // recently used view when displaying the stack
