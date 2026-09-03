@@ -191,7 +191,7 @@ def parse_listed_files(window: sublime.Window):
     for folder in folders:
         files = list_files(folder)
         if files is None:
-            return None
+            continue
         for file in files:
             item = FilePluginItem(File(file, folder, projectId), None)
             CompassPluginFileStack.append(item)
