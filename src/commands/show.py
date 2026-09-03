@@ -2,7 +2,11 @@ from typing import List, Union
 import sublime
 import sublime_plugin
 from ...utils import plugin_debug, plugin_settings, plugin_state
-from .. import File, ViewStack, SheetGroup, CompassPluginFileStack, STACK
+from ..file import File
+from ..view_stack import ViewStack
+from ..sheet_group import SheetGroup
+from ..plugins.files import CompassPluginFileStack
+from ..stack import STACK, cache_stack
 from ..utils import parse_sheet, dict_deep_get
 import os
 
@@ -181,6 +185,8 @@ class CompassShowCommand(sublime_plugin.WindowCommand):
 
     def on_done(self, index, items, items_meta: List[Union[SheetGroup, File]]):
         state = plugin_state()
+        state["is_quick_panel_open"] = False
+        cache_stack(self.window, force=True)
 
         try:
             if 0 <= index < len(items):

@@ -102,6 +102,3 @@ class CompassFocusListener(sublime_plugin.EventListener):
         sheets = window.selected_sheets_in_group(group)
         stack.push(window, sheets, group, sheet)
         cleanup_sheets(stack)
-
-        # Save the stack cache on every view change
-        cache_stack(window)
