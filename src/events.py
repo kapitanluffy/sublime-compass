@@ -5,7 +5,7 @@ from .stack import cache_stack, hydrate_stack, remove_window
 from .view_stack import ViewStack
 
 
-def is_view_valid_tab(view):
+def should_skip_view(view):
     return view.element() is not None and view.element() != "find_in_files:output"
 
 
@@ -60,7 +60,7 @@ class CompassFocusListener(sublime_plugin.EventListener):
         if sheet is None:
             return
 
-        if is_view_valid_tab(view):
+        if should_skip_view(view):
             return
 
         window = view.window()
@@ -85,7 +85,7 @@ class CompassFocusListener(sublime_plugin.EventListener):
         if sheet is None or sheet.is_transient():
             return
 
-        if is_view_valid_tab(view):
+        if should_skip_view(view):
             return
 
         window = view.window()
