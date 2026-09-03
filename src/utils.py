@@ -4,7 +4,7 @@ import re
 import subprocess
 import platform
 from typing import List
-from ..utils import plugin_settings
+from ..utils import plugin_debug, plugin_settings, plugin_state
 from .file import File
 
 KIND_VIEW = (sublime.KindId.COLOR_REDISH, "f", "File")
