@@ -1,3 +1,8 @@
+v3.0.5
+
+Bug fixes
+- Fix plugin failing to load after install/update as a .sublime-package: an internal subpackage was missing its package marker, which zip installs can't import
+
 v3.0.4
 
 Bug fixes

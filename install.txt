@@ -41,3 +41,9 @@ New setting:
   "stack_cache_throttle": 30
 
 This one's for the power users — it controls how often your tab history is saved to disk. Bump it up if you're on a big project and want to cut down on writes. Minimum is 30.
+
+---
+
+### What's new in 3.0.5 ✨
+
+A short one: if Compass wouldn't load after installing or updating, this release fixes it. A missing internal marker meant zip installs (`Installed Packages`) couldn't import the plugin — source-install users were unaffected. No new features, just getting the wheels back on.
