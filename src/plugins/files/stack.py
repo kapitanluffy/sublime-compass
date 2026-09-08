@@ -3,7 +3,9 @@ import os
 import subprocess
 from typing import List, Optional, Tuple, OrderedDict as TOrderedDict
 import sublime
-from ....utils import plugin_settings
+
+from ...utils import dict_deep_get, plugin_settings
+from ..plugin_base import CompassPlugin
 from .file import File
 
 ITEM_TYPE = "compass_plugin_file_open_file"
@@ -50,7 +52,7 @@ class FilePluginItem():
         return item
 
 
-class CompassPluginFileStack():
+class CompassPluginFileStack(CompassPlugin):
     @classmethod
     def get(cls, key: Tuple[str, str, str]):
         """
@@ -103,7 +105,13 @@ class CompassPluginFileStack():
         for key in [k for k in FILE_STACK if k[2] == projectId]:
             FILE_STACK.pop(key, None)
 
-    @classmethod
+    def get_id(self) -> str:
+        return ITEM_TYPE
+
+    def is_enabled(self) -> bool:
+        settings = plugin_settings()
+        return dict_deep_get(settings, "plugins.files.enabled", True) is True
+
     def generate_quickpanel_item(cls, key: Tuple[str, str, str], item) -> sublime.QuickPanelItem:
         settings = plugin_settings()
         is_tags_enabled = settings.get('enable_tags', False)
@@ -117,8 +125,7 @@ class CompassPluginFileStack():
         trigger = "%s | %s" % (tags, file.get_file_name()) if is_tags_enabled else "%s" % (file.get_file_name())
         return sublime.QuickPanelItem(trigger=trigger, kind=kind, annotation=annotation)
 
-    @classmethod
-    def generate_items(cls, projectId):
+    def generate_items(self, projectId):
         meta = []
         items: list[sublime.QuickPanelItem] = []
         for key, item in FILE_STACK.items():
@@ -126,30 +133,32 @@ class CompassPluginFileStack():
             if key[2] != projectId:
                 continue
             file = File(key[0], key[1], key[2])
-            items.append(cls.generate_quickpanel_item(key, item))
+            items.append(self.generate_quickpanel_item(key, item))
             meta.append(file)
         return (items, meta)
 
-    @classmethod
-    def is_applicable(cls, item: sublime.QuickPanelItem):
+    def is_applicable(self, item: sublime.QuickPanelItem):
         return item.kind[2] == ITEM_TYPE
 
-    @classmethod
-    def on_highlight(cls, item: sublime.QuickPanelItem, window: sublime.Window):
-        # We use the injected data in 102 to create a File object instance
-        key: Tuple[str, str, str] = item.kind[3]
-        file = File(*key)
+    def on_highlight(self, item: sublime.QuickPanelItem, meta, window: sublime.Window):
+        # meta is a File object; fall back to importing from the item if needed
+        file = meta if isinstance(meta, File) else File(*item.kind[3])
         window.open_file(file.get_full_path(), sublime.TRANSIENT)
 
-    @classmethod
-    def on_select(cls, item: sublime.QuickPanelItem, window: sublime.Window):
-        key: Tuple[str, str, str] = item.kind[3]
-        file = File(*key)
+    def on_select(self, item: sublime.QuickPanelItem, meta, window: sublime.Window):
+        file = meta if isinstance(meta, File) else File(*item.kind[3])
         window.open_file(file.get_full_path())
 
-    @classmethod
-    def refresh_cache(cls, window: sublime.Window):
+    def refresh_cache(self, window: sublime.Window):
+        settings = plugin_settings()
+        only_show_unopened_files_on_empty_window = settings.get("only_show_unopened_files_on_empty_window", True)
+        enable_cache = dict_deep_get(settings, "plugins.files.enable_cache", False)
+        if enable_cache is True:
+            return
+        if only_show_unopened_files_on_empty_window is True and len(window.sheets()) > 0:
+            return
         parse_listed_files(window)
+
 
 def list_files(directory="."):
     settings = plugin_settings()

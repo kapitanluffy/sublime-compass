@@ -1,13 +1,13 @@
 from typing import List, Union
 import sublime
 import sublime_plugin
-from ...utils import plugin_debug, plugin_settings, plugin_state
+from ...utils import plugin_settings, plugin_state
 from ..view_stack import ViewStack
 from ..sheet_group import SheetGroup
-from ..plugins.files import CompassPluginFileStack
+from ..plugins_registry import get_plugins
 from ..plugins.files.file import File
 from ..stack import cache_stack
-from ..utils import parse_sheet, dict_deep_get
+from ..utils import parse_sheet
 import os
 
 
@@ -109,25 +109,27 @@ class CompassShowCommand(sublime_plugin.WindowCommand):
         file_types_items: List[sublime.QuickPanelItem] = []
         file_types_meta = []
 
-        only_show_unopened_files_on_empty_window = settings.get("only_show_unopened_files_on_empty_window", True)
-        plugin_files_enable_cache = dict_deep_get(settings, "plugins.files.enable_cache")
-        plugin_files_enabled = dict_deep_get(settings, "plugins.files.enabled")
-
-        # @todo might need to move this chunk inside generate_items?
-        if plugin_files_enabled is True and plugin_files_enable_cache is False and \
-           only_show_unopened_files_on_empty_window is False or \
-           (only_show_unopened_files_on_empty_window is True and len(self.window.sheets()) <= 0):
-            CompassPluginFileStack.refresh_cache(self.window)
-
         # @todo need to make this identifier more portable
         projectId = self.window.project_file_name() or str(self.window.id())
-        unopened_files_items, unopened_files_meta = CompassPluginFileStack.generate_items(projectId) if plugin_files_enabled is True else ([], [])
 
-        items = items + post_list + unopened_files_items + file_types_items
+        plugin_items: List[sublime.QuickPanelItem] = []
+        plugin_meta: List = []
+        for plugin in get_plugins():
+            if not plugin.is_enabled():
+                continue
+            try:
+                plugin.refresh_cache(self.window)
+                p_items, p_meta = plugin.generate_items(projectId)
+                plugin_items.extend(p_items)
+                plugin_meta.extend(p_meta)
+            except Exception as e:
+                print("Compass plugin error in %s: %s" % (plugin.get_id(), e))
+
+        items = items + post_list + plugin_items + file_types_items
 
         # Right now, the items_meta is just for checking sheet_groups
         # We are slowly moving away from sheet_groups
-        items_meta = items_meta + post_list_meta + unopened_files_meta + file_types_meta
+        items_meta = items_meta + post_list_meta + plugin_meta + file_types_meta
 
         if len(items) <= 0 or len(items_meta) <= 0:
             return
@@ -157,9 +159,11 @@ class CompassShowCommand(sublime_plugin.WindowCommand):
         if is_preview_on_highlight is False:
             return
 
-        if CompassPluginFileStack.is_applicable(selected_item):
-            CompassPluginFileStack.on_highlight(selected_item, self.window)
-            return
+        for plugin in get_plugins():
+            if plugin.is_applicable(selected_item):
+                meta = items_meta[index]
+                plugin.on_highlight(selected_item, meta, self.window)
+                return
 
         if isinstance(sheets, SheetGroup) and sheets is not None:
             # Select sheets (for preview) only when head's group is the active group
@@ -183,10 +187,12 @@ class CompassShowCommand(sublime_plugin.WindowCommand):
 
         sheets = items_meta[index]
         selected_item = items[index]
-        if CompassPluginFileStack.is_applicable(selected_item):
-            state["is_quick_panel_open"] = False
-            CompassPluginFileStack.on_select(selected_item, self.window)
-            return
+        for plugin in get_plugins():
+            if plugin.is_applicable(selected_item):
+                state["is_quick_panel_open"] = False
+                meta = items_meta[index]
+                plugin.on_select(selected_item, meta, self.window)
+                return
 
         # @todo on plugin reload, sheets are still SheetGroup because it is a subclass of List.
         if isinstance(sheets, SheetGroup) and sheets is not None:
