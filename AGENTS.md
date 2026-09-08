@@ -3,9 +3,13 @@
 ## Project
 Sublime Text plugin (Python 3.8 per `.python-version`, runs inside Sublime's embedded interpreter - not standalone). Package dir name is `Compass Navigator` (space matters for `${packages}` paths). No build/test/lint toolchain, no package manager.
 
-## Workflow: Plan first, then wait for explicit "Go"
+## Workflow: Plan first, checkpoint every commit and push
 - On every prompt, provide a high-level overview of your plan before doing anything.
-- Do NOT edit files, commit, run commands, or otherwise implement until the user gives explicit approval (e.g. "Go", "proceed", "yes").
+- Do NOT edit files, run commands, or otherwise implement until the user gives explicit approval (e.g. "Go", "proceed", "yes").
+- Surface commit checkpoints: before EVERY `git commit`, show the exact staged changes (`git status --short` + `git diff --cached`) and the proposed commit message, then wait for explicit "Go". Approval of a plan does NOT carry over to approval of its commits.
+- Stage only what the approved plan called for; never sweep in unrelated WIP/untracked files.
+- Before creating a tag or running `git push`, surface the commits/refs/tags that will go out and wait for explicit approval.
+- If a tag or commit must be rewritten after the fact (amend, rebase, re-tag, move branch pointer), surface the plan and get approval first — moved tags affect anyone who already pulled.
 - If the plan involves multiple options or ambiguity, surface the choices with your recommendation and let the user decide.
 - After approval, implement and verify, then report back concisely; continue any follow-up work only when the plan covered it or the user asks.
 - Never state facts without a reference or evidence. If an assumption is needed, explicitly say so and explain why.
