@@ -8,6 +8,7 @@ from ..plugins_registry import get_plugins
 from ..plugins.files.file import File
 from ..stack import cache_stack
 from ..utils import parse_sheet
+from ..event_bus import emit
 import os
 
 
@@ -163,6 +164,9 @@ class CompassShowCommand(sublime_plugin.WindowCommand):
             if plugin.is_applicable(selected_item):
                 meta = items_meta[index]
                 plugin.on_highlight(selected_item, meta, self.window)
+                emit("compass_file_focused",
+                     item_type=plugin.get_id(),
+                     file=meta if isinstance(meta, str) else None)
                 return
 
         if isinstance(sheets, SheetGroup) and sheets is not None:
@@ -192,6 +196,9 @@ class CompassShowCommand(sublime_plugin.WindowCommand):
                 state["is_quick_panel_open"] = False
                 meta = items_meta[index]
                 plugin.on_select(selected_item, meta, self.window)
+                emit("compass_file_focused",
+                     item_type=plugin.get_id(),
+                     file=meta if isinstance(meta, str) else None)
                 return
 
         # @todo on plugin reload, sheets are still SheetGroup because it is a subclass of List.

@@ -6,6 +6,7 @@ from .view_stack import *
 from .events import *
 from .utils import *
 from .core import *
+from .event_bus import *
 
 __all__ = [
     "SheetGroup",
@@ -43,6 +44,11 @@ __all__ = [
 
     # src.events
     "CompassFocusListener",
+
+    # src.event_bus
+    "subscribe",
+    "emit",
+    "diff_folders",
 
     # Files
     "CompassPluginFileStack",
