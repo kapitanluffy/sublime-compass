@@ -85,10 +85,16 @@ from Compass Navigator.src.event_bus import subscribe
 subscribe("compass_file_focused", _on_compass_file_focused)
 ```
 
-Compass emits `compass_file_focused` (payload `item_type`, `file`) when a
-plugin row is highlighted or selected. There is deliberately no
-folder-change event: Sublime exposes no folder-add listener, so folder
-diffing was removed as unreliable — do not poll `window.folders()`.
+## What events can I subscribe to?
+
+| Event | Payload | Fired when |
+|---|---|---|
+| `compass_file_focused` | `item_type` (plugin id), `file` (path string, or `None` when the meta isn't a path) | A plugin row is highlighted (`show.py:on_highlight`) or selected (`show.py:on_done`). Fires only for rows a plugin claims via `is_applicable`. |
+| `compass_folders_changed` | `window` (the Sublime window whose folders changed) | Core's folder-list snapshot (`events.py:check_folders_changed`, called from `CompassFocusListener.on_activated_async`) sees a delta. Files subscribes and re-scans. Handlers run on the activator's thread — keep them cheap and push slow work async. |
+
+There is deliberately no richer folder event: Sublime exposes no
+folder-add listener, so detection is a cheap core-owned folder-list
+snapshot — do not poll `window.folders()` on a timer.
 
 ## Verify
 

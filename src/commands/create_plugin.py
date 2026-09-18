@@ -118,7 +118,7 @@ class __CLASS_NAME__(CompassPlugin):
 
     def generate_items(self, project_id):
         # Item details: trigger, details, annotation, kind. Compass
-        # builds the QuickPanelItem and always appends TAG to the trigger.
+        # builds the QuickPanelItem and always prepends TAG to the trigger.
         if COMPASS_AVAILABLE is False:
             return ([], [])
         details = [
