@@ -49,7 +49,6 @@ __all__ = [
     # src.event_bus
     "subscribe",
     "emit",
-    "diff_folders",
 
     # Files
     "CompassPluginFileStack",
