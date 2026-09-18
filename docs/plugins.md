@@ -78,17 +78,34 @@ also disable silently.
 
 ## Reacting to Compass events (`src/event_bus.py`)
 
-Subscribe in `plugin_loaded()` after registering:
+Subscribe in `plugin_loaded()` after registering (via the already
+imported `bus_mod` — no direct Compass imports):
 
 ```python
-from Compass Navigator.src.event_bus import subscribe
-subscribe("compass_file_focused", _on_compass_file_focused)
+bus_mod.subscribe("compass_file_focused", _on_compass_file_focused)
 ```
 
-Compass emits `compass_file_focused` (payload `item_type`, `file`) when a
-plugin row is highlighted or selected. There is deliberately no
-folder-change event: Sublime exposes no folder-add listener, so folder
-diffing was removed as unreliable — do not poll `window.folders()`.
+```python
+def _on_compass_file_focused(item_type, file):
+    _status("saw focus: %s" % (item_type,))
+```
+
+## What events can I subscribe to?
+
+One. Compass keeps the bus deliberately small:
+
+| Event | Payload | Fired when |
+|---|---|---|
+| `compass_file_focused` | `item_type` (plugin id), `file` (path string, or `None` when the meta isn't a path) | A plugin row is highlighted (`show.py:on_highlight`) or selected (`show.py:on_done`). Fires only for rows a plugin claims via `is_applicable`. |
+
+Notes:
+
+- Handlers run synchronously on the calling thread — keep them cheap
+  (status messages, cache flags), never block on subprocess or disk scans.
+- `subscribe` dedupes: registering the same handler twice is a no-op.
+- There is deliberately no folder-change event: Sublime exposes no
+  folder-add listener, so folder diffing was removed as unreliable —
+  do not poll `window.folders()`.
 
 ## Verify
 
