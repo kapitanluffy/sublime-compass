@@ -192,7 +192,7 @@ Lean sample plugin created by `Compass: Create Plugin`.
 - `plugin.py` — static `foo / bar / baz` items with per-plugin MRU:
   select `baz` then `foo` and the panel lists `foo, baz, bar`.
   Details contract: `generate_items` returns item details + meta, Compass
-  builds the `QuickPanelItem` and always appends `TAG` (`__TAG__`) to
+  builds the `QuickPanelItem` and always prepends `TAG` (`__TAG__`) to
   every trigger.
 - `<Short>.sublime-settings` — `"enabled": false` hides items via `is_enabled()`.
 - `.python-version` (`3.8`) — required so Sublime runs this package on the
