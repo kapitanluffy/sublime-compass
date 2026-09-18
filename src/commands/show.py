@@ -132,7 +132,7 @@ class CompassShowCommand(sublime_plugin.WindowCommand):
                     for detail, m in zip(p_result, p_meta):
                         trigger = detail["trigger"]
                         if tag:
-                            trigger = "%s %s" % (trigger, tag)
+                            trigger = "%s %s" % (tag, trigger)
                         kind_base = detail.get(
                             "kind", (sublime.KindId.COLOR_YELLOWISH, "p")
                         )
