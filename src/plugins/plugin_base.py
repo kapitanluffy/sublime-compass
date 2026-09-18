@@ -5,18 +5,30 @@ class CompassPlugin:
     """
     Base interface for compass panel plugins.
 
-    Subclass this and register an instance via
+    Subclass this and register an instance inside plugin_loaded() via
     plugins_registry.register_plugin(...). The Files plugin is the
-    bundled reference implementation; `Compass Plugin - Folders` is an
+    bundled reference implementation; `Compass Plugin - Markdown` is an
     external third-party example.
+
+    Item contract: generate_items returns item details and
+    Compass builds the QuickPanelItem, enforcing get_plugin_tag(). Plugins that
+    still return QuickPanelItem lists keep working via the legacy path in
+    CompassShowCommand, but new plugins must use details-only.
     """
 
     def get_id(self) -> str:
         """
         Stable internal routing key. Used as kind[2] and matched by
-        is_applicable. Not user-facing (see tags in generate_items).
+        is_applicable. Not user-facing (see get_plugin_tag).
         """
         raise NotImplementedError
+
+    def get_plugin_tag(self) -> str:
+        """
+        Tag Compass appends to every item trigger (e.g. "#open").
+        Always applied, regardless of the enable_tags setting.
+        """
+        return ""
 
     def is_enabled(self) -> bool:
         """
@@ -32,11 +44,17 @@ class CompassPlugin:
 
     def generate_items(self, project_id: str):
         """
-        Return (quick_panel_items, meta) for the given project.
+        Return (details, meta) for the given project.
 
-        meta is a list of plugin-specific objects parallel to
-        quick_panel_items. Each item's kind[3] must carry the meta
-        object for that item.
+        details is a list of dicts with the QuickPanelItem fields the
+        plugin owns: {"trigger": str, "details": str, "annotation": str,
+        "kind": (KindId, shortcut)}. Only "trigger" is required; the
+        rest default to "" and (COLOR_YELLOWISH, "p"). Compass builds
+        the QuickPanelItem, appends get_plugin_tag() to the trigger,
+        and sets kind[2] to the plugin id and kind[3] to the meta
+        object. meta is a parallel list of plugin-specific objects.
+        (Legacy: returning a list of QuickPanelItem still works, but
+        new plugins must use details dicts.)
         """
         raise NotImplementedError
 

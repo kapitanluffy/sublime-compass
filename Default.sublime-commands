@@ -24,4 +24,8 @@
         "caption": "Compass: Reindex",
         "command": "compass_index_files"
     },
+    {
+        "caption": "Compass: Create Plugin",
+        "command": "compass_create_plugin"
+    },
 ]

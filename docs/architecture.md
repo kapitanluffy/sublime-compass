@@ -27,6 +27,8 @@ src/
     dump_stack.py            ← Debug: print STACK to console
     clear_cache.py           ← Clear compass_stack_cache setting
     index_files.py           ← Reindex: clear cache + reload
+    create_plugin.py         ← CompassCreatePluginCommand — scaffold external plugin
+                             (lean foo/bar/baz sample with per-plugin MRU)
 
   plugins/files/
     file.py                  ← File(file, folder, window) — 3-arg variant with project ID
@@ -62,6 +64,19 @@ Created by `convert_stack_to_sheet_group()` in `view_stack.py`.
 ### FILE_STACK (unopened files)
 
 `src/plugins/files/stack.py` — separate from STACK. An `OrderedDict` keyed by `(file, folder, projectId)`. Populated by `ripgrep --files`. Only shown in the quick panel when `ripgrep_path` is set.
+
+### External plugins (scaffold + per-plugin MRU)
+
+`Compass: Create Plugin` (`src/commands/create_plugin.py`) scaffolds
+`Packages/Compass Plugin - <Name>/plugin.py + <Name>.sublime-settings +
+README + .python-version` from a lean static sample (`foo / bar / baz`,
+no ripgrep scan).
+
+- Registration is `plugin_loaded()`-only via `importlib` (`src/plugins_registry.py`); no top-level Compass imports, so the package no-ops silently when Compass is absent.
+- `.python-version` (`3.8`) is required: without it Sublime runs the package on the 3.3 plugin host, where the Compass import fails and the plugin disables itself.
+- Details contract (`src/plugins/plugin_base.py`): `generate_items` returns `(details, meta)` where each detail carries the `QuickPanelItem` fields the plugin owns (`trigger`, `details`, `annotation`, `kind`); Compass builds the item, always appends `get_plugin_tag()` to the trigger, and sets `kind[2]`/`kind[3]` to the plugin id/meta. Plugins still returning `QuickPanelItem` lists keep working via the legacy path, but new plugins must use details dicts.
+- Per-plugin MRU lives inside the plugin: `on_select` moves the key to the head of `_RECENT`, `generate_items` returns `_RECENT + rest`. E.g. select `baz` then `foo` → panel lists `foo, baz, bar`.
+- `is_enabled()` gates on the scaffolded `<Name>.sublime-settings` (`"enabled"`).
 
 ### PLUGIN_STATE
 

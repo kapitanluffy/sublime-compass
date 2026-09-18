@@ -108,34 +108,28 @@ class CompassPluginFileStack(CompassPlugin):
     def get_id(self) -> str:
         return ITEM_TYPE
 
+    def get_plugin_tag(self) -> str:
+        return "#open"
+
     def is_enabled(self) -> bool:
         settings = plugin_settings()
         return dict_deep_get(settings, "plugins.files.enabled", True) is True
 
-    def generate_quickpanel_item(cls, key: Tuple[str, str, str], item) -> sublime.QuickPanelItem:
-        settings = plugin_settings()
-        is_tags_enabled = settings.get('enable_tags', False)
-        file = File(key[0], key[1], key[2])
-
-        tags = '#open'
-        annotation = 'files'
-        # We inject an extra metadata on the kind param to pass around
-        # In this context, the key contains the details of the file's full path
-        kind = (*KIND_FILE_PLUGIN_FILE_ITEM_TYPE, key)
-        trigger = "%s | %s" % (tags, file.get_file_name()) if is_tags_enabled else "%s" % (file.get_file_name())
-        return sublime.QuickPanelItem(trigger=trigger, kind=kind, annotation=annotation)
-
     def generate_items(self, projectId):
+        details = []
         meta = []
-        items: list[sublime.QuickPanelItem] = []
         for key, item in FILE_STACK.items():
             # Skip file if not for the current window
             if key[2] != projectId:
                 continue
             file = File(key[0], key[1], key[2])
-            items.append(self.generate_quickpanel_item(key, item))
+            details.append({
+                "trigger": file.get_file_name(),
+                "annotation": "files",
+                "kind": KIND_FILE_PLUGIN_FILE_ITEM_TYPE[:2],
+            })
             meta.append(file)
-        return (items, meta)
+        return (details, meta)
 
     def is_applicable(self, item: sublime.QuickPanelItem):
         return item.kind[2] == ITEM_TYPE

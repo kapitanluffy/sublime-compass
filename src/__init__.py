@@ -35,6 +35,7 @@ __all__ = [
     "dict_deep_get",
 
     # src.commands
+    "CompassCreatePluginCommand",
     "CompassCloseCommand",
     "CompassMoveCommand",
     "CompassShowCommand",

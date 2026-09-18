@@ -120,9 +120,32 @@ class CompassShowCommand(sublime_plugin.WindowCommand):
                 continue
             try:
                 plugin.refresh_cache(self.window)
-                p_items, p_meta = plugin.generate_items(projectId)
-                plugin_items.extend(p_items)
-                plugin_meta.extend(p_meta)
+                p_result, p_meta = plugin.generate_items(projectId)
+                if len(p_result) > 0 and isinstance(p_result[0], sublime.QuickPanelItem):
+                    # Legacy path: plugin built its own items.
+                    plugin_items.extend(p_result)
+                    plugin_meta.extend(p_meta)
+                else:
+                    # Details path: Compass builds the items and always
+                    # appends the plugin tag to the trigger.
+                    tag = getattr(plugin, "get_plugin_tag", lambda: "")() or ""
+                    for detail, m in zip(p_result, p_meta):
+                        trigger = detail["trigger"]
+                        if tag:
+                            trigger = "%s %s" % (trigger, tag)
+                        kind_base = detail.get(
+                            "kind", (sublime.KindId.COLOR_YELLOWISH, "p")
+                        )
+                        kind = (kind_base[0], kind_base[1], plugin.get_id(), m)
+                        plugin_items.append(
+                            sublime.QuickPanelItem(
+                                trigger=trigger,
+                                details=detail.get("details", ""),
+                                annotation=detail.get("annotation", ""),
+                                kind=kind,
+                            )
+                        )
+                        plugin_meta.append(m)
             except Exception as e:
                 print("Compass plugin error in %s: %s" % (plugin.get_id(), e))
 
