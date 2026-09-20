@@ -1,8 +1,32 @@
 import sublime
 import sublime_plugin
+from typing import Dict, Tuple
 from ..utils import *
+from .event_bus import emit
 from .stack import cache_stack, hydrate_stack, remove_window
 from .view_stack import ViewStack
+
+
+_FOLDER_SNAPSHOTS: Dict[str, Tuple[str, ...]] = {}
+
+
+def check_folders_changed(window: sublime.Window) -> bool:
+    """
+    Window-level folder-list snapshot owned by core. Records the current
+    folders and emits compass_folders_changed on delta; any plugin may
+    subscribe. Cheap string compare, no ripgrep walk; safe on any thread.
+    """
+    try:
+        projectId = window.project_file_name() or str(window.id())
+        current = tuple(window.folders())
+    except Exception:
+        return False
+    previous = _FOLDER_SNAPSHOTS.get(projectId)
+    _FOLDER_SNAPSHOTS[projectId] = current
+    if previous is None or previous != current:
+        emit("compass_folders_changed", window=window)
+        return True
+    return False
 
 
 def should_skip_view(view):
@@ -93,6 +117,8 @@ class CompassFocusListener(sublime_plugin.EventListener):
         if window is None:
             # plugin_debug("Window for View #%s is a None xxx" % view.id())
             return
+
+        check_folders_changed(window)
 
         if window.views().__len__() <= 0:
             return

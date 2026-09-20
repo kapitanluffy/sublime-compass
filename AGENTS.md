@@ -22,18 +22,18 @@ Sublime Text plugin (Python 3.8 per `.python-version`, runs inside Sublime's emb
 - `src/view_stack.py` - `ViewStack` is a per-`(window.id, group)` facade over global `STACK`
 - `src/sheet_group.py` - `SheetGroup(List[Sheet])` with `.focused`
 - `src/events.py` - `CompassFocusListener` (`on_activated_async`, `on_pre_close`, `on_pre_close_window`, `on_pre_close_project`, `on_load_project_async`, `on_query_context`). A view is skipped (not pushed/removed from the stack) when `sheet.is_transient()` is True OR `should_skip_view(view)` is True, where `should_skip_view` returns True for views whose `element()` is non-None and not `"find_in_files:output"`. So find-in-files output (`element()=="find_in_files:output"`) is NOT ignored — it is tracked and tagged `#search` in `generate_view_meta`; other special panels (non-None element) are ignored. Re-verify Sublime's real `is_transient()` behavior for the find output panel.
-- `src/event_bus.py` - in-process subscribe/emit bus. `subscribe(event, handler)` / `emit(event, **payload)`. Compass emits `compass_file_focused` (payload `item_type`, `file`) from `show.py` when a plugin item is highlighted or selected. No folder-change event: Sublime has no listener for adding a folder to a project (GH #4753, #2234), so `diff_folders` was removed as unreliable — do not re-add folder diffing without owner approval.
+- `src/event_bus.py` - in-process subscribe/emit bus. `subscribe(event, handler)` / `emit(event, **payload)`. Compass emits `compass_file_focused` (payload `item_type`, `file`) from `show.py` when a plugin item is highlighted or selected, and `compass_folders_changed` (payload `window`) from `check_folders_changed()` (`src/events.py`, called on activation) when the window folder list changes. No folder-add listener from Sublime itself (GH #4753, #2234): detection is a cheap core-owned folder-list snapshot, not ripgrep walks or timer polls — do not re-add folder diffing without owner approval.
 - `src/commands/` - `compass_show` (`show.py`), `compass_move`, `compass_close`, `compass_index_files`, `compass_dump_stack`, `compass_clear_cache`
 - `src/plugins/files/` - separate `FILE_STACK: OrderedDict[(file,folder,projectId), tuple]`; filtered by `projectId = project_file_name or window.id()`
 - `src/utils.py` - `list_files()` shells `ripgrep --files`, `generate_view_meta()`/`parse_sheet()` for tags/kind
 - `Compass Navigator.sublime-settings` / `Default.sublime-commands` / `Default.sublime-keymap` / `Main.sublime-menu`
 
 ## Execution Quirks
-- Relative imports only (`from .utils import *`, `from .src import *`) - will not import/run outside Sublime; `sublime`/`sublime_plugin` are host-provided.
+- Relative imports only (`from .utils import *`, `from .src import *`) - will not import/run outside Sublime; `sublime`/`sublime_plugin` are host-provided. Gotcha: `dict_deep_get` lives in `src/utils.py`, so from `src/plugins/*/` it is `...utils` — NOT `....utils` (that is the top-level `utils.py`). `KindId` color constants use the `...ISH` suffix (e.g. `COLOR_YELLOWISH`).
 - `Default.sublime-keymap` is entirely commented out. Users must enable via `Preferences: Compass Keybindings` command. Don't uncomment in repo.
 - Settings-driven: `debug` (default false; enable for `plugin_debug` output), `enable_tags`, `ripgrep_path`, `only_show_items_in_focused_group`, `jump_to_most_recent_on_show`, `max_open_tabs` (0=disable auto-close), `stack_cache_throttle` (min 30), `plugins.files.enabled`/`enable_cache`. Tags only emit when `enable_tags==True`.
 - MRU logic: `push_sheets` moves to head of `STACK`; `cache_stack()` saves the window cache. Called throttled (30s, `stack_cache_throttle` setting, min 30) from `on_activated_async` (tab switch), and forced (`force=True`) from `show.py:on_done` (compass close) and `ViewStack.remove` (tab close). Groups are preserved because `push_sheets` operates on the full `selected_sheets_in_group` set.
-- Untracked WIP: `src/file_watcher.py` (stub `CompassFileEventListener` for `FileWatcher` broadcast) and `src/plugins_registry.py` (empty `CompassPluginsRegistry`). `artifacts/` is not tracked.
+- Untracked WIP: `artifacts/` is not tracked. Tracked but dormant: `src/file_watcher.py` (stub `CompassFileEventListener` for `FileWatcher` broadcast). The plugin registry is real: `src/plugins_registry.py` (`register_plugin` / `get_plugins`).
 
 ## Verification (no test suite exists)
 - Syntax: `python -m py_compile plugin.py utils.py` or `python -m compileall src` — checks for syntax errors in all .py files. Run this after every code change.
@@ -44,3 +44,8 @@ Sublime Text plugin (Python 3.8 per `.python-version`, runs inside Sublime's emb
 - Python 3.8 syntax only.
 - Keep executable source of truth over docs; do not add generic lint/test scaffolding not already present.
 - Evergreen docs: when changing code behavior, update the relevant doc in `docs/` in the same changeset.
+
+## Linear
+- Team **Strawhats**. Full workflow: `artifacts/linear-workflow.md` (untracked).
+- Issue conventions: bugs get a "How to Reproduce" section; features/refactors get a plan/RFC in the body or a linked spec doc; plugin-system work goes to the **Compass Navigator Plugins** project with explicit Blocked-by links.
+- `artifacts/STATE.md` (untracked) is the current-state snapshot — refresh it on every landing.

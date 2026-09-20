@@ -15,9 +15,8 @@ src/
   core.py                    ← load() / load_window() — startup initialization
   stack.py                   ← The MRU data structure (STACK) and all operations
   view_stack.py              ← Per-(window, group) facade over STACK
-  sheet_group.py             ← SheetGroup: List[Sheet] + focused pointer
-  file.py                    ← Simple File(path, folder) data class
-  events.py                  ← CompassFocusListener — keeps STACK in sync
+   sheet_group.py             ← SheetGroup: List[Sheet] + focused pointer
+   events.py                  ← CompassFocusListener — keeps STACK in sync
   utils.py                   ← View metadata, ripgrep, preview generation, parse_sheet
 
   commands/
@@ -30,9 +29,9 @@ src/
     create_plugin.py         ← CompassCreatePluginCommand — scaffold external plugin
                              (lean foo/bar/baz sample with per-plugin MRU)
 
-  plugins/files/
-    file.py                  ← File(file, folder, window) — 3-arg variant with project ID
-    stack.py                 ← FILE_STACK — OrderedDict of unopened files + ripgrep
+   plugins/files/
+     stack.py                 ← FILE_STACK — OrderedDict of unopened files + ripgrep
+                              (keys are (path, folder, projectId) tuples, no wrapper class)
     events.py                ← CompassPluginFilesListener — lifecycle for file plugin
 ```
 
@@ -57,7 +56,9 @@ Each entry represents a **group of tabs** in a specific Sublime group:
 
 ### SheetGroup
 
-`src/sheet_group.py` — a `List[sublime.Sheet]` with a `.focused` attribute. Also serves as the type discriminator in `items_meta` (mixed list of `SheetGroup` and `File`): `isinstance(meta, SheetGroup)` tells `on_highlight` and `on_done` which code path to take — select sheets vs open a file.
+`src/sheet_group.py` — a `List[sublime.Sheet]` with a `.focused` attribute. `items_meta` is a mixed list of `SheetGroup` (open tabs) and plugin payloads (e.g. files plugin `(path, folder, projectId)` tuples): `on_highlight` and `on_done` first offer each row to plugins via `is_applicable`, and the `isinstance(meta, SheetGroup)` fallback handles open tabs — select sheets vs open a file.
+
+Why SheetGroup stays: view rows need live `Sheet` objects for `select_sheets`/`focus_sheet`. Stored ids alone mis-focus (STR-16), and multi-sheet groups must survive project reload (STR-19) — plain tuples can't supply that.
 
 Created by `convert_stack_to_sheet_group()` in `view_stack.py`.
 
@@ -131,9 +132,9 @@ window.select_sheets(sheets)     # select the group
 window.focus_sheet(focused)      # focus the specific tab (with validation)
 ```
 
-**File (unopened file):**
+**File rows (unopened files, `(path, folder, projectId)` tuples):**
 ```python
-CompassPluginFileStack.on_select(item, window)  # window.open_file(path)
+CompassPluginFileStack.on_select(item, meta, window)  # window.open_file(meta[0])
 ```
 
 **Escape / Cancel:**
@@ -185,6 +186,6 @@ Returns True for views whose `element()` is non-None and not `"find_in_files:out
 
 3. **Sheet IDs as identity:** Sheets are tracked by `sublime.Sheet.id()`, not file paths. This handles views without files (scratch, console) but means IDs can go stale when views close.
 
-4. **Two File classes:** `src/file.py` (2-arg) for general use, `src/plugins/files/file.py` (3-arg with project ID) for the file plugin. Both have Windows-only path separators.
+4. **File rows are plain tuples:** files plugin keys are `(path, folder, projectId)` tuples in `FILE_STACK`; `generate_items` uses `os.path.relpath` directly and `on_highlight`/`on_select` open `meta[0]`. No `File` wrapper class.
 
 5. **Keymap is commented out:** Users must manually enable keybindings via "Preferences: Compass Keybindings". This is intentional — the keymap file in the repo is a template.

@@ -1,4 +1,3 @@
-from .file import *
 from .stack import *
 from .events import *
 

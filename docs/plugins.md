@@ -85,27 +85,27 @@ imported `bus_mod` — no direct Compass imports):
 bus_mod.subscribe("compass_file_focused", _on_compass_file_focused)
 ```
 
-```python
 def _on_compass_file_focused(item_type, file):
     _status("saw focus: %s" % (item_type,))
 ```
 
 ## What events can I subscribe to?
 
-One. Compass keeps the bus deliberately small:
+Two. Compass keeps the bus deliberately small:
 
 | Event | Payload | Fired when |
 |---|---|---|
 | `compass_file_focused` | `item_type` (plugin id), `file` (path string, or `None` when the meta isn't a path) | A plugin row is highlighted (`show.py:on_highlight`) or selected (`show.py:on_done`). Fires only for rows a plugin claims via `is_applicable`. |
+| `compass_folders_changed` | `window` (the Sublime window whose folders changed) | Core's folder-list snapshot (`events.py:check_folders_changed`, called from `CompassFocusListener.on_activated_async`) sees a delta. Files subscribes and re-scans. Handlers run on the activator's thread — keep them cheap and push slow work async. |
 
 Notes:
 
 - Handlers run synchronously on the calling thread — keep them cheap
   (status messages, cache flags), never block on subprocess or disk scans.
 - `subscribe` dedupes: registering the same handler twice is a no-op.
-- There is deliberately no folder-change event: Sublime exposes no
-  folder-add listener, so folder diffing was removed as unreliable —
-  do not poll `window.folders()`.
+- There is deliberately no richer folder event: Sublime exposes no
+  folder-add listener, so detection is a cheap core-owned folder-list
+  snapshot — do not poll `window.folders()` on a timer.
 
 ## Verify
 

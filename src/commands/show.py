@@ -1,11 +1,11 @@
-from typing import List, Union
+from typing import List, Tuple, Union
 import sublime
 import sublime_plugin
-from ...utils import plugin_settings, plugin_state
+import time
+from ...utils import plugin_debug, plugin_settings, plugin_state
 from ..view_stack import ViewStack
 from ..sheet_group import SheetGroup
 from ..plugins_registry import get_plugins
-from ..plugins.files.file import File
 from ..stack import cache_stack
 from ..utils import parse_sheet
 from ..event_bus import emit
@@ -59,7 +59,7 @@ class CompassShowCommand(sublime_plugin.WindowCommand):
             selected_index = stack_length - 1
 
         post_list: List[sublime.QuickPanelItem] = []
-        items_meta: List[Union[SheetGroup, File]] = []
+        items_meta: List[Union[SheetGroup, Tuple[str, str, str]]] = []
         post_list_meta: List[SheetGroup] = []
 
         for index, sheets in enumerate(stack_sheets):
@@ -115,6 +115,7 @@ class CompassShowCommand(sublime_plugin.WindowCommand):
 
         plugin_items: List[sublime.QuickPanelItem] = []
         plugin_meta: List = []
+        build_started = time.perf_counter()
         for plugin in get_plugins():
             if not plugin.is_enabled():
                 continue
@@ -151,8 +152,12 @@ class CompassShowCommand(sublime_plugin.WindowCommand):
 
         items = items + post_list + plugin_items + file_types_items
 
-        # Right now, the items_meta is just for checking sheet_groups
-        # We are slowly moving away from sheet_groups
+        build_ms = int((time.perf_counter() - build_started) * 1000)
+        plugin_debug("Compass panel build: %d rows in %dms" % (len(items), build_ms))
+
+        # items_meta holds SheetGroups (open tabs) + plugin payloads;
+        # plugins claim their rows via is_applicable first, the SheetGroup
+        # check below is the fallback for open tabs (needs live Sheets, STR-16).
         items_meta = items_meta + post_list_meta + plugin_meta + file_types_meta
 
         if len(items) <= 0 or len(items_meta) <= 0:
@@ -168,7 +173,7 @@ class CompassShowCommand(sublime_plugin.WindowCommand):
             on_highlight=lambda index: self.on_highlight(index, items, initial_selection, items_meta)
         )
 
-    def on_highlight(self, index: int, items, initial_selection, items_meta: List[Union[SheetGroup, File]]):
+    def on_highlight(self, index: int, items, initial_selection, items_meta: List[Union[SheetGroup, Tuple[str, str, str]]]):
         if index == -1:
             raise Exception("Cannot highlight index: -1")
 
@@ -200,7 +205,7 @@ class CompassShowCommand(sublime_plugin.WindowCommand):
             else:
                 self.window.select_sheets(initial_selection)
 
-    def on_done(self, index, items, items_meta: List[Union[SheetGroup, File]]):
+    def on_done(self, index, items, items_meta: List[Union[SheetGroup, Tuple[str, str, str]]]):
         state = plugin_state()
         state["is_quick_panel_open"] = False
         cache_stack(self.window, force=True)
