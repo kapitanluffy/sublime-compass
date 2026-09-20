@@ -15,9 +15,8 @@ src/
   core.py                    ← load() / load_window() — startup initialization
   stack.py                   ← The MRU data structure (STACK) and all operations
   view_stack.py              ← Per-(window, group) facade over STACK
-  sheet_group.py             ← SheetGroup: List[Sheet] + focused pointer
-  file.py                    ← Simple File(path, folder) data class
-  events.py                  ← CompassFocusListener — keeps STACK in sync
+   sheet_group.py             ← SheetGroup: List[Sheet] + focused pointer
+   events.py                  ← CompassFocusListener — keeps STACK in sync
   utils.py                   ← View metadata, ripgrep, preview generation, parse_sheet
 
   commands/
@@ -30,9 +29,9 @@ src/
     create_plugin.py         ← CompassCreatePluginCommand — scaffold external plugin
                              (lean foo/bar/baz sample with per-plugin MRU)
 
-  plugins/files/
-    file.py                  ← File(file, folder, window) — 3-arg variant with project ID
-    stack.py                 ← FILE_STACK — OrderedDict of unopened files + ripgrep
+   plugins/files/
+     stack.py                 ← FILE_STACK — OrderedDict of unopened files + ripgrep
+                              (keys are (path, folder, projectId) tuples, no wrapper class)
     events.py                ← CompassPluginFilesListener — lifecycle for file plugin
 ```
 
@@ -185,6 +184,6 @@ Returns True for views whose `element()` is non-None and not `"find_in_files:out
 
 3. **Sheet IDs as identity:** Sheets are tracked by `sublime.Sheet.id()`, not file paths. This handles views without files (scratch, console) but means IDs can go stale when views close.
 
-4. **Two File classes:** `src/file.py` (2-arg) for general use, `src/plugins/files/file.py` (3-arg with project ID) for the file plugin. Both have Windows-only path separators.
+4. **File rows are plain tuples:** files plugin keys are `(path, folder, projectId)` tuples in `FILE_STACK`; `generate_items` uses `os.path.relpath` directly and `on_highlight`/`on_select` open `meta[0]`. No `File` wrapper class.
 
 5. **Keymap is commented out:** Users must manually enable keybindings via "Preferences: Compass Keybindings". This is intentional — the keymap file in the repo is a template.

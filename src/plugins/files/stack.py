@@ -9,7 +9,6 @@ import sublime
 from ...utils import dict_deep_get, plugin_debug, plugin_settings
 from ...events import check_folders_changed
 from ..plugin_base import CompassPlugin
-from .file import File
 
 ITEM_TYPE = "compass_plugin_file_open_file"
 CompassItemTuple = Tuple[int, int, List[int], int]
@@ -40,16 +39,16 @@ class CompassItem():
         return (self.window.id(), self.group, sheet_ids, self.focused.id())
 
 
+FileKey = Tuple[str, str, str]
+
+
 class FilePluginItem():
-    def __init__(self, file: File, item: Optional[CompassItem]):
-        self.file = file
+    def __init__(self, key: FileKey, item: Optional[CompassItem]):
+        self.key_tuple = key
         self.item = item
 
     def key(self):
-        file = self.file.get_full_path()
-        folder = self.file.get_folder()
-        window = self.file.get_window()
-        return (file, folder, window)
+        return self.key_tuple
 
     def value(self):
         item = self.item.to_tuple() if self.item is not None else None
@@ -142,14 +141,16 @@ class CompassPluginFileStack(CompassPlugin):
         return item.kind[2] == ITEM_TYPE
 
     def on_highlight(self, item: sublime.QuickPanelItem, meta, window: sublime.Window):
-        # meta is a light (path, folder, projectId) tuple; build File on demand.
-        file = meta if isinstance(meta, File) else File(*meta)
-        window.open_file(file.get_full_path(), sublime.TRANSIENT)
+        # meta is a generic payload round-tripped through Compass core;
+        # this plugin always sends a (path, folder, projectId) tuple.
+        path = meta[0] if isinstance(meta, (tuple, list)) else meta
+        window.open_file(path, sublime.TRANSIENT)
 
     def on_select(self, item: sublime.QuickPanelItem, meta, window: sublime.Window):
-        # meta is a light (path, folder, projectId) tuple; build File on demand.
-        file = meta if isinstance(meta, File) else File(*meta)
-        window.open_file(file.get_full_path())
+        # meta is a generic payload round-tripped through Compass core;
+        # this plugin always sends a (path, folder, projectId) tuple.
+        path = meta[0] if isinstance(meta, (tuple, list)) else meta
+        window.open_file(path)
 
     def refresh_cache(self, window: sublime.Window):
         settings = plugin_settings()
@@ -227,7 +228,7 @@ def parse_listed_files(window: sublime.Window, source="panel"):
 
     found = _walk_folders(folders)
     for file, folder in found:
-        item = FilePluginItem(File(file, folder, projectId), None)
+        item = FilePluginItem((file, folder, projectId), None)
         CompassPluginFileStack.append(item)
 
     elapsed_ms = int((time.perf_counter() - started) * 1000)
@@ -277,7 +278,7 @@ def _apply_scan(window, projectId, folders, found, elapsed_ms, source):
         return
     CompassPluginFileStack.clear_project(projectId)
     for file, folder in found:
-        item = FilePluginItem(File(file, folder, projectId), None)
+        item = FilePluginItem((file, folder, projectId), None)
         CompassPluginFileStack.append(item)
     check_folders_changed(window)
     plugin_debug(

@@ -1,4 +1,4 @@
-from typing import List, Union
+from typing import List, Tuple, Union
 import sublime
 import sublime_plugin
 import time
@@ -6,7 +6,6 @@ from ...utils import plugin_debug, plugin_settings, plugin_state
 from ..view_stack import ViewStack
 from ..sheet_group import SheetGroup
 from ..plugins_registry import get_plugins
-from ..plugins.files.file import File
 from ..stack import cache_stack
 from ..utils import parse_sheet
 from ..event_bus import emit
@@ -60,7 +59,7 @@ class CompassShowCommand(sublime_plugin.WindowCommand):
             selected_index = stack_length - 1
 
         post_list: List[sublime.QuickPanelItem] = []
-        items_meta: List[Union[SheetGroup, File]] = []
+        items_meta: List[Union[SheetGroup, Tuple[str, str, str]]] = []
         post_list_meta: List[SheetGroup] = []
 
         for index, sheets in enumerate(stack_sheets):
@@ -173,7 +172,7 @@ class CompassShowCommand(sublime_plugin.WindowCommand):
             on_highlight=lambda index: self.on_highlight(index, items, initial_selection, items_meta)
         )
 
-    def on_highlight(self, index: int, items, initial_selection, items_meta: List[Union[SheetGroup, File]]):
+    def on_highlight(self, index: int, items, initial_selection, items_meta: List[Union[SheetGroup, Tuple[str, str, str]]]):
         if index == -1:
             raise Exception("Cannot highlight index: -1")
 
@@ -205,7 +204,7 @@ class CompassShowCommand(sublime_plugin.WindowCommand):
             else:
                 self.window.select_sheets(initial_selection)
 
-    def on_done(self, index, items, items_meta: List[Union[SheetGroup, File]]):
+    def on_done(self, index, items, items_meta: List[Union[SheetGroup, Tuple[str, str, str]]]):
         state = plugin_state()
         state["is_quick_panel_open"] = False
         cache_stack(self.window, force=True)
