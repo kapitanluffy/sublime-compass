@@ -29,11 +29,11 @@ Sublime Text plugin (Python 3.8 per `.python-version`, runs inside Sublime's emb
 - `Compass Navigator.sublime-settings` / `Default.sublime-commands` / `Default.sublime-keymap` / `Main.sublime-menu`
 
 ## Execution Quirks
-- Relative imports only (`from .utils import *`, `from .src import *`) - will not import/run outside Sublime; `sublime`/`sublime_plugin` are host-provided.
+- Relative imports only (`from .utils import *`, `from .src import *`) - will not import/run outside Sublime; `sublime`/`sublime_plugin` are host-provided. Gotcha: `dict_deep_get` lives in `src/utils.py`, so from `src/plugins/*/` it is `...utils` — NOT `....utils` (that is the top-level `utils.py`). `KindId` color constants use the `...ISH` suffix (e.g. `COLOR_YELLOWISH`).
 - `Default.sublime-keymap` is entirely commented out. Users must enable via `Preferences: Compass Keybindings` command. Don't uncomment in repo.
 - Settings-driven: `debug` (default false; enable for `plugin_debug` output), `enable_tags`, `ripgrep_path`, `only_show_items_in_focused_group`, `jump_to_most_recent_on_show`, `max_open_tabs` (0=disable auto-close), `stack_cache_throttle` (min 30), `plugins.files.enabled`/`enable_cache`. Tags only emit when `enable_tags==True`.
 - MRU logic: `push_sheets` moves to head of `STACK`; `cache_stack()` saves the window cache. Called throttled (30s, `stack_cache_throttle` setting, min 30) from `on_activated_async` (tab switch), and forced (`force=True`) from `show.py:on_done` (compass close) and `ViewStack.remove` (tab close). Groups are preserved because `push_sheets` operates on the full `selected_sheets_in_group` set.
-- Untracked WIP: `src/file_watcher.py` (stub `CompassFileEventListener` for `FileWatcher` broadcast) and `src/plugins_registry.py` (empty `CompassPluginsRegistry`). `artifacts/` is not tracked.
+- Untracked WIP: `artifacts/` is not tracked. Tracked but dormant: `src/file_watcher.py` (stub `CompassFileEventListener` for `FileWatcher` broadcast). The plugin registry is real: `src/plugins_registry.py` (`register_plugin` / `get_plugins`).
 
 ## Verification (no test suite exists)
 - Syntax: `python -m py_compile plugin.py utils.py` or `python -m compileall src` — checks for syntax errors in all .py files. Run this after every code change.
@@ -44,3 +44,8 @@ Sublime Text plugin (Python 3.8 per `.python-version`, runs inside Sublime's emb
 - Python 3.8 syntax only.
 - Keep executable source of truth over docs; do not add generic lint/test scaffolding not already present.
 - Evergreen docs: when changing code behavior, update the relevant doc in `docs/` in the same changeset.
+
+## Linear
+- Team **Strawhats**. Full workflow: `artifacts/linear-workflow.md` (untracked).
+- Issue conventions: bugs get a "How to Reproduce" section; features/refactors get a plan/RFC in the body or a linked spec doc; plugin-system work goes to the **Compass Navigator Plugins** project with explicit Blocked-by links.
+- `artifacts/STATE.md` (untracked) is the current-state snapshot — refresh it on every landing.
