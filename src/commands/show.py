@@ -1,7 +1,8 @@
 from typing import List, Union
 import sublime
 import sublime_plugin
-from ...utils import plugin_settings, plugin_state
+import time
+from ...utils import plugin_debug, plugin_settings, plugin_state
 from ..view_stack import ViewStack
 from ..sheet_group import SheetGroup
 from ..plugins_registry import get_plugins
@@ -115,6 +116,7 @@ class CompassShowCommand(sublime_plugin.WindowCommand):
 
         plugin_items: List[sublime.QuickPanelItem] = []
         plugin_meta: List = []
+        build_started = time.perf_counter()
         for plugin in get_plugins():
             if not plugin.is_enabled():
                 continue
@@ -150,6 +152,9 @@ class CompassShowCommand(sublime_plugin.WindowCommand):
                 print("Compass plugin error in %s: %s" % (plugin.get_id(), e))
 
         items = items + post_list + plugin_items + file_types_items
+
+        build_ms = int((time.perf_counter() - build_started) * 1000)
+        plugin_debug("Compass panel build: %d rows in %dms" % (len(items), build_ms))
 
         # Right now, the items_meta is just for checking sheet_groups
         # We are slowly moving away from sheet_groups

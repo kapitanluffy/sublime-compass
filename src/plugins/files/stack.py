@@ -126,25 +126,29 @@ class CompassPluginFileStack(CompassPlugin):
             # Skip file if not for the current window
             if key[2] != projectId:
                 continue
-            file = File(key[0], key[1], key[2])
+            # Lightweight meta: a (path, folder, projectId) tuple. The
+            # File object is built on demand in on_highlight/on_select,
+            # so opening the panel on huge indexes doesn't construct
+            # one per row. All rows stay listed and searchable.
             details.append({
-                "trigger": file.get_file_name(),
+                "trigger": os.path.relpath(key[0], key[1]),
                 "annotation": "files",
                 "kind": KIND_FILE_PLUGIN_FILE_ITEM_TYPE[:2],
             })
-            meta.append(file)
+            meta.append((key[0], key[1], key[2]))
         return (details, meta)
 
     def is_applicable(self, item: sublime.QuickPanelItem):
         return item.kind[2] == ITEM_TYPE
 
     def on_highlight(self, item: sublime.QuickPanelItem, meta, window: sublime.Window):
-        # meta is a File object; fall back to importing from the item if needed
-        file = meta if isinstance(meta, File) else File(*item.kind[3])
+        # meta is a light (path, folder, projectId) tuple; build File on demand.
+        file = meta if isinstance(meta, File) else File(*meta)
         window.open_file(file.get_full_path(), sublime.TRANSIENT)
 
     def on_select(self, item: sublime.QuickPanelItem, meta, window: sublime.Window):
-        file = meta if isinstance(meta, File) else File(*item.kind[3])
+        # meta is a light (path, folder, projectId) tuple; build File on demand.
+        file = meta if isinstance(meta, File) else File(*meta)
         window.open_file(file.get_full_path())
 
     def refresh_cache(self, window: sublime.Window):
