@@ -56,7 +56,9 @@ Each entry represents a **group of tabs** in a specific Sublime group:
 
 ### SheetGroup
 
-`src/sheet_group.py` — a `List[sublime.Sheet]` with a `.focused` attribute. Also serves as the type discriminator in `items_meta` (mixed list of `SheetGroup` and `File`): `isinstance(meta, SheetGroup)` tells `on_highlight` and `on_done` which code path to take — select sheets vs open a file.
+`src/sheet_group.py` — a `List[sublime.Sheet]` with a `.focused` attribute. `items_meta` is a mixed list of `SheetGroup` (open tabs) and plugin payloads (e.g. files plugin `(path, folder, projectId)` tuples): `on_highlight` and `on_done` first offer each row to plugins via `is_applicable`, and the `isinstance(meta, SheetGroup)` fallback handles open tabs — select sheets vs open a file.
+
+Why SheetGroup stays: view rows need live `Sheet` objects for `select_sheets`/`focus_sheet`. Stored ids alone mis-focus (STR-16), and multi-sheet groups must survive project reload (STR-19) — plain tuples can't supply that.
 
 Created by `convert_stack_to_sheet_group()` in `view_stack.py`.
 
@@ -130,9 +132,9 @@ window.select_sheets(sheets)     # select the group
 window.focus_sheet(focused)      # focus the specific tab (with validation)
 ```
 
-**File (unopened file):**
+**File rows (unopened files, `(path, folder, projectId)` tuples):**
 ```python
-CompassPluginFileStack.on_select(item, window)  # window.open_file(path)
+CompassPluginFileStack.on_select(item, meta, window)  # window.open_file(meta[0])
 ```
 
 **Escape / Cancel:**

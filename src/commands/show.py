@@ -155,8 +155,9 @@ class CompassShowCommand(sublime_plugin.WindowCommand):
         build_ms = int((time.perf_counter() - build_started) * 1000)
         plugin_debug("Compass panel build: %d rows in %dms" % (len(items), build_ms))
 
-        # Right now, the items_meta is just for checking sheet_groups
-        # We are slowly moving away from sheet_groups
+        # items_meta holds SheetGroups (open tabs) + plugin payloads;
+        # plugins claim their rows via is_applicable first, the SheetGroup
+        # check below is the fallback for open tabs (needs live Sheets, STR-16).
         items_meta = items_meta + post_list_meta + plugin_meta + file_types_meta
 
         if len(items) <= 0 or len(items_meta) <= 0:
