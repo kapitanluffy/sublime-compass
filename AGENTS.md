@@ -44,8 +44,8 @@ Sublime Text plugin (Python 3.8 per `.python-version`, runs inside Sublime's emb
 - Python 3.8 syntax only.
 - Keep executable source of truth over docs; do not add generic lint/test scaffolding not already present.
 - Evergreen docs: when changing code behavior, update the relevant doc in `docs/` in the same changeset.
+- State snapshot: `artifacts/STATE.md` (untracked — never commit) is the current-state snapshot. Refresh it on every landing (commit or merge): branch + HEAD, what changed, what's next, Linear issue statuses, and anything unpushed.
 
 ## Linear
 - Team **Strawhats**. Full workflow: `artifacts/linear-workflow.md` (untracked).
 - Issue conventions: bugs get a "How to Reproduce" section; features/refactors get a plan/RFC in the body or a linked spec doc; plugin-system work goes to the **Compass Navigator Plugins** project with explicit Blocked-by links.
-- `artifacts/STATE.md` (untracked) is the current-state snapshot — refresh it on every landing.
