@@ -92,6 +92,25 @@ also disable silently.
    `is_applicable`.
 4. **`on_unload`** — release whatever `on_load` set up.
 
+## Recent-picks pattern
+
+Each section owns its own ordering — core never reorders your rows.
+To float picked items first within your section, use the shared helper
+in `src/plugins_registry.py`:
+
+- In `on_select`, call `record_selection(get_id(), key)` with the same
+  key you emit in `generate_items` (namespace it yourself, e.g. include
+  the project id). Record selects only, never highlights.
+- In `generate_items`, wrap your keys with
+  `order_by_recent(get_id(), keys)` before building details.
+
+History is per plugin id, capped at `max_recent_picks`, in-memory
+only (`false` disables recency entirely). Stale keys (deleted files) are skipped, never stat'ed. Files
+(`#open`) is the reference implementation: recent rows float first and
+carry a `files · recent` annotation. Note `#open` also matches open-tab
+rows, which always precede plugin rows — recents top their own section,
+not the whole list.
+
 ## Reacting to Compass events (`src/event_bus.py`)
 
 Subscribe in `plugin_loaded()` after registering (via the already

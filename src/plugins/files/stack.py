@@ -8,6 +8,7 @@ import sublime
 
 from ...utils import dict_deep_get, plugin_debug, plugin_settings
 from ...events import check_folders_changed
+from ...plugins_registry import order_by_recent, recent_keys, record_selection
 from ..plugin_base import CompassPlugin
 
 ITEM_TYPE = "compass_plugin_file_open_file"
@@ -126,17 +127,16 @@ class CompassPluginFileStack(CompassPlugin):
     def generate_items(self, projectId):
         details = []
         meta = []
-        for key, item in FILE_STACK.items():
-            # Skip file if not for the current window
-            if key[2] != projectId:
-                continue
+        keys = [key for key in FILE_STACK if key[2] == projectId]
+        recent = set(recent_keys(self.get_id()))
+        for key in order_by_recent(self.get_id(), keys):
             # Lightweight meta: a (path, folder, projectId) tuple. The
             # File object is built on demand in on_highlight/on_select,
             # so opening the panel on huge indexes doesn't construct
             # one per row. All rows stay listed and searchable.
             details.append({
                 "trigger": os.path.relpath(key[0], key[1]),
-                "annotation": "files",
+                "annotation": "files · recent" if key in recent else "files",
                 "kind": KIND_FILE_PLUGIN_FILE_ITEM_TYPE[:2],
             })
             meta.append((key[0], key[1], key[2]))
@@ -154,6 +154,7 @@ class CompassPluginFileStack(CompassPlugin):
     def on_select(self, item: sublime.QuickPanelItem, meta, window: sublime.Window):
         # meta is a generic payload round-tripped through Compass core;
         # this plugin always sends a (path, folder, projectId) tuple.
+        record_selection(self.get_id(), tuple(meta) if isinstance(meta, list) else meta)
         path = meta[0] if isinstance(meta, (tuple, list)) else meta
         window.open_file(path)
 

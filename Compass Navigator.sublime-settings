@@ -25,6 +25,11 @@
     // Max limit of opened tabs. Set to 0 to disable
     "max_open_tabs": 1000,
 
+    // How many picked items each plugin remembers to float recent
+    // picks first within its own section. In-memory only.
+    // Set to false to disable recency entirely.
+    "max_recent_picks": 10,
+
     // How often (seconds) the view stack cache is written on tab switch.
     // Minimum is 30. Set high to reduce disk writes on large projects.
     "stack_cache_throttle": 30,
