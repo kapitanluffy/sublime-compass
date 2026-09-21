@@ -118,6 +118,11 @@ class CompassPluginFileStack(CompassPlugin):
         settings = plugin_settings()
         return dict_deep_get(settings, "plugins.files.enabled", True) is True
 
+    def on_load(self) -> None:
+        # Imported late: events.py imports this module at top level.
+        from .events import files_plugin_on_load
+        files_plugin_on_load()
+
     def generate_items(self, projectId):
         details = []
         meta = []

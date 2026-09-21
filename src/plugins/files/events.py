@@ -15,27 +15,31 @@ def _on_compass_folders_changed(window):
     scan_files_async(window, "activated")
 
 
+def files_plugin_on_load():
+    print("CompassNavigator - Files plugin - loaded!")
+    settings = plugin_settings()
+
+    is_enabled = dict_deep_get(settings, "plugins.files.enabled", True)
+    if is_enabled is False:
+        return
+
+    subscribe("compass_folders_changed", _on_compass_folders_changed)
+
+    only_show_unopened_files_on_empty_window = settings.get("only_show_unopened_files_on_empty_window", True)
+    windows = sublime.windows()
+    # @todo watch setting if changed
+    for window in windows:
+        if only_show_unopened_files_on_empty_window is False or (only_show_unopened_files_on_empty_window is True and window.sheets().__len__() <= 0):
+            scan_files_async(window, "startup")
+
+
 class CompassPluginFilesListener(sublime_plugin.EventListener):
     @classmethod
     def on_plugin_loaded(cls):
-        print("CompassNavigator loaded!")
-        settings = plugin_settings()
-
-        is_enabled = dict_deep_get(settings, "plugins.files.enabled", True)
-        if is_enabled is False:
-            return
-
-        subscribe("compass_folders_changed", _on_compass_folders_changed)
-
-        only_show_unopened_files_on_empty_window = settings.get("only_show_unopened_files_on_empty_window", True)
-        windows = sublime.windows()
-        # @todo watch setting if changed
-        for window in windows:
-            if only_show_unopened_files_on_empty_window is False or (only_show_unopened_files_on_empty_window is True and window.sheets().__len__() <= 0):
-                scan_files_async(window, "startup")
+        files_plugin_on_load()
 
     def on_init(self, views: List[sublime.View]):
-        print("plugin init!")
+        print("compass plugin - files - init!")
 
     def on_pre_close_window(self, window: sublime.Window):
         projectId = window.project_file_name() or str(window.id())

@@ -1,6 +1,7 @@
 import sublime
 
-from . import STACK, append_sheets, build_stack, hydrate_stack, get_item, CompassPluginFilesListener
+from . import STACK, append_sheets, build_stack, hydrate_stack, get_item
+from .plugins_registry import load_plugins
 
 
 def load_window(window: sublime.Window):
@@ -17,4 +18,5 @@ def load():
     for window in windows:
         sublime.set_timeout_async(lambda w=window: load_window(w))
 
-    CompassPluginFilesListener.on_plugin_loaded()
+    load_plugins()
+    print("CompassNavigator - loaded!")

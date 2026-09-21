@@ -36,6 +36,20 @@ class CompassPlugin:
         """
         return True
 
+    def on_load(self) -> None:
+        """
+        Called once by load_plugins() when Compass loads. Subscribe to
+        events or kick off background work here. No-op by default.
+        """
+        return None
+
+    def on_unload(self) -> None:
+        """
+        Called when Compass unloads. Release whatever on_load set up.
+        No-op by default.
+        """
+        return None
+
     def refresh_cache(self, window: sublime.Window) -> None:
         """
         Rebuild the plugin's internal data. Called before generate_items.

@@ -29,6 +29,8 @@ Subclass `CompassPlugin` and implement:
 | `get_id()` | Stable item type, e.g. `compass_plugin_foo`. Compass stores it in `kind[2]` and routes selection back via `is_applicable`. |
 | `get_plugin_tag()` | Filter tag, e.g. `#foo`. Compass **always** prepends it to the trigger (`#foo bar`), regardless of `enable_tags`. |
 | `is_enabled()` | Gate. The scaffold reads `"enabled"` from its own settings file. |
+| `on_load()` | One-time setup: subscribe to events, kick off background work. No-op by default; called once by `load_plugins()` — never call it yourself. |
+| `on_unload()` | Tear down whatever `on_load` set up. No-op by default. |
 | `refresh_cache(window)` | Rebuild whatever `generate_items` reads. Called on every panel open. |
 | `generate_items(project_id)` | Return `(details, meta)`. See contract below. |
 | `is_applicable(item)` | Claim rows for highlight/select routing (`item.kind[2] == get_id()`). |
@@ -75,6 +77,20 @@ def plugin_loaded():
 and `plugin_unloaded()` flips the flag back. Catch broad `Exception`:
 a `SyntaxError` from a stale host (see `.python-version` above) must
 also disable silently.
+
+## Lifecycle: register → `on_load` → per-open → `on_unload`
+
+1. **Register** — `plugin_loaded()` calls `register_plugin(instance)`.
+   Re-registering an id replaces the entry, so reloads never duplicate
+   rows. Bundled plugins register at import time, hence always first.
+2. **`on_load`** — `core.load()` calls `load_plugins()` once per
+   session: in registration order, skipping `is_enabled() == False`,
+   each `on_load` isolated by try/except so one broken plugin can't
+   block the rest.
+3. **Per panel open** — `refresh_cache(window)` then
+   `generate_items(project_id)`; `on_highlight` / `on_select` route by
+   `is_applicable`.
+4. **`on_unload`** — release whatever `on_load` set up.
 
 ## Reacting to Compass events (`src/event_bus.py`)
 
