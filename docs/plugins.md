@@ -84,8 +84,8 @@ Third-party plugins load only when `flags.plugin_support.enabled` is
 `true` (default `false`). Bundled plugins always run. The gate applies
 everywhere `get_plugins()` is consumed — panel rows, highlight/select
 routing, and `on_load` — so flipping it takes effect on the next panel
-open, no restart. `Compass: Create Plugin` refuses with an explanation
-while the gate is off. What counts as bundled is decided by Compass
+open, no restart. `Compass: Create Plugin` is hidden from the command
+palette while the gate is off. What counts as bundled is decided by Compass
 core (hardcoded ids in `src/plugins_registry.py`) — plugins cannot
 declare themselves bundled.
 
