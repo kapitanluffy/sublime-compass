@@ -44,5 +44,14 @@
             // Enabling this will not see newly created files
             "enable_cache": false
         }
+    },
+
+    // Feature flags for Compass internals
+    "flags": {
+        // Third-party plugin support. Bundled plugins (Files, MRU core)
+        // always run. Default off.
+        "plugin_support": {
+            "enabled": false
+        }
     }
 }

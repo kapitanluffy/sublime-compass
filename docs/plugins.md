@@ -78,6 +78,17 @@ and `plugin_unloaded()` flips the flag back. Catch broad `Exception`:
 a `SyntaxError` from a stale host (see `.python-version` above) must
 also disable silently.
 
+## Disabling external plugins
+
+Third-party plugins load only when `flags.plugin_support.enabled` is
+`true` (default `false`). Bundled plugins always run. The gate applies
+everywhere `get_plugins()` is consumed — panel rows, highlight/select
+routing, and `on_load` — so flipping it takes effect on the next panel
+open, no restart. `Compass: Create Plugin` refuses with an explanation
+while the gate is off. What counts as bundled is decided by Compass
+core (hardcoded ids in `src/plugins_registry.py`) — plugins cannot
+declare themselves bundled.
+
 ## Lifecycle: register → `on_load` → per-open → `on_unload`
 
 1. **Register** — `plugin_loaded()` calls `register_plugin(instance)`.

@@ -205,6 +205,14 @@ Lean sample plugin created by `Compass: Create Plugin`.
 
 class CompassCreatePluginCommand(sublime_plugin.WindowCommand):
     def run(self):
+        from ..plugins_registry import external_plugins_enabled
+        if not external_plugins_enabled():
+            sublime.error_message(
+                "Compass: external plugin support is disabled. Set "
+                "\"flags.plugin_support.enabled\" to true in Compass "
+                "Navigator.sublime-settings to create plugins."
+            )
+            return
         self.window.show_input_panel(
             "Plugin name:", "", self.on_done, None, None
         )

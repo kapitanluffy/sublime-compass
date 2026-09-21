@@ -1,5 +1,6 @@
 from typing import Dict, List
 
+from .utils import dict_deep_get
 from ..utils import plugin_debug, plugin_settings
 
 # Public API for compass plugins.
@@ -18,6 +19,13 @@ from ..utils import plugin_debug, plugin_settings
 
 _PLUGINS: List = []
 _LOADED = False
+
+# Bundled plugin ids, decided by Compass core — callers cannot declare
+# themselves bundled. Keep in sync with the in-tree plugins (Files:
+# ITEM_TYPE in src/plugins/files/stack.py).
+_BUNDLED_IDS = frozenset([
+    "compass_plugin_file_open_file",
+])
 
 # Selection history per plugin id: most-recent-first lists of opaque
 # keys. In-memory only; plugins namespace their own keys (e.g. include
@@ -57,9 +65,25 @@ def get_plugins() -> List:
     """
     Return the list of registered plugins, in registration order.
     Bundled plugins register at import time (before any external
-    plugin_loaded runs), so they always come first.
+    plugin_loaded runs), so they always come first. When external
+    plugin support is disabled (flags.plugin_support.enabled), only
+    bundled plugins are returned.
     """
-    return list(_PLUGINS)
+    plugins = list(_PLUGINS)
+    if external_plugins_enabled():
+        return plugins
+    return [p for p in plugins if _plugin_id(p) in _BUNDLED_IDS]
+
+
+def external_plugins_enabled() -> bool:
+    """
+    Gate for third-party plugins. Bundled plugins always run.
+    """
+    try:
+        settings = plugin_settings()
+        return dict_deep_get(settings, "flags.plugin_support.enabled", False) is True
+    except Exception:
+        return False
 
 
 def _recent_cap() -> int:

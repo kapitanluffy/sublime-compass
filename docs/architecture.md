@@ -177,6 +177,7 @@ Returns True for views whose `element()` is non-None and not `"find_in_files:out
 | `only_show_items_in_focused_group` | `true` | Only show items from active group |
 | `plugins.files.enabled` | `true` | Enable unopened-files plugin |
 | `plugins.files.enable_cache` | `false` | Cache ripgrep output |
+| `flags.plugin_support.enabled` | `false` | Load third-party plugins; bundled always run |
 
 ## Key Design Decisions
 
