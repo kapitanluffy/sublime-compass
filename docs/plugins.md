@@ -91,17 +91,32 @@ declare themselves bundled.
 
 ## Lifecycle: register → `on_load` → per-open → `on_unload`
 
-1. **Register** — `plugin_loaded()` calls `register_plugin(instance)`.
-   Re-registering an id replaces the entry, so reloads never duplicate
-   rows. Bundled plugins register at import time, hence always first.
+1. **Register** — one call for everyone: `register_plugin(instance)`.
+   External plugins call it in `plugin_loaded()`; bundled plugins call
+   it at import time (same call, no separate path — bundled just means
+   pre-included, no install needed). Re-registering an id replaces the
+   entry, so reloads never duplicate rows.
 2. **`on_load`** — `core.load()` calls `load_plugins()` once per
-   session: in registration order, skipping `is_enabled() == False`,
-   each `on_load` isolated by try/except so one broken plugin can't
-   block the rest.
+   session: every plugin runs `on_load` bundled-first, skipping
+   `is_enabled() == False`, each isolated by try/except so one broken
+   plugin can't block the rest. Bundled-first is structural
+   (`get_plugins()` partitions), never dependent on import order.
 3. **Per panel open** — `refresh_cache(window)` then
    `generate_items(project_id)`; `on_highlight` / `on_select` route by
    `is_applicable`.
-4. **`on_unload`** — release whatever `on_load` set up.
+4. **`on_unload`** — release whatever `on_load` set up (Files clears
+   its stack). The bus has no unsubscribe: Sublime reloads wipe all
+   subscriptions, and the `_LOADED` guard prevents double-subscribing
+   within a session — so there is nothing to tear down there.
+
+## Who watches the folders
+
+Core owns folder-change detection: a cheap folder-list snapshot taken
+on activation, announcing `compass_folders_changed` on delta. Plugins
+may read the snapshot (`check_folders_changed`) and must subscribe for
+announcements — the per-open check and post-scan bookkeeping are
+sanctioned reads, not polling. Never run your own folder-watching:
+no ripgrep walks outside a detected change, no timer polls.
 
 ## Recent-picks pattern
 

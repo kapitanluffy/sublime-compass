@@ -63,16 +63,18 @@ def register_plugin(plugin) -> None:
 
 def get_plugins() -> List:
     """
-    Return the list of registered plugins, in registration order.
-    Bundled plugins register at import time (before any external
-    plugin_loaded runs), so they always come first. When external
-    plugin support is disabled (flags.plugin_support.enabled), only
-    bundled plugins are returned.
+    Return the list of registered plugins, bundled ids first (stable),
+    then externals in registration order. Ordering never depends on
+    which package's plugin_loaded ran first. When external plugin
+    support is disabled (flags.plugin_support.enabled), only bundled
+    plugins are returned.
     """
     plugins = list(_PLUGINS)
-    if external_plugins_enabled():
-        return plugins
-    return [p for p in plugins if _plugin_id(p) in _BUNDLED_IDS]
+    if not external_plugins_enabled():
+        plugins = [p for p in plugins if _plugin_id(p) in _BUNDLED_IDS]
+    bundled = [p for p in plugins if _plugin_id(p) in _BUNDLED_IDS]
+    external = [p for p in plugins if _plugin_id(p) not in _BUNDLED_IDS]
+    return bundled + external
 
 
 def external_plugins_enabled() -> bool:
@@ -157,9 +159,9 @@ def recent_keys(plugin_id: str) -> List:
 def load_plugins() -> None:
     """
     Central load entry point. Called once from core.load(): iterates the
-    registry in registration order, skips disabled plugins, and calls
-    on_load per plugin. One broken plugin cannot block the rest, and a
-    second call within the same session is a no-op.
+    registry (bundled first), skips disabled plugins, and calls on_load
+    per plugin. One broken plugin cannot block the rest, and a second
+    call within the same session is a no-op.
     """
     global _LOADED
     if _LOADED:

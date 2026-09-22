@@ -8,23 +8,15 @@ import sublime_plugin
 
 
 def _on_compass_folders_changed(window):
-    settings = plugin_settings()
-    is_enabled = dict_deep_get(settings, "plugins.files.enabled", True)
-    if is_enabled is False:
-        return
     scan_files_async(window, "activated")
 
 
 def files_plugin_on_load():
     print("CompassNavigator - Files plugin - loaded!")
-    settings = plugin_settings()
-
-    is_enabled = dict_deep_get(settings, "plugins.files.enabled", True)
-    if is_enabled is False:
-        return
 
     subscribe("compass_folders_changed", _on_compass_folders_changed)
 
+    settings = plugin_settings()
     only_show_unopened_files_on_empty_window = settings.get("only_show_unopened_files_on_empty_window", True)
     windows = sublime.windows()
     # @todo watch setting if changed

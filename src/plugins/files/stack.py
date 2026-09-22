@@ -124,6 +124,9 @@ class CompassPluginFileStack(CompassPlugin):
         from .events import files_plugin_on_load
         files_plugin_on_load()
 
+    def on_unload(self) -> None:
+        CompassPluginFileStack.clear()
+
     def generate_items(self, projectId):
         details = []
         meta = []

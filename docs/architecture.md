@@ -32,7 +32,9 @@ src/
    plugins/files/
      stack.py                 ← FILE_STACK — OrderedDict of unopened files + ripgrep
                               (keys are (path, folder, projectId) tuples, no wrapper class)
-    events.py                ← CompassPluginFilesListener — lifecycle for file plugin
+     events.py                ← CompassPluginFilesListener — thin Sublime adapter
+                               (window/project close + project load); lifecycle
+                               lives in CompassPluginFileStack.on_load/on_unload
 ```
 
 ## Data Structures
