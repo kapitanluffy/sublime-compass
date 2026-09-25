@@ -48,9 +48,15 @@
 
     // Feature flags for Compass internals
     "flags": {
-        // Third-party plugin support. Bundled plugins (Files, MRU core)
-        // always run. Default off.
+        // Third-party plugin support. Bundled plugins (Files, MRU) are
+        // always registered. Default off.
         "plugin_support": {
+            "enabled": false
+        },
+        // Temporary rollback switch for the MRU-tabs plugin row path
+        // (STR-27). Default off = legacy core rows. Dies in Phase 4
+        // with the old path — never a user preference.
+        "mru_plugin": {
             "enabled": false
         }
     }

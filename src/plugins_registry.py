@@ -22,9 +22,11 @@ _LOADED = False
 
 # Bundled plugin ids, decided by Compass core — callers cannot declare
 # themselves bundled. Keep in sync with the in-tree plugins (Files:
-# ITEM_TYPE in src/plugins/files/stack.py).
+# ITEM_TYPE in src/plugins/files/stack.py; MRU tabs: ITEM_TYPE in
+# src/plugins/mru/stack.py).
 _BUNDLED_IDS = frozenset([
     "compass_plugin_file_open_file",
+    "compass_plugin_mru_tabs",
 ])
 
 # Selection history per plugin id: most-recent-first lists of opaque

@@ -1,4 +1,5 @@
 from .plugins.files import CompassPluginFileStack, CompassPluginFilesListener
+from .plugins.mru import CompassPluginMruTabs
 from .stack import *
 from .sheet_group import *
 from .commands import *
@@ -52,5 +53,8 @@ __all__ = [
 
     # Files
     "CompassPluginFileStack",
-    "CompassPluginFilesListener"
+    "CompassPluginFilesListener",
+
+    # MRU tabs
+    "CompassPluginMruTabs",
 ]
