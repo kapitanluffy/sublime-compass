@@ -107,9 +107,6 @@ class CompassShowCommand(sublime_plugin.WindowCommand):
                     post_list.append(item)
                     post_list_meta.append(sheets)
 
-        file_types_items: List[sublime.QuickPanelItem] = []
-        file_types_meta = []
-
         # @todo need to make this identifier more portable
         projectId = self.window.project_file_name() or str(self.window.id())
 
@@ -150,7 +147,7 @@ class CompassShowCommand(sublime_plugin.WindowCommand):
             except Exception as e:
                 print("Compass plugin error in %s: %s" % (plugin.get_id(), e))
 
-        items = items + post_list + plugin_items + file_types_items
+        items = items + post_list + plugin_items
 
         build_ms = int((time.perf_counter() - build_started) * 1000)
         plugin_debug("Compass panel build: %d rows in %dms" % (len(items), build_ms))
@@ -158,7 +155,7 @@ class CompassShowCommand(sublime_plugin.WindowCommand):
         # items_meta holds SheetGroups (open tabs) + plugin payloads;
         # plugins claim their rows via is_applicable first, the SheetGroup
         # check below is the fallback for open tabs (needs live Sheets, STR-16).
-        items_meta = items_meta + post_list_meta + plugin_meta + file_types_meta
+        items_meta = items_meta + post_list_meta + plugin_meta
 
         if len(items) <= 0 or len(items_meta) <= 0:
             return
