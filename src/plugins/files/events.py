@@ -1,20 +1,13 @@
 from typing import List
 
-from ...event_bus import subscribe
 from ...utils import dict_deep_get, plugin_debug, plugin_settings
 from .stack import CompassPluginFileStack, scan_files_async
 import sublime
 import sublime_plugin
 
 
-def _on_compass_folders_changed(window):
-    scan_files_async(window, "activated")
-
-
 def files_plugin_on_load():
     print("CompassNavigator - Files plugin - loaded!")
-
-    subscribe("compass_folders_changed", _on_compass_folders_changed)
 
     settings = plugin_settings()
     only_show_unopened_files_on_empty_window = settings.get("only_show_unopened_files_on_empty_window", True)
@@ -26,10 +19,6 @@ def files_plugin_on_load():
 
 
 class CompassPluginFilesListener(sublime_plugin.EventListener):
-    @classmethod
-    def on_plugin_loaded(cls):
-        files_plugin_on_load()
-
     def on_init(self, views: List[sublime.View]):
         print("compass plugin - files - init!")
 

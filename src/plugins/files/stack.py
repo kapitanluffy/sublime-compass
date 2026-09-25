@@ -127,6 +127,9 @@ class CompassPluginFileStack(CompassPlugin):
     def on_unload(self) -> None:
         CompassPluginFileStack.clear()
 
+    def on_folders_changed(self, window: sublime.Window) -> None:
+        scan_files_async(window, "activated")
+
     def generate_items(self, projectId):
         details = []
         meta = []
