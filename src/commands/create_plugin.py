@@ -143,9 +143,11 @@ class __CLASS_NAME__(CompassPlugin):
             _touch(meta)
         _status("Opened %s: %s" % ("__DISPLAY__", meta,))
 
-
-def _on_compass_file_focused(item_type, file):
-    _status("__DISPLAY__ saw focus: %s" % (item_type,))
+    def on_file_focused(self, window, item_type, file):
+        # Called directly by Compass for every focus event (see
+        # dispatch_event). Override the other on_* event methods the
+        # same way; no listener or subscription needed.
+        _status("__DISPLAY__ saw focus: %s" % (item_type,))
 
 
 _PLUGIN_INSTANCE = __CLASS_NAME__()
@@ -160,16 +162,12 @@ def plugin_loaded():
         registry_mod = importlib.import_module(
             "Compass Navigator.src.plugins_registry"
         )
-        bus_mod = importlib.import_module(
-            "Compass Navigator.src.event_bus"
-        )
     except Exception:
         COMPASS_AVAILABLE = False
         return
     COMPASS_AVAILABLE = True
     try:
         registry_mod.register_plugin(_PLUGIN_INSTANCE)
-        bus_mod.subscribe("compass_file_focused", _on_compass_file_focused)
     except Exception:
         return
 
