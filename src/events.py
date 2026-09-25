@@ -3,6 +3,7 @@ import sublime_plugin
 from typing import Dict, Tuple
 from ..utils import *
 from .plugins_registry import dispatch_event
+from .stack import cache_stack, hydrate_stack, remove_window
 
 
 _FOLDER_SNAPSHOTS: Dict[str, Tuple[str, ...]] = {}
@@ -38,14 +39,17 @@ class CompassFocusListener(sublime_plugin.EventListener):
         return False
 
     def on_load_project_async(self, window):
-        # Tracking (STACK hydrate) lives in the MRU plugin.
+        # Persistence is core-owned: dispatch first, then hydrate.
         dispatch_event(window, "project_loaded")
+        hydrate_stack(window)
 
     def on_pre_close_window(self, window: sublime.Window):
         dispatch_event(window, "window_closed")
+        remove_window(window)
 
     def on_pre_close_project(self, window: sublime.Window):
         dispatch_event(window, "project_closed")
+        remove_window(window)
 
     def on_pre_close(self, view: sublime.View):
         state = plugin_state()
@@ -99,3 +103,6 @@ class CompassFocusListener(sublime_plugin.EventListener):
 
         group = sheet.group() or window.active_group()
         dispatch_event(window, "sheet_activated", sheet=sheet, group=group)
+        # Core-owned throttled save (replaces the plugin's old call):
+        # tracking policy lives in the plugin, persistence here.
+        cache_stack(window)

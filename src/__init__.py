@@ -1,6 +1,7 @@
 from .plugins.files import CompassPluginFileStack
 from .plugins.mru import CompassPluginMruTabs
 from .stack import *
+from .cache import *
 from .sheet_group import *
 from .commands import *
 from .view_stack import *
@@ -22,6 +23,11 @@ __all__ = [
     "push_sheets",
     "remove_sheet",
     "remove_window",
+
+    # cache service
+    "cache_throttle",
+    "read_cache",
+    "write_cache",
 
     # functions
     "build_stack",

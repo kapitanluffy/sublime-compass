@@ -2,8 +2,7 @@ import re
 import sublime
 from typing import List, Optional, Tuple, Union
 from os import path
-from time import time
-from ..utils import plugin_settings
+from .cache import read_cache, write_cache
 
 SheetList = List[int]
 FocusedSheet = int
@@ -37,11 +36,7 @@ STACK: StackItem = []
     The first StackItem in the STACK is the current "view"
 """
 
-STACK_UPDATE_TIME: float = time()
-
-def stack_cache_throttle() -> int:
-    throttle = int(plugin_settings().get("stack_cache_throttle", 30))
-    return max(throttle, 30)
+STACK_CACHE_KEY = 'compass_stack_cache'
 
 def create_item(window: sublime.Window, sheets: List[sublime.Sheet], group: int = 0, focused: Optional[sublime.Sheet] = None):
     if len(sheets) <= 0:
@@ -128,13 +123,8 @@ def append_sheets(window: sublime.Window, sheets: List[sublime.Sheet], group: in
     STACK.append(item)
 
 def cache_stack(window: sublime.Window, force: bool=False):
-    global STACK_UPDATE_TIME
-    cache_delta = time() - STACK_UPDATE_TIME
-    if cache_delta < stack_cache_throttle() and force is not True:
-        return
-    STACK_UPDATE_TIME = time()
-
-    window_settings = window.settings()
+    # Serialization stays here with the storage (adapter-permanent);
+    # medium + throttle live in cache.py. Key + tuple format frozen.
     stack = []
     for block in STACK:
         if block[0] != window.id():
@@ -146,7 +136,7 @@ def cache_stack(window: sublime.Window, force: bool=False):
             sheet_files.append(get_sheet_name(sheet))
         stack.append((block[0], block[1], block[2], block[3], sheet_files))
 
-    window_settings.set('compass_stack_cache', stack)
+    write_cache(window, STACK_CACHE_KEY, stack, force)
 
 def get_sheet_from_window(sheet_name: str, sheets: List[sublime.Sheet]):
     for sheet in sheets:
@@ -181,8 +171,7 @@ def build_stack(window: sublime.Window):
 
 
 def hydrate_stack(window):
-    window_settings = window.settings()
-    stack_cache = window_settings.get('compass_stack_cache', [])
+    stack_cache = read_cache(window, STACK_CACHE_KEY, [])
     window_sheets = window.sheets()
 
     if len(stack_cache) <= 0:

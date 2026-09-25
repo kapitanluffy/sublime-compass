@@ -14,6 +14,9 @@ src/
   __init__.py                ← Re-export hub, imports everything
   core.py                    ← load() / load_window() — startup initialization
   stack.py                   ← The MRU data structure (STACK) and all operations
+                               (serialization only; medium + throttle in cache.py)
+  cache.py                   ← Central cache service: window.settings() medium +
+                               throttle; plugins own their data, core owns when
   view_stack.py              ← Per-(window, group) facade over STACK
    sheet_group.py             ← SheetGroup: List[Sheet] + focused pointer
    events.py                  ← CompassFocusListener — keeps STACK in sync

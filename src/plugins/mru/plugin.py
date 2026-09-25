@@ -3,7 +3,6 @@
 import sublime
 
 from ...sheet_group import SheetGroup
-from ...stack import cache_stack, hydrate_stack, remove_window
 from ...utils import parse_sheet, plugin_settings, plugin_state
 from ...view_stack import ViewStack
 from ..plugin_base import CompassPlugin
@@ -39,26 +38,18 @@ class CompassPluginMruTabs(CompassPlugin):
         return None
 
     def on_sheet_activated(self, window: sublime.Window, sheet: sublime.Sheet, group: int):
-        # MRU write on tab switch. Core vets the event, dispatches here.
+        # MRU write on tab switch. Core vets the event, dispatches here,
+        # and saves the cache itself (throttled) right after dispatch.
         stack = ViewStack(window, group)
         sheets = window.selected_sheets_in_group(group)
         stack.push(window, sheets, group, sheet)
         cleanup_sheets(stack)
-        cache_stack(window)
 
     def on_sheet_closed(self, window: sublime.Window, sheet: sublime.Sheet):
-        # MRU forget on tab close.
+        # MRU forget on tab close. ViewStack.remove force-saves the
+        # cache core-side.
         group = sheet.group() or window.active_group()
         ViewStack(window, group).remove(sheet)
-
-    def on_window_closed(self, window: sublime.Window):
-        remove_window(window)
-
-    def on_project_closed(self, window: sublime.Window):
-        remove_window(window)
-
-    def on_project_loaded(self, window: sublime.Window):
-        hydrate_stack(window)
 
     def refresh_cache(self, window: sublime.Window):
         # The protocol hands us the window here; generate_items only gets
