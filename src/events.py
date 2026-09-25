@@ -3,9 +3,6 @@ import sublime_plugin
 from typing import Dict, Tuple
 from ..utils import *
 from .plugins_registry import dispatch_event
-from .plugins.mru.plugin import cleanup_sheets, is_mru_rows_enabled
-from .stack import cache_stack, hydrate_stack, remove_window
-from .view_stack import ViewStack
 
 
 _FOLDER_SNAPSHOTS: Dict[str, Tuple[str, ...]] = {}
@@ -41,20 +38,14 @@ class CompassFocusListener(sublime_plugin.EventListener):
         return False
 
     def on_load_project_async(self, window):
-        # Dispatched (legacy inline below dies in Phase 4).
+        # Tracking (STACK hydrate) lives in the MRU plugin.
         dispatch_event(window, "project_loaded")
-        if is_mru_rows_enabled() is False:
-            hydrate_stack(window)
 
     def on_pre_close_window(self, window: sublime.Window):
         dispatch_event(window, "window_closed")
-        if is_mru_rows_enabled() is False:
-            remove_window(window)
 
     def on_pre_close_project(self, window: sublime.Window):
         dispatch_event(window, "project_closed")
-        if is_mru_rows_enabled() is False:
-            remove_window(window)
 
     def on_pre_close(self, view: sublime.View):
         state = plugin_state()
@@ -75,11 +66,7 @@ class CompassFocusListener(sublime_plugin.EventListener):
         if sheet.is_transient():
             return
 
-        group = sheet.group() or window.active_group()
         dispatch_event(window, "sheet_closed", sheet=sheet)
-        if is_mru_rows_enabled() is False:
-            stack = ViewStack(window, group)
-            stack.remove(sheet)
 
         if state["is_quick_panel_open"] is True:
             window.run_command("compass_close", {"reset": True})
@@ -112,9 +99,3 @@ class CompassFocusListener(sublime_plugin.EventListener):
 
         group = sheet.group() or window.active_group()
         dispatch_event(window, "sheet_activated", sheet=sheet, group=group)
-        if is_mru_rows_enabled() is False:
-            stack = ViewStack(window, group)
-            sheets = window.selected_sheets_in_group(group)
-            stack.push(window, sheets, group, sheet)
-            cleanup_sheets(stack)
-            cache_stack(window)

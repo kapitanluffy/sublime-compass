@@ -7,22 +7,6 @@ from ..view_stack import ViewStack
 from ..sheet_group import SheetGroup
 from ..plugins_registry import dispatch_event, get_plugins
 from ..stack import cache_stack
-from ..utils import dict_deep_get, parse_sheet
-import os
-
-
-def generate_post_file_item(window: sublime.Window, file_label, tags, kind, annotation):
-    settings = plugin_settings()
-    open_folders = window.folders()
-    is_tags_enabled = settings.get("enable_tags")
-
-    for folder in open_folders:
-        file_label = file_label.replace("%s%s" % (folder, os.path.sep), "")
-
-    if is_tags_enabled is True and len(tags) > 0:
-        file_label = "%s%s%s" % (' '.join(tags), ' | ', file_label)
-
-    return sublime.QuickPanelItem(trigger=file_label, kind=kind, annotation=annotation)
 
 
 class CompassShowCommand(sublime_plugin.WindowCommand):
@@ -41,15 +25,12 @@ class CompassShowCommand(sublime_plugin.WindowCommand):
 
         # @note show quick panel even if window is empty
 
-        items: List[sublime.QuickPanelItem] = []
-        # @note showing quickpanel does not need a current_view
+        # @note show quickpanel does not need a current_view
 
         initial_selection = self.window.selected_sheets_in_group(self.window.active_group())
         state["initial_selection_ids"] = [s.id() for s in initial_selection]
         stack_length = len(stack.all())
         selected_index = 0
-        # stack_sheets = copy.deepcopy(stack.all())
-        stack_sheets = stack.all()
 
         if settings["jump_to_most_recent_on_show"] is True:
             selected_index = 1
@@ -57,62 +38,8 @@ class CompassShowCommand(sublime_plugin.WindowCommand):
         if is_forward is False:
             selected_index = stack_length - 1
 
-        post_list: List[sublime.QuickPanelItem] = []
-        items_meta: List[Union[SheetGroup, Tuple[str, str, str]]] = []
-        post_list_meta: List[SheetGroup] = []
-
-        # STR-27 Phase 1b: when the MRU plugin path is on, tab rows
-        # (mains + aliases, in legacy order) arrive via the plugin
-        # dispatch loop below. This core loop stays for the flag-off
-        # path and dies in Phase 4.
-        mru_plugin_enabled = dict_deep_get(settings, "flags.mru_plugin.enabled", False) is True
-
-        if not mru_plugin_enabled:
-            for index, sheets in enumerate(stack_sheets):
-                names = []
-                files = []
-                preview = ""
-                kind = None
-                tags = set()
-                valid_sheets = []
-
-                for sheet in sheets:
-                    parsedSheet = parse_sheet(sheet)
-
-                    if parsedSheet is False:
-                        continue
-
-                    names.append(parsedSheet['name'])
-                    files.append(parsedSheet['file'])
-                    tags = tags.union(parsedSheet['tags'])
-                    valid_sheets.append(sheet)
-
-                    if preview == "":
-                        preview = parsedSheet['preview']
-
-                    if kind is None:
-                        kind = parsedSheet['kind']
-
-                if names.__len__() <= 0:
-                    continue
-
-                # Update the sheets in the stack with only valid sheets
-                if len(valid_sheets) > 0 and len(valid_sheets) != len(sheets):
-                    sheets[:] = valid_sheets
-
-                trigger = ' + '.join(names)
-                is_tags_enabled = settings.get('enable_tags', False)
-                annotation = ' '.join(tags) if is_tags_enabled else ''
-                item = sublime.QuickPanelItem(trigger=trigger, kind=kind, details=preview, annotation=annotation)
-                items.append(item)
-                items_meta.append(sheets)
-
-                if is_tags_enabled:
-                    for index, file in enumerate(files):
-                        item = generate_post_file_item(self.window, file or names[index], tags, kind, trigger)
-                        post_list.append(item)
-                        post_list_meta.append(sheets)
-
+        # Tab rows (mains + aliases) arrive via the MRU plugin dispatch
+        # loop below; unopened-file rows via the Files plugin.
         # @todo need to make this identifier more portable
         projectId = self.window.project_file_name() or str(self.window.id())
 
@@ -153,7 +80,7 @@ class CompassShowCommand(sublime_plugin.WindowCommand):
             except Exception as e:
                 print("Compass plugin error in %s: %s" % (plugin.get_id(), e))
 
-        items = items + post_list + plugin_items
+        items = plugin_items
 
         build_ms = int((time.perf_counter() - build_started) * 1000)
         plugin_debug("Compass panel build: %d rows in %dms" % (len(items), build_ms))
@@ -161,7 +88,7 @@ class CompassShowCommand(sublime_plugin.WindowCommand):
         # items_meta holds SheetGroups (open tabs) + plugin payloads;
         # plugins claim their rows via is_applicable first, the SheetGroup
         # check below is the fallback for open tabs (needs live Sheets, STR-16).
-        items_meta = items_meta + post_list_meta + plugin_meta
+        items_meta = plugin_meta
 
         if len(items) <= 0 or len(items_meta) <= 0:
             return

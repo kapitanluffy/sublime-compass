@@ -5,26 +5,16 @@ import sublime
 
 from ...sheet_group import SheetGroup
 from ...stack import cache_stack, hydrate_stack, remove_window
-from ...utils import dict_deep_get, parse_sheet, plugin_settings, plugin_state
+from ...utils import parse_sheet, plugin_settings, plugin_state
 from ...view_stack import ViewStack
 from ..plugin_base import CompassPlugin
 
 ITEM_TYPE = "compass_plugin_mru_tabs"
 
 
-def is_mru_rows_enabled() -> bool:
-    # Temporary rollback switch, default off = legacy core rows in
-    # show.py. Dies in Phase 4 — never a user preference.
-    try:
-        settings = plugin_settings()
-        return dict_deep_get(settings, "flags.mru_plugin.enabled", False) is True
-    except Exception:
-        return False
-
-
 def generate_alias_trigger(window: sublime.Window, file_label, tags):
-    # Folder-stripped, tags-prefixed alias label. Duplicates show.py —
-    # the core copy dies in Phase 4.
+    # Folder-stripped, tags-prefixed alias label. Moved from show.py —
+    # the core copy is gone, this is the only one.
     settings = plugin_settings()
     open_folders = window.folders()
     is_tags_enabled = settings.get("enable_tags")
@@ -80,12 +70,13 @@ class CompassPluginMruTabs(CompassPlugin):
         return ""
 
     def is_enabled(self):
-        return is_mru_rows_enabled()
+        # Bundled plugin: always on. Third-party gating
+        # (flags.plugin_support) does not apply to bundled ids.
+        return True
 
     def on_load(self):
         # Import-time registration (see __init__) leaves nothing to set
-        # up. This print doubles as the gating proof: it appears only
-        # when the flag is on at startup.
+        # up. This print doubles as the load proof in the console.
         print("CompassNavigator - MRU tabs plugin - loaded!")
         return None
 
@@ -135,9 +126,8 @@ class CompassPluginMruTabs(CompassPlugin):
         details = []
         meta = []
         # Alias rows (tags-only view of the same tabs) accumulate
-        # separately and concatenate AFTER all mains — the legacy path
-        # appends mains to items and aliases to post_list, joining them
-        # as items + post_list. Interleaving per group is wrong.
+        # separately and concatenate AFTER all mains. Interleaving
+        # per group is wrong.
         alias_details = []
         alias_meta = []
 

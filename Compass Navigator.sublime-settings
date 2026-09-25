@@ -52,13 +52,6 @@
         // always registered. Default off.
         "plugin_support": {
             "enabled": false
-        },
-        // Temporary rollback switch for the MRU-tabs plugin row path
-        // (STR-27). Default off = legacy core rows. Dies in Phase 4
-        // with the old path — never a user preference. Enabling needs a
-        // restart (tracking hooks attach at load); disabling flips live.
-        "mru_plugin": {
-            "enabled": false
         }
     }
 }

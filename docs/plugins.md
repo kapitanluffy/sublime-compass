@@ -98,13 +98,6 @@ Compass ships two bundled plugins, rendered in this section order
 - Unopened files (`compass_plugin_file_open_file`, `#open`) — ripgrep
   results from its own `FILE_STACK`.
 
-While the MRU extraction (STR-27) is underway, `flags.mru_plugin.enabled`
-(default `false`) selects the row source: off keeps the legacy core-built
-tab rows, on builds them through the MRU plugin. The flag is temporary
-migration scaffolding and will be removed at cutover — it is not a user
-preference. Enabling needs a restart (tracking hooks attach at load,
-like Files); disabling flips live.
-
 ## Lifecycle: register → `on_load` → per-open → `on_unload`
 
 1. **Register** — one call for everyone: `register_plugin(instance)`.
