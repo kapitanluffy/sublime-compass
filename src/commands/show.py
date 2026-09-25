@@ -7,7 +7,7 @@ from ..view_stack import ViewStack
 from ..sheet_group import SheetGroup
 from ..plugins_registry import get_plugins
 from ..stack import cache_stack
-from ..utils import parse_sheet
+from ..utils import dict_deep_get, parse_sheet
 from ..event_bus import emit
 import os
 
@@ -62,50 +62,57 @@ class CompassShowCommand(sublime_plugin.WindowCommand):
         items_meta: List[Union[SheetGroup, Tuple[str, str, str]]] = []
         post_list_meta: List[SheetGroup] = []
 
-        for index, sheets in enumerate(stack_sheets):
-            names = []
-            files = []
-            preview = ""
-            kind = None
-            tags = set()
-            valid_sheets = []
+        # STR-27 Phase 1b: when the MRU plugin path is on, tab rows
+        # (mains + aliases, in legacy order) arrive via the plugin
+        # dispatch loop below. This core loop stays for the flag-off
+        # path and dies in Phase 4.
+        mru_plugin_enabled = dict_deep_get(settings, "flags.mru_plugin.enabled", False) is True
 
-            for sheet in sheets:
-                parsedSheet = parse_sheet(sheet)
+        if not mru_plugin_enabled:
+            for index, sheets in enumerate(stack_sheets):
+                names = []
+                files = []
+                preview = ""
+                kind = None
+                tags = set()
+                valid_sheets = []
 
-                if parsedSheet is False:
+                for sheet in sheets:
+                    parsedSheet = parse_sheet(sheet)
+
+                    if parsedSheet is False:
+                        continue
+
+                    names.append(parsedSheet['name'])
+                    files.append(parsedSheet['file'])
+                    tags = tags.union(parsedSheet['tags'])
+                    valid_sheets.append(sheet)
+
+                    if preview == "":
+                        preview = parsedSheet['preview']
+
+                    if kind is None:
+                        kind = parsedSheet['kind']
+
+                if names.__len__() <= 0:
                     continue
 
-                names.append(parsedSheet['name'])
-                files.append(parsedSheet['file'])
-                tags = tags.union(parsedSheet['tags'])
-                valid_sheets.append(sheet)
+                # Update the sheets in the stack with only valid sheets
+                if len(valid_sheets) > 0 and len(valid_sheets) != len(sheets):
+                    sheets[:] = valid_sheets
 
-                if preview == "":
-                    preview = parsedSheet['preview']
+                trigger = ' + '.join(names)
+                is_tags_enabled = settings.get('enable_tags', False)
+                annotation = ' '.join(tags) if is_tags_enabled else ''
+                item = sublime.QuickPanelItem(trigger=trigger, kind=kind, details=preview, annotation=annotation)
+                items.append(item)
+                items_meta.append(sheets)
 
-                if kind is None:
-                    kind = parsedSheet['kind']
-
-            if names.__len__() <= 0:
-                continue
-
-            # Update the sheets in the stack with only valid sheets
-            if len(valid_sheets) > 0 and len(valid_sheets) != len(sheets):
-                sheets[:] = valid_sheets
-
-            trigger = ' + '.join(names)
-            is_tags_enabled = settings.get('enable_tags', False)
-            annotation = ' '.join(tags) if is_tags_enabled else ''
-            item = sublime.QuickPanelItem(trigger=trigger, kind=kind, details=preview, annotation=annotation)
-            items.append(item)
-            items_meta.append(sheets)
-
-            if is_tags_enabled:
-                for index, file in enumerate(files):
-                    item = generate_post_file_item(self.window, file or names[index], tags, kind, trigger)
-                    post_list.append(item)
-                    post_list_meta.append(sheets)
+                if is_tags_enabled:
+                    for index, file in enumerate(files):
+                        item = generate_post_file_item(self.window, file or names[index], tags, kind, trigger)
+                        post_list.append(item)
+                        post_list_meta.append(sheets)
 
         # @todo need to make this identifier more portable
         projectId = self.window.project_file_name() or str(self.window.id())
