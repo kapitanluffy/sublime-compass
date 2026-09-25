@@ -123,6 +123,13 @@ class CompassFocusListener(sublime_plugin.EventListener):
         if window.views().__len__() <= 0:
             return
 
+        # Browsing previews fire activations too — they must not rewrite
+        # MRU history (or auto-close previewed tabs via cleanup_sheets).
+        # The genuine selection pushes on close, after on_done clears
+        # is_quick_panel_open.
+        if plugin_state()["is_quick_panel_open"] is True:
+            return
+
         group = sheet.group() or window.active_group()
         stack = ViewStack(window, group)
         sheets = window.selected_sheets_in_group(group)
