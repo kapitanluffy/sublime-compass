@@ -82,6 +82,12 @@ class CompassPluginMruTabs(CompassPlugin):
 
         details = []
         meta = []
+        # Alias rows (tags-only view of the same tabs) accumulate
+        # separately and concatenate AFTER all mains — the legacy path
+        # appends mains to items and aliases to post_list, joining them
+        # as items + post_list. Interleaving per group is wrong.
+        alias_details = []
+        alias_meta = []
 
         for sheets in ViewStack(window, group).all():
             names = []
@@ -131,15 +137,15 @@ class CompassPluginMruTabs(CompassPlugin):
                 trigger = ' + '.join(names)
                 for index, file in enumerate(files):
                     alias = generate_alias_trigger(window, file or names[index], tags)
-                    details.append({
+                    alias_details.append({
                         "trigger": alias,
                         "details": "",
                         "annotation": trigger,
                         "kind": kind,
                     })
-                    meta.append(sheets)
+                    alias_meta.append(sheets)
 
-        return (details, meta)
+        return (details + alias_details, meta + alias_meta)
 
     def is_applicable(self, item: sublime.QuickPanelItem):
         return item.kind[2] == ITEM_TYPE
