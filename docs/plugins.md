@@ -29,7 +29,7 @@ Subclass `CompassPlugin` and implement:
 | `get_id()` | Stable item type, e.g. `compass_plugin_foo`. Compass stores it in `kind[2]` and routes selection back via `is_applicable`. |
 | `get_plugin_tag()` | Filter tag, e.g. `#foo`. Compass **always** prepends it to the trigger (`#foo bar`), regardless of `enable_tags`. |
 | `is_enabled()` | Gate. The scaffold reads `"enabled"` from its own settings file. |
-| `on_load()` | One-time setup: subscribe to events, kick off background work. No-op by default; called once by `load_plugins()` — never call it yourself. |
+| `on_load()` | One-time setup: kick off background work. No-op by default; called once by `load_plugins()` — never call it yourself. |
 | `on_unload()` | Tear down whatever `on_load` set up. No-op by default. |
 | `refresh_cache(window)` | Rebuild whatever `generate_items` reads. Called on every panel open. |
 | `generate_items(project_id)` | Return `(details, meta)`. See contract below. |
@@ -102,7 +102,8 @@ While the MRU extraction (STR-27) is underway, `flags.mru_plugin.enabled`
 (default `false`) selects the row source: off keeps the legacy core-built
 tab rows, on builds them through the MRU plugin. The flag is temporary
 migration scaffolding and will be removed at cutover — it is not a user
-preference.
+preference. Enabling needs a restart (tracking hooks attach at load,
+like Files); disabling flips live.
 
 ## Lifecycle: register → `on_load` → per-open → `on_unload`
 
@@ -120,18 +121,18 @@ preference.
    `generate_items(project_id)`; `on_highlight` / `on_select` route by
    `is_applicable`.
 4. **`on_unload`** — release whatever `on_load` set up (Files clears
-   its stack). The bus has no unsubscribe: Sublime reloads wipe all
-   subscriptions, and the `_LOADED` guard prevents double-subscribing
-   within a session — so there is nothing to tear down there.
+    its stack). Broadcast hooks need no teardown: Sublime owns the
+    listener lifetime, and the `_LOADED` guard keeps `load_plugins()`
+    single-run within a session.
 
 ## Who watches the folders
 
 Core owns folder-change detection: a cheap folder-list snapshot taken
-on activation, announcing `compass_folders_changed` on delta. Plugins
-may read the snapshot (`check_folders_changed`) and must subscribe for
-announcements — the per-open check and post-scan bookkeeping are
-sanctioned reads, not polling. Never run your own folder-watching:
-no ripgrep walks outside a detected change, no timer polls.
+on activation, dispatching `folders_changed` on delta. Plugins
+may read the snapshot (`check_folders_changed`) for the per-open check
+and post-scan bookkeeping — sanctioned reads, not polling. Never run
+your own folder-watching: no ripgrep walks outside a detected change,
+no timer polls.
 
 ## Recent-picks pattern
 
@@ -152,33 +153,38 @@ carry a `files · recent` annotation. Note `#open` also matches open-tab
 rows, which always precede plugin rows — recents top their own section,
 not the whole list.
 
-## Reacting to Compass events (`src/event_bus.py`)
+## Reacting to Compass events
 
-Subscribe in `plugin_loaded()` after registering (via the already
-imported `bus_mod` — no direct Compass imports):
+Override the `on_*` methods on your plugin class — Compass calls them
+directly (`dispatch_event`), bundled and external alike. No imports,
+no subscriptions:
 
 ```python
-bus_mod.subscribe("compass_file_focused", _on_compass_file_focused)
+def on_file_focused(self, window, item_type, file):
+    ...
 ```
 
-def _on_compass_file_focused(item_type, file):
-    _status("saw focus: %s" % (item_type,))
-```
+Payloads carry live objects (`window`, `sheet`). A second path exists
+for packages outside Compass: every event also runs the no-op
+`compass_broadcast_event` window command with a JSON payload, which any
+package can snoop via `on_window_command` with zero Compass imports.
+The command string is the contract — hardcode it, never rename it.
+Outsiders get ids instead of objects (`window_id`, `sheet_id`).
 
-## What events can I subscribe to?
-
-Two. Compass keeps the bus deliberately small:
-
-| Event | Payload | Fired when |
-|---|---|---|
-| `compass_file_focused` | `item_type` (plugin id), `file` (path string, or `None` when the meta isn't a path) | A plugin row is highlighted (`show.py:on_highlight`) or selected (`show.py:on_done`). Fires only for rows a plugin claims via `is_applicable`. |
-| `compass_folders_changed` | `window` (the Sublime window whose folders changed) | Core's folder-list snapshot (`events.py:check_folders_changed`, called from `CompassFocusListener.on_activated_async`) sees a delta. Files subscribes and re-scans. Handlers run on the activator's thread — keep them cheap and push slow work async. |
+| Event | `on_*` payload | Broadcast payload | Fired when |
+|---|---|---|---|
+| `file_focused` | `item_type`, `file` (path or `None`) | same | A plugin row is highlighted or selected. Only for rows a plugin claims via `is_applicable`. |
+| `folders_changed` | `window` | — (`window` is implicit) | Core's folder-list snapshot sees a delta. Files re-scans. |
+| `sheet_activated` | `sheet`, `group` | `sheet_id`, `group` | A vetted tab switch: not transient, not skipped, panel closed. May fire on a worker thread. |
+| `sheet_closed` | `sheet` | `sheet_id` | A vetted tab close. |
+| `window_closed` | `window` | — | Window pre-close. |
+| `project_closed` | `window` | — | Project pre-close. |
+| `project_loaded` | `window` | — | Project load. |
 
 Notes:
 
 - Handlers run synchronously on the calling thread — keep them cheap
   (status messages, cache flags), never block on subprocess or disk scans.
-- `subscribe` dedupes: registering the same handler twice is a no-op.
 - There is deliberately no richer folder event: Sublime exposes no
   folder-add listener, so detection is a cheap core-owned folder-list
   snapshot — do not poll `window.folders()` on a timer.

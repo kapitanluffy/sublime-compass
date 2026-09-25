@@ -23,9 +23,13 @@ src/
     show.py                  ← CompassShowCommand — the quick panel (main UI)
     move.py                  ← CompassMoveCommand — arrow key handling
     close.py                 ← CompassCloseCommand — close panel with reset flag
-    dump_stack.py            ← Debug: print STACK to console
-    clear_cache.py           ← Clear compass_stack_cache setting
-    index_files.py           ← Reindex: clear cache + reload
+     dump_stack.py            ← Debug: print STACK to console
+     clear_cache.py           ← Clear compass_stack_cache setting
+     index_files.py           ← Reindex: clear cache + reload
+     broadcast.py             ← No-op compass_broadcast_event hook for
+                              outside packages (snoop via on_window_command)
+    plugins_registry.py      ← register_plugin / get_plugins / dispatch_event
+                              (direct on_<event> calls for registered plugins)
     create_plugin.py         ← CompassCreatePluginCommand — scaffold external plugin
                              (lean foo/bar/baz sample with per-plugin MRU)
 
@@ -36,8 +40,9 @@ src/
                                 (window/project close + project load); lifecycle
                                 lives in CompassPluginFileStack.on_load/on_unload
     plugins/mru/
-      stack.py                 ← CompassPluginMruTabs — open-tab rows (STR-27)
-                               (reads STACK via ViewStack; storage + cache stay core)
+      plugin.py                ← CompassPluginMruTabs — open-tab rows (STR-27)
+                               (reads STACK via ViewStack; storage + cache
+                               stay core)
 ```
 
 ## Data Structures
