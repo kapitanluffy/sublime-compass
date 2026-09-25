@@ -1,20 +1,22 @@
 from typing import Dict, List
 
+import sublime
+
 from .utils import dict_deep_get
 from ..utils import plugin_debug, plugin_settings
 
 # Public API for compass plugins.
-# External plugins must register inside plugin_loaded() only (never at import
-# time), using importlib so a missing Compass disables silently:
+# Register inside plugin_loaded() only (never at import time), using
+# importlib so a missing Compass disables silently. Compass calls your
+# on_* event methods directly (see dispatch_event below) — no imports,
+# no subscriptions, no listener needed:
 #   import importlib
 #   def plugin_loaded():
 #       try:
 #           registry = importlib.import_module("Compass Navigator.src.plugins_registry")
-#           bus = importlib.import_module("Compass Navigator.src.event_bus")
 #       except ImportError:
 #           return
 #       registry.register_plugin(MyPlugin())
-#       bus.subscribe("compass_file_focused", on_focused)
 # Use `Compass: Create Plugin` to scaffold this pattern.
 
 _PLUGINS: List = []
@@ -25,7 +27,7 @@ _LOADED = False
 # top): MRU tabs above Files, matching the legacy core layout where tab
 # rows always preceded file rows. Keep in sync with the in-tree plugins
 # (Files: ITEM_TYPE in src/plugins/files/stack.py; MRU tabs: ITEM_TYPE
-# in src/plugins/mru/stack.py).
+# in src/plugins/mru/plugin.py).
 _BUNDLED_ORDER = [
     "compass_plugin_mru_tabs",
     "compass_plugin_file_open_file",
@@ -81,6 +83,35 @@ def get_plugins() -> List:
     order = {pid: index for index, pid in enumerate(_BUNDLED_ORDER)}
     bundled.sort(key=lambda p: order.get(_plugin_id(p), len(order)))
     return bundled + external
+
+
+BROADCAST_COMMAND = "compass_broadcast_event"
+
+# Broadcast payload keys that differ from the dispatch payload: live
+# objects never cross into command args.
+_COMMAND_KEYS = {"sheet": "sheet_id"}
+
+
+def dispatch_event(window, event: str, **payload):
+    # Dual-path announce. Runs the broadcast command for outside packages
+    # (JSON payload, ids only) and calls on_<event> directly on every
+    # enabled registered plugin (live objects).
+    command_payload = {"_event": event}  # type: Dict[str, object]
+    for key, value in payload.items():
+        if isinstance(value, sublime.Sheet):
+            command_payload[_COMMAND_KEYS.get(key, key)] = value.id()
+        elif value is None or isinstance(value, (bool, int, float, str)):
+            command_payload[key] = value
+    window.run_command(BROADCAST_COMMAND, command_payload)
+    for plugin in get_plugins():
+        try:
+            if plugin.is_enabled() is False:
+                continue
+            handler = getattr(plugin, "on_" + event, None)
+            if callable(handler):
+                handler(window, **payload)
+        except Exception as e:
+            print("Compass event %s ignored: %r" % (event, e))
 
 
 def external_plugins_enabled() -> bool:

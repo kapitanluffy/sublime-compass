@@ -90,3 +90,31 @@ class CompassPlugin:
         Called when the user selects an item. Open/focus the target.
         """
         raise NotImplementedError
+
+    def on_file_focused(self, window: sublime.Window, item_type: str, file) -> None:
+        """A plugin row was highlighted or selected."""
+        return None
+
+    def on_folders_changed(self, window: sublime.Window) -> None:
+        """The window folder list changed. Re-scan here."""
+        return None
+
+    def on_sheet_activated(self, window: sublime.Window, sheet: sublime.Sheet, group: int) -> None:
+        """Vetted tab switch."""
+        return None
+
+    def on_sheet_closed(self, window: sublime.Window, sheet: sublime.Sheet) -> None:
+        """Vetted tab close."""
+        return None
+
+    def on_window_closed(self, window: sublime.Window) -> None:
+        """Window pre-close."""
+        return None
+
+    def on_project_closed(self, window: sublime.Window) -> None:
+        """Project pre-close."""
+        return None
+
+    def on_project_loaded(self, window: sublime.Window) -> None:
+        """Project load."""
+        return None
