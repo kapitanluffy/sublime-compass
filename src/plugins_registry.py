@@ -21,13 +21,16 @@ _PLUGINS: List = []
 _LOADED = False
 
 # Bundled plugin ids, decided by Compass core — callers cannot declare
-# themselves bundled. Keep in sync with the in-tree plugins (Files:
-# ITEM_TYPE in src/plugins/files/stack.py; MRU tabs: ITEM_TYPE in
-# src/plugins/mru/stack.py).
-_BUNDLED_IDS = frozenset([
-    "compass_plugin_file_open_file",
+# themselves bundled. _BUNDLED_ORDER is the panel section order (first =
+# top): MRU tabs above Files, matching the legacy core layout where tab
+# rows always preceded file rows. Keep in sync with the in-tree plugins
+# (Files: ITEM_TYPE in src/plugins/files/stack.py; MRU tabs: ITEM_TYPE
+# in src/plugins/mru/stack.py).
+_BUNDLED_ORDER = [
     "compass_plugin_mru_tabs",
-])
+    "compass_plugin_file_open_file",
+]
+_BUNDLED_IDS = frozenset(_BUNDLED_ORDER)
 
 # Selection history per plugin id: most-recent-first lists of opaque
 # keys. In-memory only; plugins namespace their own keys (e.g. include
@@ -65,17 +68,18 @@ def register_plugin(plugin) -> None:
 
 def get_plugins() -> List:
     """
-    Return the list of registered plugins, bundled ids first (stable),
-    then externals in registration order. Ordering never depends on
-    which package's plugin_loaded ran first. When external plugin
-    support is disabled (flags.plugin_support.enabled), only bundled
-    plugins are returned.
+    Return the list of registered plugins: bundled first in _BUNDLED_ORDER
+    (stable, independent of import or plugin_loaded order), then externals
+    in registration order. When external plugin support is disabled
+    (flags.plugin_support.enabled), only bundled plugins are returned.
     """
     plugins = list(_PLUGINS)
     if not external_plugins_enabled():
         plugins = [p for p in plugins if _plugin_id(p) in _BUNDLED_IDS]
     bundled = [p for p in plugins if _plugin_id(p) in _BUNDLED_IDS]
     external = [p for p in plugins if _plugin_id(p) not in _BUNDLED_IDS]
+    order = {pid: index for index, pid in enumerate(_BUNDLED_ORDER)}
+    bundled.sort(key=lambda p: order.get(_plugin_id(p), len(order)))
     return bundled + external
 
 
