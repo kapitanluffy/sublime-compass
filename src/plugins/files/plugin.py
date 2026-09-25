@@ -1,6 +1,7 @@
+"""Files (#open) - Compass Navigator bundled plugin."""
+
 from collections import OrderedDict
 import os
-import subprocess
 import threading
 import time
 from typing import List, Optional, Tuple, OrderedDict as TOrderedDict
@@ -10,50 +11,12 @@ from ...utils import dict_deep_get, plugin_debug, plugin_settings
 from ...events import check_folders_changed
 from ...plugins_registry import order_by_recent, recent_keys, record_selection
 from ..plugin_base import CompassPlugin
+from .utils import _SCAN_IN_FLIGHT, _walk_folders, FilePluginItem
 
 ITEM_TYPE = "compass_plugin_file_open_file"
 CompassItemTuple = Tuple[int, int, List[int], int]
 FILE_STACK: TOrderedDict[Tuple[str, str, str], Optional[CompassItemTuple]] = OrderedDict()
 KIND_FILE_PLUGIN_FILE_ITEM_TYPE = (sublime.KindId.COLOR_YELLOWISH, "f", ITEM_TYPE)
-_SCAN_IN_FLIGHT = set()
-
-
-class CompassItem():
-    """
-    A compass item points to a location in Sublime
-    """
-
-    def __init__(
-        self,
-        window: sublime.Window,
-        sheets: List[sublime.Sheet],
-        group: int = 0,
-        focused: Optional[sublime.Sheet] = None,
-    ):
-        self.window = window
-        self.sheets = sheets
-        self.group = group
-        self.focused = focused if focused is not None else self.sheets[0]
-
-    def to_tuple(self):
-        sheet_ids = [sheet.id() for sheet in self.sheets]
-        return (self.window.id(), self.group, sheet_ids, self.focused.id())
-
-
-FileKey = Tuple[str, str, str]
-
-
-class FilePluginItem():
-    def __init__(self, key: FileKey, item: Optional[CompassItem]):
-        self.key_tuple = key
-        self.item = item
-
-    def key(self):
-        return self.key_tuple
-
-    def value(self):
-        item = self.item.to_tuple() if self.item is not None else None
-        return item
 
 
 class CompassPluginFileStack(CompassPlugin):
@@ -120,15 +83,47 @@ class CompassPluginFileStack(CompassPlugin):
         return dict_deep_get(settings, "plugins.files.enabled", True) is True
 
     def on_load(self) -> None:
-        # Imported late: events.py imports this module at top level.
-        from .events import files_plugin_on_load
-        files_plugin_on_load()
+        # Startup scan, one worker per window. Moved from the deleted
+        # files/events.py (files_plugin_on_load) — dispatch needs no
+        # Sublime listener for this.
+        print("CompassNavigator - Files plugin - loaded!")
+
+        settings = plugin_settings()
+        only_show_unopened_files_on_empty_window = settings.get("only_show_unopened_files_on_empty_window", True)
+        windows = sublime.windows()
+        # @todo watch setting if changed
+        for window in windows:
+            if only_show_unopened_files_on_empty_window is False or (only_show_unopened_files_on_empty_window is True and window.sheets().__len__() <= 0):
+                scan_files_async(window, "startup")
 
     def on_unload(self) -> None:
         CompassPluginFileStack.clear()
 
     def on_folders_changed(self, window: sublime.Window) -> None:
         scan_files_async(window, "activated")
+
+    def on_window_closed(self, window: sublime.Window) -> None:
+        # Moved from the deleted files/events.py listener — core
+        # dispatches window_closed, the plugin forgets the project.
+        projectId = window.project_file_name() or str(window.id())
+        CompassPluginFileStack.clear_project(projectId)
+        plugin_debug("on_window_closed", len(CompassPluginFileStack.get_stack()))
+
+    def on_project_closed(self, window: sublime.Window) -> None:
+        # Same as above, for the project-close path.
+        projectId = window.project_file_name() or str(window.id())
+        CompassPluginFileStack.clear_project(projectId)
+        plugin_debug("on_project_closed", len(CompassPluginFileStack.get_stack()))
+
+    def on_project_loaded(self, window: sublime.Window) -> None:
+        # Moved from the deleted files/events.py listener. The explicit
+        # enabled check stays even though dispatch targets enabled
+        # plugins — preserves the exact old behavior.
+        settings = plugin_settings()
+        is_enabled = dict_deep_get(settings, "plugins.files.enabled", True)
+        if is_enabled is False:
+            return
+        scan_files_async(window, "project-load")
 
     def generate_items(self, projectId):
         details = []
@@ -184,53 +179,6 @@ class CompassPluginFileStack(CompassPlugin):
         if not check_folders_changed(window):
             return
         parse_listed_files(window)
-
-
-def list_files(directory="."):
-    settings = plugin_settings()
-    ripgrep = str(settings.get("ripgrep_path", ""))
-
-    if ripgrep == "" or os.path.exists(ripgrep) is False:
-        print("⚠ To enable Files plugin in Compass, you need to set the ripgrep path.")
-        return None
-
-    command = [settings["ripgrep_path"], "--files", directory]
-
-    try:
-        cmdFlags = 0
-        if sublime.platform() == "windows":
-            cmdFlags = subprocess.CREATE_NO_WINDOW
-
-        # Run the command and capture the output
-        result = subprocess.run(
-            command,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True,  # This makes sure the output is treated as text (str) rather than bytes
-            creationflags=cmdFlags,
-        )
-
-        if result.returncode != 0:
-            print(result.stderr)
-            return []
-
-        return result.stdout.splitlines()
-    except Exception as e:
-        print(f"An error occurred: {e}")
-
-
-def _walk_folders(folders):
-    """
-    Blocking ripgrep walk shared by the sync (panel) and async
-    (worker) paths. Returns [(file, folder)] without touching state.
-    """
-    found = []
-    for folder in folders:
-        files = list_files(folder)
-        if files is None:
-            continue
-        found.extend((file, folder) for file in files)
-    return found
 
 
 def parse_listed_files(window: sublime.Window, source="panel"):
@@ -297,3 +245,6 @@ def _apply_scan(window, projectId, folders, found, elapsed_ms, source):
         "Compass files scan (async, %s): %d folders, %d files in %dms"
         % (source, len(folders), len(found), elapsed_ms)
     )
+
+
+_PLUGIN_INSTANCE = CompassPluginFileStack()

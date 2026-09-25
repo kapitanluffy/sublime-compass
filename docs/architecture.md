@@ -34,15 +34,17 @@ src/
                              (lean foo/bar/baz sample with per-plugin MRU)
 
     plugins/files/
-      stack.py                 ← FILE_STACK — OrderedDict of unopened files + ripgrep
-                               (keys are (path, folder, projectId) tuples, no wrapper class)
-      events.py                ← CompassPluginFilesListener — thin Sublime adapter
-                                (window/project close + project load); lifecycle
-                                lives in CompassPluginFileStack.on_load/on_unload
+      plugin.py                ← CompassPluginFileStack + FILE_STACK (OrderedDict
+                               of unopened files; keys are (path, folder,
+                               projectId) tuples) + dispatched on_* tracking
+                               (startup scan, close/project forget, rescan)
+      utils.py                 ← ripgrep walkers (list_files, scans) + item
+                               wrappers (FilePluginItem, CompassItem)
     plugins/mru/
       plugin.py                ← CompassPluginMruTabs — open-tab rows (STR-27)
                                (reads STACK via ViewStack; storage + cache
                                stay core)
+      utils.py                 ← alias-label builder + max-open-tabs cleanup
 ```
 
 ## Data Structures
@@ -74,7 +76,7 @@ Created by `convert_stack_to_sheet_group()` in `view_stack.py`.
 
 ### FILE_STACK (unopened files)
 
-`src/plugins/files/stack.py` — separate from STACK. An `OrderedDict` keyed by `(file, folder, projectId)`. Populated by `ripgrep --files`. Only shown in the quick panel when `ripgrep_path` is set.
+`src/plugins/files/plugin.py` — separate from STACK. An `OrderedDict` keyed by `(file, folder, projectId)`. Populated by `ripgrep --files`. Only shown in the quick panel when `ripgrep_path` is set.
 
 ### External plugins (scaffold + per-plugin MRU)
 
@@ -106,8 +108,9 @@ plugin_loaded()                          [plugin.py]
        │    load_window(window)          [src/core.py]
        │      ├─ hydrate_stack(window)   [src/stack.py]  — restore from cache
        │      └─ append_sheets(...)      [src/stack.py]  — add any sheets not in cache
-       └─ CompassPluginFilesListener.on_plugin_loaded()
-            └─ parse_listed_files(window)  [src/plugins/files/stack.py]  — ripgrep
+        └─ CompassPluginFileStack.on_load()
+             └─ scan_files_async(window)  [src/plugins/files/plugin.py]  — ripgrep
+                workers in src/plugins/files/utils.py
 ```
 
 ### hydrate_stack
@@ -170,7 +173,7 @@ Returns True for views whose `element()` is non-None and not `"find_in_files:out
 
 ### Auto-close Tabs
 
-`cleanup_sheets()` in `events.py` — after each activation, if `max_open_tabs > 0` and sheet count exceeds it, closes the oldest non-dirty, non-scratch sheet.
+`cleanup_sheets()` in `src/plugins/mru/utils.py` — after each activation, if `max_open_tabs > 0` and sheet count exceeds it, closes the oldest non-dirty, non-scratch sheet.
 
 ## Settings
 

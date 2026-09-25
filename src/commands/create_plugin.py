@@ -57,7 +57,10 @@ appending get_plugin_tag() to the trigger. Register inside
 plugin_loaded() only; no Compass imports at top level so this package
 loads with zero traceback when Compass is absent. Requires
 `.python-version` with `3.8` (written by the scaffold) so Sublime runs
-this package on the 3.8 plugin host.
+this package on the 3.8 plugin host. Outgrowing one file? Split helpers
+into `utils.py` (pure functions, no plugin state) and keep the class +
+`_PLUGIN_INSTANCE` in `plugin.py` — the same shape as the bundled
+Files/MRU plugins.
 """
 
 try:
@@ -200,6 +203,8 @@ Lean sample plugin created by `Compass: Create Plugin`.
   silently disables itself.
 - No top-level Compass imports: the package loads silently when Compass
   is absent and registers in `plugin_loaded()` when present.
+- Outgrowing one file? Mirror the bundled plugins: helpers in `utils.py`,
+  class + `_PLUGIN_INSTANCE` in `plugin.py`.
 '''
 
 

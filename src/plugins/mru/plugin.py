@@ -1,6 +1,5 @@
 """MRU tabs - Compass Navigator bundled plugin."""
 
-import os
 import sublime
 
 from ...sheet_group import SheetGroup
@@ -8,54 +7,9 @@ from ...stack import cache_stack, hydrate_stack, remove_window
 from ...utils import parse_sheet, plugin_settings, plugin_state
 from ...view_stack import ViewStack
 from ..plugin_base import CompassPlugin
+from .utils import cleanup_sheets, generate_alias_trigger
 
 ITEM_TYPE = "compass_plugin_mru_tabs"
-
-
-def generate_alias_trigger(window: sublime.Window, file_label, tags):
-    # Folder-stripped, tags-prefixed alias label. Moved from show.py —
-    # the core copy is gone, this is the only one.
-    settings = plugin_settings()
-    open_folders = window.folders()
-    is_tags_enabled = settings.get("enable_tags")
-
-    for folder in open_folders:
-        file_label = file_label.replace("%s%s" % (folder, os.path.sep), "")
-
-    if is_tags_enabled is True and len(tags) > 0:
-        file_label = "%s%s%s" % (' '.join(tags), ' | ', file_label)
-
-    return file_label
-
-
-def cleanup_sheets(stack: ViewStack):
-    # MRU policy: discard the least-recent open tab when max_open_tabs
-    # is met. Moved verbatim from src/events.py.
-    settings = plugin_settings()
-    max_open_tabs = settings.get('max_open_tabs', 100)  # type: int
-
-    if max_open_tabs == 0 or stack.length() <= max_open_tabs:
-        return True
-
-    stack_length = stack.length()
-
-    for si in range(stack_length):
-        index = stack_length - (si + 1)
-        last_sheet_group = stack.all()[index]
-
-        for s in last_sheet_group:
-            sview = s.view()
-
-            if sview is None:
-                continue
-
-            if sview.is_dirty() or sview.is_scratch():
-                continue
-
-            print("cleaning up", sview.file_name() or sview.name())
-
-            s.close()
-            return True
 
 
 class CompassPluginMruTabs(CompassPlugin):

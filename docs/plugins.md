@@ -94,9 +94,14 @@ Compass ships two bundled plugins, rendered in this section order
 
 - MRU tabs (`compass_plugin_mru_tabs`, no tag) — open-tab rows read from
   core's STACK via `ViewStack`. Storage, caching, and resurrection stay
-  in core; the plugin owns row-building, preview, and focus.
+  in core; the plugin owns row-building, preview, and focus. Layout:
+  `src/plugins/mru/plugin.py` (class + instance) + `src/plugins/mru/utils.py`
+  (alias-label + max-tabs-cleanup helpers).
 - Unopened files (`compass_plugin_file_open_file`, `#open`) — ripgrep
-  results from its own `FILE_STACK`.
+  results from its own `FILE_STACK`. Layout: `src/plugins/files/plugin.py`
+  (class + `FILE_STACK` + instance) + `src/plugins/files/utils.py`
+  (ripgrep walkers + item wrappers). Tracking arrives via dispatched
+  `on_*` methods — no Sublime listener.
 
 ## Lifecycle: register → `on_load` → per-open → `on_unload`
 
