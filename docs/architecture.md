@@ -29,12 +29,15 @@ src/
     create_plugin.py         ← CompassCreatePluginCommand — scaffold external plugin
                              (lean foo/bar/baz sample with per-plugin MRU)
 
-   plugins/files/
-     stack.py                 ← FILE_STACK — OrderedDict of unopened files + ripgrep
-                              (keys are (path, folder, projectId) tuples, no wrapper class)
-     events.py                ← CompassPluginFilesListener — thin Sublime adapter
-                               (window/project close + project load); lifecycle
-                               lives in CompassPluginFileStack.on_load/on_unload
+    plugins/files/
+      stack.py                 ← FILE_STACK — OrderedDict of unopened files + ripgrep
+                               (keys are (path, folder, projectId) tuples, no wrapper class)
+      events.py                ← CompassPluginFilesListener — thin Sublime adapter
+                                (window/project close + project load); lifecycle
+                                lives in CompassPluginFileStack.on_load/on_unload
+    plugins/mru/
+      stack.py                 ← CompassPluginMruTabs — open-tab rows (STR-27)
+                               (reads STACK via ViewStack; storage + cache stay core)
 ```
 
 ## Data Structures
@@ -149,7 +152,7 @@ CompassPluginFileStack.on_select(item, meta, window)  # window.open_file(meta[0]
 
 | Event | Action |
 |---|---|
-| `on_activated_async` | `push_sheets(window, [view.sheet()], group, focused)` — moves to MRU head. Skips if `is_transient()` or `should_skip_view()` returns True. |
+| `on_activated_async` | `push_sheets(window, [view.sheet()], group, focused)` — moves to MRU head. Skips if `is_transient()` or `should_skip_view()` returns True, and skips entirely while the quick panel is open (preview highlights must not rewrite MRU history). |
 | `on_pre_close` | `remove_sheet(sheet)` — removes from STACK. Closes panel if open. |
 | `on_pre_close_window` | `remove_window(window)` — clears all entries for this window. |
 | `on_pre_close_project` | `remove_window(window)` — same. |

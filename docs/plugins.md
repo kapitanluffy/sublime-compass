@@ -89,6 +89,21 @@ palette while the gate is off. What counts as bundled is decided by Compass
 core (hardcoded ids in `src/plugins_registry.py`) — plugins cannot
 declare themselves bundled.
 
+Compass ships two bundled plugins, rendered in this section order
+(`_BUNDLED_ORDER` in `src/plugins_registry.py`):
+
+- MRU tabs (`compass_plugin_mru_tabs`, no tag) — open-tab rows read from
+  core's STACK via `ViewStack`. Storage, caching, and resurrection stay
+  in core; the plugin owns row-building, preview, and focus.
+- Unopened files (`compass_plugin_file_open_file`, `#open`) — ripgrep
+  results from its own `FILE_STACK`.
+
+While the MRU extraction (STR-27) is underway, `flags.mru_plugin.enabled`
+(default `false`) selects the row source: off keeps the legacy core-built
+tab rows, on builds them through the MRU plugin. The flag is temporary
+migration scaffolding and will be removed at cutover — it is not a user
+preference.
+
 ## Lifecycle: register → `on_load` → per-open → `on_unload`
 
 1. **Register** — one call for everyone: `register_plugin(instance)`.
