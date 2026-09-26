@@ -129,7 +129,14 @@ class __CLASS_NAME__(CompassPlugin):
             {"trigger": key, "annotation": "__DISPLAY__"}
             for key in _ordered_keys()
         ]
-        return (details, list(_ordered_keys()))
+        # Meta is your own object per row, handed back to you in
+        # on_highlight/on_select. A dict keeps it self-describing;
+        # the ordering key lives inside it.
+        meta = [
+            {"key": key, "source": "sample"}
+            for key in _ordered_keys()
+        ]
+        return (details, meta)
 
     def is_applicable(self, item):
         try:
@@ -140,14 +147,15 @@ class __CLASS_NAME__(CompassPlugin):
     def on_highlight(self, window, item, meta):
         if not self.is_applicable(item):
             return
-        _log("__DISPLAY__: %s" % (meta,))
+        _log("Highlighted: %s" % (meta,))
 
     def on_select(self, window, item, meta):
         if not self.is_applicable(item):
             return
-        if meta is not None:
-            _touch(meta)
-        _log("Opened %s: %s" % ("__DISPLAY__", meta,))
+        key = meta.get("key") if isinstance(meta, dict) else meta
+        if key is not None:
+            _touch(key)
+        _log("Opened: %s" % (meta,))
 
 
 _PLUGIN_INSTANCE = __CLASS_NAME__()
