@@ -144,15 +144,22 @@ class CompassPluginFileStack(CompassPlugin):
         return (details, meta)
 
     def is_applicable(self, item: sublime.QuickPanelItem):
-        return item.kind[2] == ITEM_TYPE
+        try:
+            return item.kind[2] == ITEM_TYPE
+        except Exception:
+            return False
 
-    def on_highlight(self, item: sublime.QuickPanelItem, meta, window: sublime.Window):
+    def on_highlight(self, window: sublime.Window, item: sublime.QuickPanelItem, meta):
+        if not self.is_applicable(item):
+            return
         # meta is a generic payload round-tripped through Compass core;
         # this plugin always sends a (path, folder, projectId) tuple.
         path = meta[0] if isinstance(meta, (tuple, list)) else meta
         window.open_file(path, sublime.TRANSIENT)
 
-    def on_select(self, item: sublime.QuickPanelItem, meta, window: sublime.Window):
+    def on_select(self, window: sublime.Window, item: sublime.QuickPanelItem, meta):
+        if not self.is_applicable(item):
+            return
         # meta is a generic payload round-tripped through Compass core;
         # this plugin always sends a (path, folder, projectId) tuple.
         record_selection(self.get_id(), tuple(meta) if isinstance(meta, list) else meta)

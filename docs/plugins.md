@@ -33,9 +33,9 @@ Subclass `CompassPlugin` and implement:
 | `on_unload()` | Tear down whatever `on_load` set up. No-op by default. |
 | `refresh_cache(window)` | Rebuild whatever `generate_items` reads. Called on every panel open. |
 | `generate_items(project_id)` | Return `(details, meta)`. See contract below. |
-| `is_applicable(item)` | Claim rows for highlight/select routing (`item.kind[2] == get_id()`). |
-| `on_highlight(item, meta, window)` | Preview (transient open). |
-| `on_select(item, meta, window)` | Commit. Move the key to the head of `_RECENT` for MRU. |
+| `is_applicable(item)` | Claim rows (`item.kind[2] == get_id()`). Core dispatches highlight/select to every plugin; only the claiming plugin acts. |
+| `on_highlight(window, item, meta)` | Preview (transient open). Return early unless `is_applicable(item)`. |
+| `on_select(window, item, meta)` | Commit. Return early unless `is_applicable(item)`. Move the key to the head of `_RECENT` for MRU. |
 
 ## Item contract: details dicts, not panel items
 
@@ -116,8 +116,10 @@ Compass ships two bundled plugins, rendered in this section order
    plugin can't block the rest. Bundled-first is structural
    (`get_plugins()` partitions), never dependent on import order.
 3. **Per panel open** — `refresh_cache(window)` then
-   `generate_items(project_id)`; `on_highlight` / `on_select` route by
-   `is_applicable`.
+   `generate_items(project_id)`; core dispatches `highlight` /
+   `select` to every plugin and each acts only on rows it claims
+   via `is_applicable` (unclaimed rows fall to the SheetGroup
+   fallback).
 4. **`on_unload`** — release whatever `on_load` set up (Files clears
     its stack). Broadcast hooks need no teardown: Sublime owns the
     listener lifetime, and the `_LOADED` guard keeps `load_plugins()`
@@ -158,7 +160,9 @@ directly (`dispatch_event`), bundled and external alike. No imports,
 no subscriptions:
 
 ```python
-def on_file_focused(self, window, item_type, file):
+def on_highlight(self, window, item, meta):
+    if not self.is_applicable(item):
+        return
     ...
 ```
 
@@ -171,7 +175,8 @@ Outsiders get ids instead of objects (`window_id`, `sheet_id`).
 
 | Event | `on_*` payload | Broadcast payload | Fired when |
 |---|---|---|---|
-| `file_focused` | `item_type`, `file` (path or `None`) | same | A plugin row is highlighted or selected. Only for rows a plugin claims via `is_applicable`. |
+| `highlight` | `item`, `meta` | — (live objects don't cross) | Any row highlighted (preview pass). Every plugin's `on_highlight` runs; only the claiming one acts. |
+| `select` | `item`, `meta` | — (live objects don't cross) | Any row selected (commit). Every plugin's `on_select` runs; only the claiming one acts. |
 | `folders_changed` | `window` | — (`window` is implicit) | Core's folder-list snapshot sees a delta. Files re-scans. |
 | `sheet_activated` | `sheet`, `group` | `sheet_id`, `group` | A vetted tab switch: not transient, not skipped, panel closed. May fire on a worker thread. |
 | `sheet_closed` | `sheet` | `sheet_id` | A vetted tab close. |

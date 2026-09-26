@@ -9,6 +9,19 @@ from ..plugins_registry import dispatch_event, get_plugins
 from ..stack import cache_stack
 
 
+def _is_claimed(item) -> bool:
+    # Mirrors dispatch: True when an enabled plugin owns this row.
+    for plugin in get_plugins():
+        try:
+            if plugin.is_enabled() is False:
+                continue
+            if plugin.is_applicable(item):
+                return True
+        except Exception:
+            continue
+    return False
+
+
 class CompassShowCommand(sublime_plugin.WindowCommand):
     def run(self, **kwargs):
         settings = plugin_settings()
@@ -118,14 +131,11 @@ class CompassShowCommand(sublime_plugin.WindowCommand):
         if is_preview_on_highlight is False:
             return
 
-        for plugin in get_plugins():
-            if plugin.is_applicable(selected_item):
-                meta = items_meta[index]
-                plugin.on_highlight(selected_item, meta, self.window)
-                file = meta if isinstance(meta, str) else None
-                dispatch_event(self.window, "file_focused",
-                    item_type=plugin.get_id(), file=file)
-                return
+        dispatch_event(self.window, "highlight",
+            item=selected_item, meta=items_meta[index])
+
+        if _is_claimed(selected_item):
+            return
 
         if isinstance(sheets, SheetGroup) and sheets is not None:
             # Select sheets (for preview) only when head's group is the active group
@@ -149,15 +159,10 @@ class CompassShowCommand(sublime_plugin.WindowCommand):
 
         sheets = items_meta[index]
         selected_item = items[index]
-        for plugin in get_plugins():
-            if plugin.is_applicable(selected_item):
-                state["is_quick_panel_open"] = False
-                meta = items_meta[index]
-                plugin.on_select(selected_item, meta, self.window)
-                file = meta if isinstance(meta, str) else None
-                dispatch_event(self.window, "file_focused",
-                    item_type=plugin.get_id(), file=file)
-                return
+        dispatch_event(self.window, "select",
+            item=selected_item, meta=items_meta[index])
+        if _is_claimed(selected_item):
+            return
 
         # @todo on plugin reload, sheets are still SheetGroup because it is a subclass of List.
         if isinstance(sheets, SheetGroup) and sheets is not None:

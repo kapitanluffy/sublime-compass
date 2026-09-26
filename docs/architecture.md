@@ -71,7 +71,7 @@ Each entry represents a **group of tabs** in a specific Sublime group:
 
 ### SheetGroup
 
-`src/sheet_group.py` — a `List[sublime.Sheet]` with a `.focused` attribute. `items_meta` is a mixed list of `SheetGroup` (open tabs) and plugin payloads (e.g. files plugin `(path, folder, projectId)` tuples): `on_highlight` and `on_done` first offer each row to plugins via `is_applicable`, and the `isinstance(meta, SheetGroup)` fallback handles open tabs — select sheets vs open a file.
+`src/sheet_group.py` — a `List[sublime.Sheet]` with a `.focused` attribute. `items_meta` is a mixed list of `SheetGroup` (open tabs) and plugin payloads (e.g. files plugin `(path, folder, projectId)` tuples): `show.py` dispatches highlight/select to every plugin (each acts only on rows it claims via `is_applicable`), and the `isinstance(meta, SheetGroup)` fallback handles unclaimed rows — select sheets vs open a file.
 
 Why SheetGroup stays: view rows need live `Sheet` objects for `select_sheets`/`focus_sheet`. Stored ids alone mis-focus (STR-16), and multi-sheet groups must survive project reload (STR-19) — plain tuples can't supply that.
 
@@ -133,9 +133,9 @@ compass_show                             [show.py: run()]
   │    └─ convert_stack_to_sheet_group() — STACK tuples → SheetGroup objects
   ├─ CompassPluginFileStack.generate_items(projectId)  — unopened files
   ├─ build QuickPanelItem list
-  └─ window.show_quick_panel()
-       ├─ on_highlight(index)            — preview (transient open or select_sheets)
-       └─ on_done(index)                — final selection
+   └─ window.show_quick_panel()
+        ├─ on_highlight(index)            — preview gate, then dispatch highlight
+        └─ on_done(index)                — dispatch select, SheetGroup fallback
 ```
 
 ### on_done Selection
@@ -150,7 +150,7 @@ window.focus_sheet(focused)      # focus the specific tab (with validation)
 
 **File rows (unopened files, `(path, folder, projectId)` tuples):**
 ```python
-CompassPluginFileStack.on_select(item, meta, window)  # window.open_file(meta[0])
+CompassPluginFileStack.on_select(window, item, meta)  # window.open_file(meta[0])
 ```
 
 **Escape / Cancel:**

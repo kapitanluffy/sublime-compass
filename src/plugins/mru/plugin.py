@@ -135,12 +135,15 @@ class CompassPluginMruTabs(CompassPlugin):
         return (details + alias_details, meta + alias_meta)
 
     def is_applicable(self, item: sublime.QuickPanelItem):
-        return item.kind[2] == ITEM_TYPE
+        try:
+            return item.kind[2] == ITEM_TYPE
+        except Exception:
+            return False
 
-    def on_highlight(self, item: sublime.QuickPanelItem, meta, window: sublime.Window):
-        # Moved from the SheetGroup fallback in show.on_highlight (STR-27
-        # choice 3: plugin acts, core signals). The preview_on_highlight
-        # gate stays in core and runs before dispatch.
+    def on_highlight(self, window: sublime.Window, item: sublime.QuickPanelItem, meta):
+        # The preview_on_highlight gate stays in core and runs first.
+        if not self.is_applicable(item):
+            return
         sheets = meta
         if isinstance(sheets, SheetGroup) and sheets is not None:
             # Select sheets (for preview) only when head's group is the active group
@@ -151,9 +154,10 @@ class CompassPluginMruTabs(CompassPlugin):
                 initial_ids = plugin_state().get("initial_selection_ids", [])
                 window.select_sheets([sublime.Sheet(sid) for sid in initial_ids])
 
-    def on_select(self, item: sublime.QuickPanelItem, meta, window: sublime.Window):
-        # Moved from the SheetGroup fallback in show.on_done. Panel state
-        # (close, Esc-cancel) and the forced cache write stay in core.
+    def on_select(self, window: sublime.Window, item: sublime.QuickPanelItem, meta):
+        # Panel close, Esc-cancel, and the forced cache write stay in core.
+        if not self.is_applicable(item):
+            return
         sheets = meta
         if isinstance(sheets, SheetGroup) and sheets is not None:
             window.select_sheets(sheets)

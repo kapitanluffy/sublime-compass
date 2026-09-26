@@ -78,22 +78,21 @@ class CompassPlugin:
         """
         return item.kind[2] == self.get_id()
 
-    def on_highlight(self, item: sublime.QuickPanelItem, meta, window: sublime.Window) -> None:
+    def on_highlight(self, window: sublime.Window, item: sublime.QuickPanelItem, meta) -> None:
         """
-        Called when the user highlights an item in the quick panel.
+        Dispatched by core for EVERY highlighted row. Return early
+        unless is_applicable(item) — only the row's owner previews.
         meta is the plugin-specific object for this item.
         """
         return None
 
-    def on_select(self, item: sublime.QuickPanelItem, meta, window: sublime.Window) -> None:
+    def on_select(self, window: sublime.Window, item: sublime.QuickPanelItem, meta) -> None:
         """
+        Dispatched by core for EVERY selected row. Return early
+        unless is_applicable(item) — only the row's owner commits.
         Called when the user selects an item. Open/focus the target.
         """
         raise NotImplementedError
-
-    def on_file_focused(self, window: sublime.Window, item_type: str, file) -> None:
-        """A plugin row was highlighted or selected."""
-        return None
 
     def on_folders_changed(self, window: sublime.Window) -> None:
         """The window folder list changed. Re-scan here."""

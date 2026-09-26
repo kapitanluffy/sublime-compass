@@ -96,9 +96,8 @@ def _touch(key):
     del _RECENT[len(_SAMPLES):]
 
 
-def _status(msg):
-    if sublime is not None:
-        sublime.status_message(msg)
+def _log(msg):
+    print("Compass Plugin - __DISPLAY__: %s" % (msg,))
 
 
 class __CLASS_NAME__(CompassPlugin):
@@ -138,19 +137,17 @@ class __CLASS_NAME__(CompassPlugin):
         except Exception:
             return False
 
-    def on_highlight(self, item, meta, window):
-        _status("__DISPLAY__: %s" % (meta,))
+    def on_highlight(self, window, item, meta):
+        if not self.is_applicable(item):
+            return
+        _log("__DISPLAY__: %s" % (meta,))
 
-    def on_select(self, item, meta, window):
+    def on_select(self, window, item, meta):
+        if not self.is_applicable(item):
+            return
         if meta is not None:
             _touch(meta)
-        _status("Opened %s: %s" % ("__DISPLAY__", meta,))
-
-    def on_file_focused(self, window, item_type, file):
-        # Called directly by Compass for every focus event (see
-        # dispatch_event). Override the other on_* event methods the
-        # same way; no listener or subscription needed.
-        _status("__DISPLAY__ saw focus: %s" % (item_type,))
+        _log("Opened %s: %s" % ("__DISPLAY__", meta,))
 
 
 _PLUGIN_INSTANCE = __CLASS_NAME__()
